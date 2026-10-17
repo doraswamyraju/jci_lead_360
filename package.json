@@ -1,0 +1,20 @@
+{
+  "name": "jci-lead-360",
+  "version": "1.0.0",
+  "description": "JCI LEAD360 - Dynamic Flyer & Frame Automation Platform for JCI Leaders 2027",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/database/seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}

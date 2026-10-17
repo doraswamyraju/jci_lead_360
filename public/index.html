@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JCI LEAD360 - Digital Support for JCI Leaders</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-root">
+    <!-- Login Card (Universal Single Authentication Entrypoint) -->
+    <div class="auth-wrapper" id="auth-section">
+      <div class="auth-card">
+        <div class="brand-header">
+          <img src="/assets/logo.png" alt="JCI LEAD360 - Powered by JCI Tirupati Innovations">
+        </div>
+        <h1 class="auth-title">JCI LEAD360 Portal</h1>
+        <p class="auth-subtitle">Sign in with your registered Leader credentials</p>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="name@jci.org" required autofocus />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" id="btn-login" class="btn-primary">Sign In</button>
+        </form>
+
+        <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-top: 14px; display: none;"></div>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted);">
+          <span>Year 2027 • JCI LEAD360 Platform</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiLogin, saveSession, getSession } from '/js/modules/authService.js';
+    import { routeDashboard } from '/js/modules/roleRouter.js';
+
+    // Auto-login if session exists
+    const session = getSession();
+    if (session && session.user) {
+      routeDashboard(session.user);
+    } else {
+      const form = document.getElementById('login-form');
+      const errBox = document.getElementById('auth-error');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errBox.style.display = 'none';
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+          const res = await apiLogin(email, password);
+          if (res.success && res.token) {
+            saveSession(res.token, res.user);
+            routeDashboard(res.user);
+          } else {
+            errBox.textContent = res.message || 'Login failed';
+            errBox.style.display = 'block';
+          }
+        } catch (err) {
+          errBox.textContent = 'Server connection error. Please try again.';
+          errBox.style.display = 'block';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
