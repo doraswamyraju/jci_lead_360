@@ -7,7 +7,15 @@ import { ROLES } from '../../config/roles.js';
 const router = express.Router();
 
 /**
- * Super Admin: Get all users
+ * Super Admin & Employees: Get real dashboard stats directly from DB
+ */
+router.get('/stats', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE), (req, res) => {
+  const stats = db.getStats();
+  res.json({ success: true, stats });
+});
+
+/**
+ * Super Admin & Employees: List all real users
  */
 router.get('/', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE), (req, res) => {
   const users = db.getUsers().map(u => ({
@@ -16,6 +24,7 @@ router.get('/', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE),
     email: u.email,
     role: u.role,
     phone: u.phone,
+    chapterId: u.chapterId,
     chapterName: u.chapterName,
     isActive: u.isActive,
     createdAt: u.createdAt
@@ -24,32 +33,52 @@ router.get('/', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE),
 });
 
 /**
- * Super Admin: Create Employee or Chapter President
+ * Super Admin: Create User (President or Employee)
  */
 router.post('/create-user', authenticate, authorizeRoles(ROLES.SUPER_ADMIN), async (req, res) => {
   try {
-    const { name, email, password, role, phone, chapterId, chapterName } = req.body;
+    const { name, email, password, role, phone, chapterName, zone } = req.body;
 
     if (!name || !email || !password || !role) {
-      return res.status(400).json({ success: false, message: 'Missing required user fields' });
+      return res.status(400).json({ success: false, message: 'All required fields must be filled' });
     }
 
     if (db.findUserByEmail(email)) {
-      return res.status(409).json({ success: false, message: 'User with this email already exists' });
+      return res.status(409).json({ success: false, message: 'A user with this email already exists in the database' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    let chapterId = null;
+    let finalChapterName = chapterName ? chapterName.trim() : null;
+
+    if (role === ROLES.PRESIDENT && finalChapterName) {
+      // Check or create Chapter in DB
+      const existingChapters = db.getChapters();
+      let chap = existingChapters.find(c => c.name.toLowerCase() === finalChapterName.toLowerCase());
+      if (!chap) {
+        chap = {
+          id: `chap_${Date.now()}`,
+          name: finalChapterName,
+          zone: zone || 'Unassigned',
+          year: 2027,
+          createdAt: new Date().toISOString()
+        };
+        db.saveChapter(chap);
+      }
+      chapterId = chap.id;
+    }
+
     const newUser = {
       id: `usr_${Date.now()}`,
-      name,
+      name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashedPassword,
       role,
-      phone: phone || '',
-      chapterId: chapterId || null,
-      chapterName: chapterName || null,
+      phone: phone ? phone.trim() : '',
+      chapterId,
+      chapterName: finalChapterName,
       isActive: true,
       createdAt: new Date().toISOString()
     };
@@ -74,6 +103,30 @@ router.post('/create-user', authenticate, authorizeRoles(ROLES.SUPER_ADMIN), asy
 });
 
 /**
+ * Super Admin: Toggle user active status or delete
+ */
+router.patch('/:id/toggle-status', authenticate, authorizeRoles(ROLES.SUPER_ADMIN), (req, res) => {
+  const user = db.findUserById(req.params.id);
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  if (user.role === ROLES.SUPER_ADMIN) {
+    return res.status(400).json({ success: false, message: 'Cannot deactivate Super Admin' });
+  }
+  user.isActive = !user.isActive;
+  db.saveUser(user);
+  res.json({ success: true, isActive: user.isActive });
+});
+
+router.delete('/:id', authenticate, authorizeRoles(ROLES.SUPER_ADMIN), (req, res) => {
+  const user = db.findUserById(req.params.id);
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  if (user.role === ROLES.SUPER_ADMIN) {
+    return res.status(400).json({ success: false, message: 'Cannot delete Super Admin' });
+  }
+  db.deleteUser(req.params.id);
+  res.json({ success: true, message: 'User deleted from database' });
+});
+
+/**
  * Chapter President: Create Secretary or Treasurer
  */
 router.post('/create-team-member', authenticate, authorizeRoles(ROLES.PRESIDENT), async (req, res) => {
@@ -93,7 +146,7 @@ router.post('/create-team-member', authenticate, authorizeRoles(ROLES.PRESIDENT)
 
     const newTeamMember = {
       id: `usr_${Date.now()}`,
-      name,
+      name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashedPassword,
       role,

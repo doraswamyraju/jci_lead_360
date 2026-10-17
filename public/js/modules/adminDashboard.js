@@ -1,81 +1,115 @@
+import { renderTemplateMarker } from './templateMarker.js';
+import { renderFrameStudio } from './frameStudio.js';
+import { renderUserManager } from './userManager.js';
+
 export function renderSuperAdminDashboard(container, user) {
   container.innerHTML = `
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div>
-          <h2>Super Admin Command Suite</h2>
-          <p style="color: var(--text-muted); font-size: 14px;">Master Control: Dynamic Template Engine & User Management</p>
-        </div>
-        <span class="badge badge-admin">Super Admin</span>
+    <!-- Top Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h2 style="font-size: 24px; color: var(--dark);">Super Admin Command Suite</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">Connected directly to Hostinger Production Database • Port 5087</p>
       </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px;">
-        <div style="padding: 16px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
-          <h4 style="color: #166534; font-size: 13px;">ACTIVE CHAPTERS</h4>
-          <p style="font-size: 26px; font-weight: 700; color: #15803d;" id="stat-chapters">1</p>
-        </div>
-        <div style="padding: 16px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
-          <h4 style="color: #1e40af; font-size: 13px;">TEMPLATES LIVE</h4>
-          <p style="font-size: 26px; font-weight: 700; color: #1d4ed8;" id="stat-templates">0</p>
-        </div>
-        <div style="padding: 16px; background: #faf5ff; border-radius: 8px; border: 1px solid #e9d5ff;">
-          <h4 style="color: #6b21a8; font-size: 13px;">VPS HOST PORT</h4>
-          <p style="font-size: 26px; font-weight: 700; color: #7e22ce;">5087</p>
-        </div>
-      </div>
-
-      <div style="border-top: 1px solid var(--border); padding-top: 20px;">
-        <h3>Quick Operations</h3>
-        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Create new Chapter Presidents or Employee Accounts</p>
-        
-        <form id="create-user-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
-          <input type="text" id="nu-name" class="form-control" placeholder="Full Name" required />
-          <input type="email" id="nu-email" class="form-control" placeholder="Email Address" required />
-          <input type="password" id="nu-password" class="form-control" placeholder="Password" required />
-          <select id="nu-role" class="form-control" required>
-            <option value="PRESIDENT">Chapter President (2027)</option>
-            <option value="EMPLOYEE">Employee / Designer</option>
-          </select>
-          <input type="text" id="nu-chapter" class="form-control" placeholder="Chapter Name (for President)" />
-          <button type="submit" class="btn-primary" style="margin: 0;">Create User</button>
-        </form>
-        <div id="create-user-msg" style="font-size: 13px; font-weight: 600;"></div>
+      <div style="display: flex; gap: 8px;">
+        <span class="badge badge-admin">Master Super Admin</span>
       </div>
     </div>
+
+    <!-- Real Database KPI Counters -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
+      <div style="padding: 18px; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; border-left: 4px solid #0097D8;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Presidents</div>
+        <div style="font-size: 28px; font-weight: 700; color: #0097D8; margin-top: 4px;" id="stat-presidents">-</div>
+      </div>
+      <div style="padding: 18px; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; border-left: 4px solid #10b981;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Active Chapters</div>
+        <div style="font-size: 28px; font-weight: 700; color: #10b981; margin-top: 4px;" id="stat-chapters">-</div>
+      </div>
+      <div style="padding: 18px; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; border-left: 4px solid #F37023;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Flyer Templates</div>
+        <div style="font-size: 28px; font-weight: 700; color: #F37023; margin-top: 4px;" id="stat-templates">-</div>
+      </div>
+      <div style="padding: 18px; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; border-left: 4px solid #8b5cf6;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Photo Frames</div>
+        <div style="font-size: 28px; font-weight: 700; color: #8b5cf6; margin-top: 4px;" id="stat-frames">-</div>
+      </div>
+    </div>
+
+    <!-- Tabbed Navigation between Standalone Modules -->
+    <div style="display: flex; gap: 12px; border-bottom: 2px solid var(--border); margin-bottom: 24px; padding-bottom: 8px;">
+      <button id="tab-templates" class="admin-tab active-tab">🎨 Template Studio (Marking)</button>
+      <button id="tab-frames" class="admin-tab">🖼️ Frame Studio</button>
+      <button id="tab-users" class="admin-tab">👥 Leaders & Employees DB</button>
+    </div>
+
+    <!-- Active Tab Container -->
+    <div id="admin-module-root"></div>
   `;
 
-  const form = document.getElementById('create-user-form');
-  const msg = document.getElementById('create-user-msg');
+  // Style Tabs
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    .admin-tab {
+      background: none;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .admin-tab:hover {
+      background: #f1f5f9;
+      color: var(--dark);
+    }
+    .active-tab {
+      background: #e0f2fe !important;
+      color: #0369a1 !important;
+    }
+  `;
+  document.head.appendChild(styleEl);
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('lead360_token');
-    const body = {
-      name: document.getElementById('nu-name').value,
-      email: document.getElementById('nu-email').value,
-      password: document.getElementById('nu-password').value,
-      role: document.getElementById('nu-role').value,
-      chapterName: document.getElementById('nu-chapter').value
-    };
+  const moduleRoot = document.getElementById('admin-module-root');
+  const token = localStorage.getItem('lead360_token');
 
+  async function refreshStats() {
     try {
-      const res = await fetch('/api/users/create-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(body)
+      const res = await fetch('/api/users/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.success) {
-        msg.style.color = '#15803d';
-        msg.textContent = `✓ Created account for ${data.user.name} (${data.user.role})`;
-        form.reset();
-      } else {
-        msg.style.color = '#b91c1c';
-        msg.textContent = `✗ ${data.message}`;
+      if (data.success && data.stats) {
+        document.getElementById('stat-presidents').textContent = data.stats.totalPresidents;
+        document.getElementById('stat-chapters').textContent = data.stats.totalChapters;
+        document.getElementById('stat-templates').textContent = data.stats.totalTemplates;
+        document.getElementById('stat-frames').textContent = data.stats.totalFrames;
       }
-    } catch (err) {
-      msg.style.color = '#b91c1c';
-      msg.textContent = '✗ Network/Server error';
+    } catch (e) {
+      console.error('Stats error:', e);
     }
+  }
+
+  function switchTab(activeBtnId, renderFn) {
+    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active-tab'));
+    document.getElementById(activeBtnId).classList.add('active-tab');
+    renderFn(moduleRoot, refreshStats);
+  }
+
+  document.getElementById('tab-templates').addEventListener('click', () => {
+    switchTab('tab-templates', renderTemplateMarker);
   });
+
+  document.getElementById('tab-frames').addEventListener('click', () => {
+    switchTab('tab-frames', renderFrameStudio);
+  });
+
+  document.getElementById('tab-users').addEventListener('click', () => {
+    switchTab('tab-users', renderUserManager);
+  });
+
+  // Default initial view: Template Studio
+  switchTab('tab-templates', renderTemplateMarker);
+  refreshStats();
 }

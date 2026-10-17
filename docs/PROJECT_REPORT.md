@@ -38,7 +38,8 @@ Every feature is built as a self-contained, standalone component in its own file
 
 | Date | Module / Layer | Tasks Completed / In Progress | Status | Notes & Blockers |
 | :--- | :--- | :--- | :--- | :--- |
-| **2026-10-17** | **Architecture & Planning** | Finalized requirements, role matrix, single login logic, modular architecture, and project status tracker setup. | **Completed** | Master project report created. |
+| **2026-10-17** | **Architecture & VPS Setup** | Configured GitHub remote, Port 5087 binding, firewall specs, isolated Nginx setup, and project report. | **Completed** | Master project report created. |
+| **2026-10-17** | **Super Admin Web & DB** | Built real-data Super Admin suite: Live DB Stats, User/Chapter Manager, Visual Template Marker with bounding-box canvas, Frame Studio, and file uploads. No dummy data. | **Completed** | Fully wired to live database API. |
 | *Upcoming* | **Database & Backend API** | Setup PostgreSQL schema on VPS (Users, Roles, Chapters, Templates, Coordinates, Categories). | *Pending* | - |
 | *Upcoming* | **Auth Service** | Single Login endpoint with role detection and JWT token generation. | *Pending* | - |
 | *Upcoming* | **Web Super Admin** | Visual Template Marker component (drag-and-drop bounding boxes). | *Pending* | - |

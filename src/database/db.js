@@ -40,6 +40,12 @@ export const db = {
     writeStore(store);
     return user;
   },
+  deleteUser: (id) => {
+    const store = readStore();
+    store.users = store.users.filter(u => u.id !== id);
+    writeStore(store);
+    return true;
+  },
   getChapters: () => readStore().chapters,
   findChapterById: (id) => readStore().chapters.find(c => c.id === id),
   saveChapter: (chapter) => {
@@ -53,18 +59,60 @@ export const db = {
     writeStore(store);
     return chapter;
   },
+  deleteChapter: (id) => {
+    const store = readStore();
+    store.chapters = store.chapters.filter(c => c.id !== id);
+    writeStore(store);
+    return true;
+  },
   getTemplates: () => readStore().templates,
+  findTemplateById: (id) => readStore().templates.find(t => t.id === id),
   saveTemplate: (template) => {
     const store = readStore();
-    store.templates.push(template);
+    const idx = store.templates.findIndex(t => t.id === template.id);
+    if (idx >= 0) {
+      store.templates[idx] = template;
+    } else {
+      store.templates.push(template);
+    }
     writeStore(store);
     return template;
   },
+  deleteTemplate: (id) => {
+    const store = readStore();
+    store.templates = store.templates.filter(t => t.id !== id);
+    writeStore(store);
+    return true;
+  },
   getFrames: () => readStore().frames,
+  findFrameById: (id) => readStore().frames.find(f => f.id === id),
   saveFrame: (frame) => {
     const store = readStore();
-    store.frames.push(frame);
+    const idx = store.frames.findIndex(f => f.id === frame.id);
+    if (idx >= 0) {
+      store.frames[idx] = frame;
+    } else {
+      store.frames.push(frame);
+    }
     writeStore(store);
     return frame;
+  },
+  deleteFrame: (id) => {
+    const store = readStore();
+    store.frames = store.frames.filter(f => f.id !== id);
+    writeStore(store);
+    return true;
+  },
+  getStats: () => {
+    const store = readStore();
+    return {
+      totalUsers: store.users.length,
+      totalChapters: store.chapters.length,
+      totalPresidents: store.users.filter(u => u.role === 'PRESIDENT').length,
+      totalEmployees: store.users.filter(u => u.role === 'EMPLOYEE').length,
+      totalPST: store.users.filter(u => ['SECRETARY', 'TREASURER'].includes(u.role)).length,
+      totalTemplates: store.templates.length,
+      totalFrames: store.frames.length
+    };
   }
 };
