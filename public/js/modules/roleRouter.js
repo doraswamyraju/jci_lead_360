@@ -1,3 +1,6 @@
+import { renderSidebar } from './sidebar.js';
+import { renderTopbar } from './topbar.js';
+import { renderFloatingActions } from './floatingActions.js';
 import { renderSuperAdminDashboard } from './adminDashboard.js';
 import { renderPresidentDashboard } from './presidentDashboard.js';
 import { renderPSTDashboard } from './pstDashboard.js';
@@ -5,40 +8,73 @@ import { clearSession } from './authService.js';
 
 export function routeDashboard(user) {
   const root = document.getElementById('app-root');
-  root.innerHTML = `
-    <header class="navbar">
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <img src="/assets/logo.png" alt="JCI LEAD360" />
+
+  let currentModule = (user.role === 'SUPER_ADMIN' || user.role === 'EMPLOYEE') ? 'templates' : 'flyers';
+
+  function buildShell() {
+    const sidebarObj = renderSidebar(user, currentModule, (newMod) => {
+      currentModule = newMod;
+      buildShell();
+    });
+
+    const topbarObj = renderTopbar(user, () => {
+      clearSession();
+      window.location.reload();
+    }, () => {
+      const sb = document.getElementById('app-sidebar');
+      if (sb) sb.classList.toggle('mobile-open');
+    });
+
+    const floatingObj = renderFloatingActions(user, (action) => {
+      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team'].includes(action)) {
+        currentModule = action;
+        buildShell();
+      } else if (action === 'new-template') {
+        currentModule = 'templates';
+        buildShell();
+      } else if (action === 'new-frame') {
+        currentModule = 'frames';
+        buildShell();
+      } else if (action === 'new-user') {
+        currentModule = 'users';
+        buildShell();
+      }
+    });
+
+    root.innerHTML = `
+      <div class="app-shell">
+        ${sidebarObj.html}
+        <div class="main-wrapper">
+          ${topbarObj.html}
+          <main class="page-container" id="dashboard-content"></main>
+        </div>
+        ${floatingObj.html}
       </div>
-      <div class="user-pill">
-        <span style="font-size: 14px; font-weight: 600;">${user.name}</span>
-        <button id="btn-logout" class="btn-logout">Logout</button>
-      </div>
-    </header>
-    <main class="content-container" id="dashboard-content"></main>
-  `;
+    `;
 
-  document.getElementById('btn-logout').addEventListener('click', () => {
-    clearSession();
-    window.location.reload();
-  });
+    // Attach events to all standalone components
+    sidebarObj.attachEvents(root);
+    topbarObj.attachEvents(root);
+    floatingObj.attachEvents(root);
 
-  const content = document.getElementById('dashboard-content');
-
-  // Unified Role Routing Engine
-  switch (user.role) {
-    case 'SUPER_ADMIN':
-    case 'EMPLOYEE':
-      renderSuperAdminDashboard(content, user);
-      break;
-    case 'PRESIDENT':
-      renderPresidentDashboard(content, user);
-      break;
-    case 'SECRETARY':
-    case 'TREASURER':
-      renderPSTDashboard(content, user);
-      break;
-    default:
-      content.innerHTML = `<div class="card">Unknown role: ${user.role}</div>`;
+    // Render internal module based on user role and current selection
+    const content = document.getElementById('dashboard-content');
+    switch (user.role) {
+      case 'SUPER_ADMIN':
+      case 'EMPLOYEE':
+        renderSuperAdminDashboard(content, user, currentModule);
+        break;
+      case 'PRESIDENT':
+        renderPresidentDashboard(content, user, currentModule);
+        break;
+      case 'SECRETARY':
+      case 'TREASURER':
+        renderPSTDashboard(content, user, currentModule);
+        break;
+      default:
+        content.innerHTML = `<div class="card-premium">Unknown role: ${user.role}</div>`;
+    }
   }
+
+  buildShell();
 }
