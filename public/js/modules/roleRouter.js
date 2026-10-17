@@ -1,7 +1,7 @@
-import { renderSuperAdminDashboard } from './modules/adminDashboard.js';
-import { renderPresidentDashboard } from './modules/presidentDashboard.js';
-import { renderPSTDashboard } from './modules/pstDashboard.js';
-import { clearSession } from './modules/authService.js';
+import { renderSuperAdminDashboard } from './adminDashboard.js';
+import { renderPresidentDashboard } from './presidentDashboard.js';
+import { renderPSTDashboard } from './pstDashboard.js';
+import { clearSession } from './authService.js';
 
 export function routeDashboard(user) {
   const root = document.getElementById('app-root');
