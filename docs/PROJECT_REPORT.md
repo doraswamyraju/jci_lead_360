@@ -38,26 +38,26 @@ Every feature is built as a self-contained, standalone component in its own file
 
 | Date | Module / Layer | Tasks Completed / In Progress | Status | Notes & Blockers |
 | :--- | :--- | :--- | :--- | :--- |
-| **2026-10-17** | **Architecture & VPS Setup** | Configured GitHub remote, Port 5087 binding, firewall specs, isolated Nginx setup, and project report. | **Completed** | Master project report created. |
-| **2026-10-17** | **Super Admin Web & DB** | Built real-data Super Admin suite: Live DB Stats, User/Chapter Manager, Visual Template Marker with bounding-box canvas, Frame Studio, and file uploads. No dummy data. | **Completed** | Fully wired to live database API. |
-| *Upcoming* | **Database & Backend API** | Setup PostgreSQL schema on VPS (Users, Roles, Chapters, Templates, Coordinates, Categories). | *Pending* | - |
-| *Upcoming* | **Auth Service** | Single Login endpoint with role detection and JWT token generation. | *Pending* | - |
-| *Upcoming* | **Web Super Admin** | Visual Template Marker component (drag-and-drop bounding boxes). | *Pending* | - |
-| *Upcoming* | **Android Native** | Project init, Compose navigation, single auth screen, and local canvas renderer. | *Pending* | - |
-| *Upcoming* | **iOS Native** | Project init, SwiftUI navigation, single auth screen, and CoreGraphics renderer. | *Pending* | - |
+| **2026-10-17** | **Architecture & VPS Setup** | Configured GitHub remote, Port 5087 binding, firewall specs, isolated Nginx setup, and master tracking report. | **Completed** | Master project report created. |
+| **2026-10-17** | **Hostinger Production Deployment** | Configured Nginx reverse proxy on port 5087, SSL certificate with Certbot on `lead.sriddha.com`, PM2 process isolation. | **Completed** | Live on HTTPS with multi-site protection. |
+| **2026-10-17** | **Super Admin Web & DB** | Built real-data Super Admin suite: Live DB Stats, User/Chapter Manager, Visual Template Marker with bounding-box canvas, Frame Studio, and Multer file uploads. No dummy data. | **Completed** | Fully wired to live database API. |
+| **2026-10-17** | **Enterprise UI & Navigation Shell** | Built modular dark sidebar with branded logo pill, sticky topbar with VPS status, floating action buttons (FAB), and mobile bottom navigation. | **Completed** | Clean separation into standalone modules. |
+| *Upcoming* | **Chapter President Desk** | 1-Tap dynamic flyer generator with auto-populated PST details & WhatsApp direct share. | *Pending* | - |
+| *Upcoming* | **Android Native (Kotlin)** | Project init, Compose navigation, single auth screen, and local canvas renderer. | *Pending* | - |
+| *Upcoming* | **iOS Native (Swift)** | Project init, SwiftUI navigation, single auth screen, and CoreGraphics renderer. | *Pending* | - |
 
 ---
 
 ## 3. Work Breakdown Structure (WBS) & Feature Modules
 
 ### Module 0: Unified Authentication & Role Resolver (Cross-Platform)
-- [ ] `AuthService` (Backend): Single login endpoint validating email/phone & password.
-- [ ] `RoleResolver` (Web/iOS/Android): Interceptor/router directing tokens to appropriate dashboard:
+- [x] `AuthService` (Backend): Single login endpoint validating email/phone & password.
+- [x] `RoleResolver` (Web/iOS/Android): Interceptor/router directing tokens to appropriate dashboard:
   - `Role == SUPER_ADMIN` $\rightarrow$ Super Admin Dashboard
   - `Role == EMPLOYEE` $\rightarrow$ Employee Studio Dashboard
   - `Role == PRESIDENT` $\rightarrow$ President Command Hub
   - `Role == SECRETARY \| TREASURER` $\rightarrow$ PST Flyer Desk
-- [ ] Session persistence, secure token storage (Android Keystore / iOS Keychain / Encrypted Cookie).
+- [x] Session persistence and automatic re-authentication on refresh.
 
 ---
 
