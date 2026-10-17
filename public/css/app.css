@@ -13,6 +13,7 @@
   --sidebar-text-active: #ffffff;
   --topbar-bg: #ffffff;
   --bg-main: #f1f5f9;
+  --bg-gradient: linear-gradient(135deg, #0b192c 0%, #1e3e62 100%);
   --card-bg: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
@@ -36,10 +37,128 @@ body {
   background: var(--bg-main);
   color: var(--text-main);
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
-/* App Master Shell Layout */
+/* =========================================
+   LOGIN SCREEN STYLES (Restored & Enhanced)
+   ========================================= */
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  padding: 24px;
+}
+
+.auth-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 440px;
+  padding: 40px 36px;
+  text-align: center;
+}
+
+.brand-header img {
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.auth-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 26px;
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  outline: none;
+  background: #ffffff;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 151, 216, 0.15);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(0, 151, 216, 0.3);
+}
+
+.btn-primary:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-admin { background: #fee2e2; color: #b91c1c; }
+.badge-president { background: #e0f2fe; color: #0369a1; }
+.badge-sec-treas { background: #fef3c7; color: #92400e; }
+
+/* =========================================
+   APP MASTER SHELL (Sidebar, Topbar, Main)
+   ========================================= */
 .app-shell {
   display: flex;
   min-height: 100vh;
@@ -70,7 +189,6 @@ body {
   transition: margin-left 0.3s;
 }
 
-/* Topbar */
 .topbar {
   height: 72px;
   background: var(--topbar-bg);
@@ -85,7 +203,6 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-/* Page Body */
 .page-container {
   flex: 1;
   padding: 32px;
@@ -94,7 +211,6 @@ body {
   margin: 0 auto;
 }
 
-/* Cards & Components */
 .card-premium {
   background: var(--card-bg);
   border-radius: var(--radius-md);
@@ -108,7 +224,6 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* KPI Card */
 .kpi-card {
   background: #ffffff;
   border-radius: var(--radius-md);
@@ -136,7 +251,7 @@ body {
   font-size: 24px;
 }
 
-/* Floating Action Button (FAB) */
+/* Floating Action Button */
 .fab-container {
   position: fixed;
   bottom: 28px;
@@ -169,7 +284,6 @@ body {
   box-shadow: 0 12px 28px rgba(0, 151, 216, 0.55);
 }
 
-/* Bottom Nav for Mobile */
 .bottom-nav {
   display: none;
   position: fixed;
