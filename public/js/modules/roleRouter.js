@@ -26,7 +26,7 @@ export function routeDashboard(user) {
     });
 
     const floatingObj = renderFloatingActions(user, (action) => {
-      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team'].includes(action)) {
+      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team', 'notices', 'greetings'].includes(action)) {
         currentModule = action;
         buildShell();
       } else if (action === 'new-template') {
@@ -37,6 +37,12 @@ export function routeDashboard(user) {
         buildShell();
       } else if (action === 'new-user') {
         currentModule = 'users';
+        buildShell();
+      } else if (action === 'generate-flyer') {
+        currentModule = 'flyers';
+        buildShell();
+      } else if (action === 'make-frame') {
+        currentModule = 'frames';
         buildShell();
       }
     });

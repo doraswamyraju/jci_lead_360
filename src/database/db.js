@@ -103,6 +103,26 @@ export const db = {
     writeStore(store);
     return true;
   },
+  getCalendarEvents: () => readStore().calendar_events || [],
+  saveCalendarEvent: (event) => {
+    const store = readStore();
+    if (!store.calendar_events) store.calendar_events = [];
+    const idx = store.calendar_events.findIndex(e => e.id === event.id);
+    if (idx >= 0) {
+      store.calendar_events[idx] = event;
+    } else {
+      store.calendar_events.push(event);
+    }
+    writeStore(store);
+    return event;
+  },
+  deleteCalendarEvent: (id) => {
+    const store = readStore();
+    if (!store.calendar_events) store.calendar_events = [];
+    store.calendar_events = store.calendar_events.filter(e => e.id !== id);
+    writeStore(store);
+    return true;
+  },
   getStats: () => {
     const store = readStore();
     return {
@@ -112,7 +132,9 @@ export const db = {
       totalEmployees: store.users.filter(u => u.role === 'EMPLOYEE').length,
       totalPST: store.users.filter(u => ['SECRETARY', 'TREASURER'].includes(u.role)).length,
       totalTemplates: store.templates.length,
-      totalFrames: store.frames.length
+      totalFrames: store.frames.length,
+      totalEvents: (store.calendar_events || []).length
     };
   }
 };
+

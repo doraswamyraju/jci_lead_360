@@ -93,4 +93,42 @@ router.delete('/frames/:id', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROL
   res.json({ success: true, message: 'Frame deleted from database' });
 });
 
+/**
+ * JCI 2027 Calendar Events Endpoints
+ */
+router.get('/calendar/events', authenticate, (req, res) => {
+  const events = db.getCalendarEvents();
+  res.json({ success: true, count: events.length, events });
+});
+
+router.post('/calendar/events', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE), (req, res) => {
+  try {
+    const { title, category, targetDate, mandatory, description, templateId } = req.body;
+    if (!title || !targetDate) {
+      return res.status(400).json({ success: false, message: 'Title and target date are required' });
+    }
+
+    const newEvent = {
+      id: `ev_${Date.now()}`,
+      title: title.trim(),
+      category: category || '100% Efficiency',
+      targetDate,
+      mandatory: Boolean(mandatory),
+      description: description || '',
+      templateId: templateId || null,
+      createdAt: new Date().toISOString()
+    };
+
+    db.saveCalendarEvent(newEvent);
+    res.status(201).json({ success: true, event: newEvent });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error saving calendar event' });
+  }
+});
+
+router.delete('/calendar/events/:id', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE), (req, res) => {
+  db.deleteCalendarEvent(req.params.id);
+  res.json({ success: true, message: 'Calendar event removed' });
+});
+
 export default router;

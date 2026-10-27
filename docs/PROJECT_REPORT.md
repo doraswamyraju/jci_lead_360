@@ -40,11 +40,14 @@ Every feature is built as a self-contained, standalone component in its own file
 | :--- | :--- | :--- | :--- | :--- |
 | **2026-10-17** | **Architecture & VPS Setup** | Configured GitHub remote, Port 5087 binding, firewall specs, isolated Nginx setup, and master tracking report. | **Completed** | Master project report created. |
 | **2026-10-17** | **Hostinger Production Deployment** | Configured Nginx reverse proxy on port 5087, SSL certificate with Certbot on `lead.sriddha.com`, PM2 process isolation. | **Completed** | Live on HTTPS with multi-site protection. |
-| **2026-10-17** | **Super Admin Web & DB** | Built real-data Super Admin suite: Live DB Stats, User/Chapter Manager, Visual Template Marker with bounding-box canvas, Frame Studio, and Multer file uploads. No dummy data. | **Completed** | Fully wired to live database API. |
+| **2026-10-17** | **Super Admin Web & DB** | Built real-data Super Admin suite: Live DB Stats, User/Chapter Manager, Visual Template Marker with bounding-box canvas, Frame Studio, and Multer file uploads. | **Completed** | Fully wired to live database API. |
 | **2026-10-17** | **Enterprise UI & Navigation Shell** | Built modular dark sidebar with branded logo pill, sticky topbar with VPS status, floating action buttons (FAB), and mobile bottom navigation. | **Completed** | Clean separation into standalone modules. |
-| *Upcoming* | **Chapter President Desk** | 1-Tap dynamic flyer generator with auto-populated PST details & WhatsApp direct share. | *Pending* | - |
-| *Upcoming* | **Android Native (Kotlin)** | Project init, Compose navigation, single auth screen, and local canvas renderer. | *Pending* | - |
-| *Upcoming* | **iOS Native (Swift)** | Project init, SwiftUI navigation, single auth screen, and CoreGraphics renderer. | *Pending* | - |
+| **2026-10-27** | **Phase 1: Storage & Upload Pipeline Hardening** | Added explicit Multer error catching, directory safety guarantees, and expressive JSON client feedback. | **Completed** | Eliminates unhandled 500 crashes. |
+| **2026-10-27** | **Phase 2: Dynamic Flyer & Frame Engine** | Standalone Canvas compositor (`canvasRenderer.js`), 1-Tap Flyer Generator (`flyerGenerator.js`), Frame Maker (`frameMaker.js`), WhatsApp direct share & PNG download. | **Completed** | Zero-latency browser 300 DPI compositing. |
+| **2026-10-27** | **Phase 3: JCI 2027 Calendar Engine** | Chronological 100% Efficiency compliance deadlines, UN International Days, and 1-tap jump to flyer templates (`calendarModule.js`). | **Completed** | Database backed with seed fixtures. |
+| **2026-10-27** | **Phase 4: Native Android (Kotlin + Compose)** | Android app scaffold with single LoginScreen, AndroidFlyerRenderer canvas compositor, and AndroidShareManager FileProvider intent. | **Completed** | Clean architecture under `mobile-android/`. |
+| **2026-10-27** | **Phase 5: Native iOS (Swift + SwiftUI)** | Single unified LoginView in SwiftUI, iOSFlyerRenderer CoreGraphics compositor, and UIActivityViewController sharing. | **Completed** | Clean architecture under `mobile-ios/`. |
+| **2026-10-27** | **Phase 6: Automated Verification & CI Test Suite** | Automated test suite verifying auth integrity, data store schemas, templates, frames, and calendar compliance. | **Completed** | 100% tests passing (`npm test`). |
 
 ---
 

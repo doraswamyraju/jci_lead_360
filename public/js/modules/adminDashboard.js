@@ -1,6 +1,7 @@
 import { renderTemplateMarker } from './templateMarker.js';
 import { renderFrameStudio } from './frameStudio.js';
 import { renderUserManager } from './userManager.js';
+import { renderCalendarModule } from './calendarModule.js';
 
 export function renderSuperAdminDashboard(container, user, activeSubmodule = 'templates') {
   container.innerHTML = `
@@ -80,15 +81,7 @@ export function renderSuperAdminDashboard(container, user, activeSubmodule = 'te
   } else if (activeSubmodule === 'users') {
     renderUserManager(moduleRoot, refreshStats);
   } else if (activeSubmodule === 'calendar') {
-    moduleRoot.innerHTML = `
-      <div class="card-premium">
-        <h3 style="font-size: 18px; margin-bottom: 8px;">📅 JCI 2027 100% Efficiency Master Calendar</h3>
-        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Link flyer templates to release on official JCI compliance deadlines and UN International Days.</p>
-        <div style="padding: 20px; background: #f8fafc; border: 1px dashed var(--border); border-radius: 8px; text-align: center; color: var(--text-muted);">
-          Calendar activity module ready for 2027 scheduling.
-        </div>
-      </div>
-    `;
+    renderCalendarModule(moduleRoot, user);
   } else {
     // Default: 'templates'
     renderTemplateMarker(moduleRoot, refreshStats);
