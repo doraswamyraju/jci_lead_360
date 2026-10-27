@@ -42,12 +42,15 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (req, file, cb) => {
-    const allowed = ['.png', '.jpg', '.jpeg', '.webp'];
+    const allowedExts = ['.png', '.jpg', '.jpeg', '.webp', '.svg', '.jfif', '.avif', '.bmp'];
     const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) {
+    const isImageMime = file.mimetype.startsWith('image/');
+
+    if (allowedExts.includes(ext) || isImageMime) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only PNG, JPG, JPEG, and WebP images are permitted.'));
+      console.warn(`[Upload Rejected] name: ${file.originalname}, ext: ${ext}, mime: ${file.mimetype}`);
+      cb(new Error(`File "${file.originalname}" is not supported. Please upload a standard image (PNG, JPG, JPEG, WebP, SVG).`));
     }
   }
 });
