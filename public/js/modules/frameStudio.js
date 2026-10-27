@@ -64,17 +64,20 @@ export function renderFrameStudio(container, onSavedCallback) {
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => ({ success: false, message: 'Server returned invalid response' }));
+      if (res.ok && data.success) {
         uploadedFrameUrl = data.fileUrl;
+        uploadStatus.style.color = '#15803d';
         uploadStatus.textContent = `✓ Frame uploaded: ${file.name}`;
         previewImg.src = uploadedFrameUrl;
         workspace.style.display = 'block';
       } else {
-        uploadStatus.textContent = `✗ Upload failed: ${data.message}`;
+        uploadStatus.style.color = '#b91c1c';
+        uploadStatus.textContent = `✗ Upload failed: ${data.message || 'Status ' + res.status}`;
       }
     } catch (err) {
-      uploadStatus.textContent = '✗ Upload error on VPS.';
+      uploadStatus.style.color = '#b91c1c';
+      uploadStatus.textContent = `✗ Upload error: ${err.message || 'Network/Server connection failed'}`;
     }
   });
 

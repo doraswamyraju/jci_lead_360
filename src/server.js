@@ -44,6 +44,15 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error('[Unhandled Server Error]:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error occurred'
+  });
+});
+
 // Fallback to Single Page App index
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));

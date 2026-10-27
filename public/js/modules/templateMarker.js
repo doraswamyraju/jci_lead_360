@@ -130,9 +130,10 @@ export function renderTemplateMarker(container, onSavedCallback) {
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => ({ success: false, message: 'Server returned invalid response' }));
+      if (res.ok && data.success) {
         uploadedFileUrl = data.fileUrl;
+        uploadStatus.style.color = '#15803d';
         uploadStatus.textContent = `✓ Uploaded: ${file.name} (${(data.size / 1024).toFixed(1)} KB)`;
         previewImg.src = uploadedFileUrl;
         previewImg.onload = () => {
@@ -141,10 +142,12 @@ export function renderTemplateMarker(container, onSavedCallback) {
           workspace.style.display = 'block';
         };
       } else {
-        uploadStatus.textContent = `✗ Upload failed: ${data.message}`;
+        uploadStatus.style.color = '#b91c1c';
+        uploadStatus.textContent = `✗ Upload failed: ${data.message || 'Status ' + res.status}`;
       }
     } catch (err) {
-      uploadStatus.textContent = '✗ Network/Server upload error.';
+      uploadStatus.style.color = '#b91c1c';
+      uploadStatus.textContent = `✗ Upload error: ${err.message || 'Network/Server connection failed'}`;
     }
   }
 
