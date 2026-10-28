@@ -1,7 +1,7 @@
 /**
  * Standalone Client-Side Canvas Image Compositor Engine
  * Renders high-resolution 1080x1080 / 1080x1350 flyers in the browser
- * with custom fonts, bounding boxes, logo placement, and text wrapping.
+ * with custom fonts, dynamic coordinates, shapes, colors, alignment, and logo placement.
  */
 
 export class CanvasRenderer {
@@ -18,7 +18,7 @@ export class CanvasRenderer {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
-      img.onerror = (e) => reject(new Error(`Failed to load image: ${src}`));
+      img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
       img.src = src;
     });
   }
@@ -53,12 +53,28 @@ export class CanvasRenderer {
       const w = (layer.width / (template.dimensions?.width || 1080)) * width;
       const h = (layer.height / (template.dimensions?.height || 1080)) * height;
 
+      // Extract layer styling options
+      const textColor = layer.textColor || '#ffffff';
+      const textAlign = layer.textAlign || 'left';
+      const fontSize = layer.fontSize || Math.max(16, Math.round(w * 0.065));
+      const fontWeight = layer.fontWeight || '700';
+      const hasShadow = layer.hasShadow !== false;
+      const shape = layer.shape || (layer.type.includes('photo') ? 'circle' : 'rectangle');
+      const borderWidth = layer.borderWidth ?? (layer.type.includes('photo') ? 4 : 0);
+      const borderColor = layer.borderColor || '#ffffff';
+
       switch (layer.type) {
         case 'chapter_logo':
-          if (values.chapterLogo) {
+        case 'cohost_logo':
+          const logoSrc = (layer.type === 'cohost_logo') ? (values.cohostLogo || values.chapterLogo) : values.chapterLogo;
+          if (logoSrc) {
             try {
-              const logo = await CanvasRenderer.loadImage(values.chapterLogo);
-              this.drawContainImage(logo, x, y, w, h);
+              const logo = await CanvasRenderer.loadImage(logoSrc);
+              if (shape === 'circle') {
+                this.drawCircleImage(logo, x, y, Math.min(w, h), borderWidth, borderColor);
+              } else {
+                this.drawContainImage(logo, x, y, w, h);
+              }
             } catch (err) {
               console.warn('Logo render failed:', err);
             }
@@ -67,11 +83,24 @@ export class CanvasRenderer {
 
         case 'president_photo':
         case 'chief_guest_photo':
-          const photoUrl = layer.type === 'president_photo' ? values.presidentPhoto : values.chiefGuestPhoto;
+        case 'secretary_photo':
+          let photoUrl = values.presidentPhoto;
+          if (layer.type === 'chief_guest_photo') photoUrl = values.chiefGuestPhoto || values.presidentPhoto;
+          if (layer.type === 'secretary_photo') photoUrl = values.secretaryPhoto || values.presidentPhoto;
+
           if (photoUrl) {
             try {
               const photo = await CanvasRenderer.loadImage(photoUrl);
-              this.drawCircleImage(photo, x, y, Math.min(w, h));
+              if (shape === 'circle') {
+                this.drawCircleImage(photo, x, y, Math.min(w, h), borderWidth, borderColor);
+              } else {
+                this.ctx.drawImage(photo, x, y, w, h);
+                if (borderWidth > 0) {
+                  this.ctx.strokeStyle = borderColor;
+                  this.ctx.lineWidth = borderWidth;
+                  this.ctx.strokeRect(x, y, w, h);
+                }
+              }
             } catch (err) {
               console.warn('Photo render failed:', err);
             }
@@ -81,11 +110,11 @@ export class CanvasRenderer {
         case 'president_name':
           if (values.presidentName) {
             this.drawText(values.presidentName, x, y, w, h, {
-              fontSize: Math.max(18, Math.round(w * 0.07)),
-              fontWeight: '800',
-              color: '#ffffff',
-              align: 'left',
-              hasShadow: true
+              fontSize: layer.fontSize || Math.max(18, Math.round(w * 0.07)),
+              fontWeight,
+              color: textColor,
+              align: textAlign,
+              hasShadow
             });
           }
           break;
@@ -93,11 +122,11 @@ export class CanvasRenderer {
         case 'event_date_time':
           if (values.dateTime) {
             this.drawText(`📅 ${values.dateTime}`, x, y, w, h, {
-              fontSize: Math.max(16, Math.round(w * 0.05)),
-              fontWeight: '700',
-              color: '#ffffff',
-              align: 'left',
-              hasShadow: true
+              fontSize: layer.fontSize || Math.max(16, Math.round(w * 0.05)),
+              fontWeight,
+              color: textColor,
+              align: textAlign,
+              hasShadow
             });
           }
           break;
@@ -105,11 +134,11 @@ export class CanvasRenderer {
         case 'event_venue':
           if (values.venue) {
             this.drawText(`📍 ${values.venue}`, x, y, w, h, {
-              fontSize: Math.max(16, Math.round(w * 0.05)),
-              fontWeight: '600',
-              color: '#ffffff',
-              align: 'left',
-              hasShadow: true
+              fontSize: layer.fontSize || Math.max(16, Math.round(w * 0.05)),
+              fontWeight,
+              color: textColor,
+              align: textAlign,
+              hasShadow
             });
           }
           break;
@@ -117,22 +146,24 @@ export class CanvasRenderer {
         case 'chief_guest':
           if (values.chiefGuest) {
             this.drawText(values.chiefGuest, x, y, w, h, {
-              fontSize: Math.max(16, Math.round(w * 0.055)),
-              fontWeight: '700',
-              color: '#ffffff',
-              align: 'left',
-              hasShadow: true
+              fontSize: layer.fontSize || Math.max(16, Math.round(w * 0.055)),
+              fontWeight,
+              color: textColor,
+              align: textAlign,
+              hasShadow
             });
           }
           break;
 
         default:
-          if (values[layer.type]) {
-            this.drawText(values[layer.type], x, y, w, h, {
-              fontSize: 20,
-              fontWeight: '600',
-              color: '#ffffff',
-              align: 'left'
+          const textVal = values[layer.type] || layer.label || '';
+          if (textVal) {
+            this.drawText(textVal, x, y, w, h, {
+              fontSize: layer.fontSize || 20,
+              fontWeight,
+              color: textColor,
+              align: textAlign,
+              hasShadow
             });
           }
       }
@@ -154,9 +185,9 @@ export class CanvasRenderer {
   }
 
   /**
-   * Helper: Render circular avatar cropped cleanly
+   * Helper: Render circular avatar cropped cleanly with custom border
    */
-  drawCircleImage(img, x, y, size) {
+  drawCircleImage(img, x, y, size, borderWidth = 4, borderColor = '#ffffff') {
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
@@ -165,16 +196,17 @@ export class CanvasRenderer {
     this.ctx.drawImage(img, x, y, size, size);
     this.ctx.restore();
 
-    // Border around circular avatar
-    this.ctx.strokeStyle = '#ffffff';
-    this.ctx.lineWidth = 4;
-    this.ctx.beginPath();
-    this.ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-    this.ctx.stroke();
+    if (borderWidth > 0) {
+      this.ctx.strokeStyle = borderColor;
+      this.ctx.lineWidth = borderWidth;
+      this.ctx.beginPath();
+      this.ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
   }
 
   /**
-   * Helper: Draw wrapped text with dropshadow
+   * Helper: Draw wrapped text with dropshadow and precise alignment
    */
   drawText(text, x, y, maxWidth, maxHeight, { fontSize = 18, fontWeight = '600', color = '#ffffff', align = 'left', hasShadow = false }) {
     this.ctx.save();
@@ -184,22 +216,30 @@ export class CanvasRenderer {
     this.ctx.textBaseline = 'top';
 
     if (hasShadow) {
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
       this.ctx.shadowBlur = 6;
       this.ctx.shadowOffsetX = 2;
       this.ctx.shadowOffsetY = 2;
     }
 
+    // Determine target anchor X based on alignment
+    let textAnchorX = x;
+    if (align === 'center') {
+      textAnchorX = x + (maxWidth / 2);
+    } else if (align === 'right') {
+      textAnchorX = x + maxWidth;
+    }
+
     const words = text.split(' ');
     let line = '';
     let currentY = y;
-    const lineHeight = fontSize * 1.3;
+    const lineHeight = fontSize * 1.35;
 
     for (let i = 0; i < words.length; i++) {
       const testLine = line + words[i] + ' ';
       const metrics = this.ctx.measureText(testLine);
       if (metrics.width > maxWidth && i > 0) {
-        this.ctx.fillText(line.trim(), x, currentY);
+        this.ctx.fillText(line.trim(), textAnchorX, currentY);
         line = words[i] + ' ';
         currentY += lineHeight;
         if (currentY + lineHeight > y + maxHeight) break;
@@ -207,7 +247,7 @@ export class CanvasRenderer {
         line = testLine;
       }
     }
-    this.ctx.fillText(line.trim(), x, currentY);
+    this.ctx.fillText(line.trim(), textAnchorX, currentY);
     this.ctx.restore();
   }
 
