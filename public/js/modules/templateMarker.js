@@ -687,17 +687,18 @@ export function renderTemplateMarker(container, onSavedCallback) {
       return;
     }
 
-    activeZoneBadge.textContent = l.type;
+    const zoneType = (l.type || l.key || 'custom_text').toLowerCase();
+    activeZoneBadge.textContent = zoneType;
     activeZoneBadge.style.background = '#e0f2fe';
     activeZoneBadge.style.color = '#0369a1';
 
     inspectorEmpty.style.display = 'none';
     inspectorActive.style.display = 'flex';
 
-    propLabel.value = l.label;
+    propLabel.value = l.label || zoneType;
     updateInspectorCoords();
 
-    const isImage = l.type.includes('logo') || l.type.includes('photo');
+    const isImage = zoneType.includes('logo') || zoneType.includes('photo');
     if (isImage) {
       sectionImageControls.style.display = 'block';
       sectionTextControls.style.display = 'none';
@@ -1024,14 +1025,19 @@ export function renderTemplateMarker(container, onSavedCallback) {
     naturalWidth = tpl.dimensions?.width || 1080;
     naturalHeight = tpl.dimensions?.height || 1080;
 
-    layers = (tpl.layers || []).map(l => ({
-      ...l,
-      id: l.id || `layer_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      xPercent: l.xPercent ?? ((l.x / naturalWidth) * 100),
-      yPercent: l.yPercent ?? ((l.y / naturalHeight) * 100),
-      wPercent: l.wPercent ?? ((l.width / naturalWidth) * 100),
-      hPercent: l.hPercent ?? ((l.height / naturalHeight) * 100)
-    }));
+    layers = (tpl.layers || []).map(l => {
+      const type = (l.type || l.key || 'custom_text').toLowerCase();
+      return {
+        ...l,
+        type,
+        label: l.label || type,
+        id: l.id || `layer_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        xPercent: l.xPercent ?? ((l.x / naturalWidth) * 100),
+        yPercent: l.yPercent ?? ((l.y / naturalHeight) * 100),
+        wPercent: l.wPercent ?? ((l.width / naturalWidth) * 100),
+        hPercent: l.hPercent ?? ((l.height / naturalHeight) * 100)
+      };
+    });
 
     selectedLayerId = layers[0]?.id || null;
     workspace.style.display = 'block';
