@@ -111,9 +111,9 @@ export function renderTemplateMarker(container, onSavedCallback) {
             </div>
 
             <!-- COLUMN 2: Visual Canvas Area -->
-            <div style="background: #091322; border: 2px solid #1e293b; border-radius: 14px; overflow: auto; max-height: 600px; text-align: center; padding: 16px; user-select: none; position: relative;">
-              <div id="canvas-container" style="position: relative; display: inline-block; box-shadow: 0 15px 40px rgba(0,0,0,0.7);">
-                <img id="base-preview-img" style="max-width: 100%; display: block; border-radius: 6px;" draggable="false" />
+            <div style="background: #091322; border: 2px solid #1e293b; border-radius: 14px; overflow: auto; min-height: 480px; max-height: 720px; text-align: center; padding: 20px; user-select: none; position: relative; display: flex; align-items: center; justify-content: center;">
+              <div id="canvas-container" style="position: relative; display: inline-block; box-shadow: 0 15px 40px rgba(0,0,0,0.7); max-width: 100%;">
+                <img id="base-preview-img" style="max-width: 100%; max-height: 660px; width: auto; height: auto; display: block; border-radius: 6px; object-fit: contain;" draggable="false" />
                 <div id="layers-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; overflow: hidden;"></div>
               </div>
             </div>
