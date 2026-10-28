@@ -28,3 +28,7 @@ Thumbs.db
 # Large media files (keep repo lightweight)
 uploads/temp/
 *.psd
+
+# Mobile build caches
+.gradle/
+*.gradle
