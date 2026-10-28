@@ -6,8 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.jci2027.lead360.auth.LoginScreen
+import com.jci2027.lead360.president.PresidentFlyerStudioScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,14 +20,30 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LoginScreen(
-                        onLoginSuccess = { user ->
-                            // Navigate to Dashboard
-                        }
-                    )
+                    var token by remember { mutableStateOf<String?>(null) }
+                    var userRole by remember { mutableStateOf("PRESIDENT") }
+                    var userName by remember { mutableStateOf("JC Doraswamy Raju") }
+                    var userChapter by remember { mutableStateOf("JCI Bangalore Garden City") }
+
+                    if (token == null) {
+                        LoginScreen(
+                            onLoginSuccess = { t, role, name, chapter ->
+                                token = t
+                                userRole = role
+                                userName = name
+                                userChapter = chapter
+                            }
+                        )
+                    } else {
+                        // Direct to President Flyer Studio with live templates
+                        PresidentFlyerStudioScreen(
+                            token = token!!,
+                            presidentName = userName,
+                            chapterName = userChapter
+                        )
+                    }
                 }
             }
         }
     }
 }
-

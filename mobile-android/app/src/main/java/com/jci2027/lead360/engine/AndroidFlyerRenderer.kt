@@ -2,69 +2,196 @@ package com.jci2027.lead360.engine
 
 import android.content.Context
 import android.graphics.*
+import com.jci2027.lead360.model.TemplateLayer
+import com.jci2027.lead360.model.TemplateModel
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.math.min
 
 /**
- * Native Android Canvas Flyer Compositor
- * High performance hardware-accelerated 300 DPI image generator
+ * Native Android High-Res Dynamic Flyer Compositor
+ * Accurately translates all Super Admin template coordinates, typography,
+ * text alignment, colors, circular avatars, and photo borders.
  */
 class AndroidFlyerRenderer(private val context: Context) {
 
-    fun compositeFlyer(
+    fun compositeDynamicFlyer(
+        template: TemplateModel,
         baseBitmap: Bitmap,
-        chapterLogo: Bitmap?,
-        presidentName: String,
-        dateTime: String,
-        venue: String,
-        chiefGuest: String?
+        chapterLogoBitmap: Bitmap?,
+        presidentPhotoBitmap: Bitmap?,
+        fieldValues: Map<String, String>
     ): Bitmap {
-        val width = baseBitmap.width
-        val height = baseBitmap.height
+        val width = template.dimensions?.width ?: baseBitmap.width
+        val height = template.dimensions?.height ?: baseBitmap.height
 
         val resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(resultBitmap)
 
         // 1. Draw Base Flyer
-        canvas.drawBitmap(baseBitmap, 0f, 0f, null)
+        val baseRect = Rect(0, 0, width, height)
+        canvas.drawBitmap(baseBitmap, null, baseRect, null)
 
-        // 2. Draw Chapter Logo if provided
-        chapterLogo?.let { logo ->
-            val logoRect = RectF(80f, 80f, 300f, 180f)
-            canvas.drawBitmap(logo, null, logoRect, null)
-        }
+        // 2. Iterate through configured layers
+        template.layers?.forEach { layer ->
+            val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
 
-        // 3. Draw President Name & Designation
-        val titlePaint = Paint().apply {
-            color = Color.WHITE
-            textSize = width * 0.038f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            isAntiAlias = true
-            setShadowLayer(6f, 2f, 2f, Color.argb(180, 0, 0, 0))
-        }
-        canvas.drawText(presidentName, 80f, height - 160f, titlePaint)
+            val x = (layer.xPercent / 100f) * width
+            val y = (layer.yPercent / 100f) * height
+            val w = (layer.wPercent / 100f) * width
+            val h = (layer.hPercent / 100f) * height
 
-        // 4. Draw Date, Time, Venue
-        val bodyPaint = Paint().apply {
-            color = Color.WHITE
-            textSize = width * 0.032f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-            isAntiAlias = true
-            setShadowLayer(6f, 2f, 2f, Color.argb(180, 0, 0, 0))
-        }
-        canvas.drawText("📅 $dateTime", 80f, height - 320f, bodyPaint)
-        canvas.drawText("📍 $venue", 80f, height - 260f, bodyPaint)
+            val shape = layer.shape ?: if (zoneType.contains("photo")) "circle" else "rectangle"
+            val borderWidth = layer.borderWidth ?: if (zoneType.contains("photo")) 4 else 0
+            val borderColorInt = parseHexColor(layer.borderColor, Color.WHITE)
 
-        chiefGuest?.takeIf { it.isNotBlank() }?.let { guest ->
-            canvas.drawText("🌟 Chief Guest: $guest", 80f, height - 200f, bodyPaint)
+            when {
+                // CHAPTER LOGO / CO-HOST LOGO
+                zoneType.contains("logo") -> {
+                    chapterLogoBitmap?.let { logo ->
+                        if (shape == "circle") {
+                            drawCircleBitmap(canvas, logo, x, y, min(w, h), borderWidth, borderColorInt)
+                        } else {
+                            val destRect = RectF(x, y, x + w, y + h)
+                            canvas.drawBitmap(logo, null, destRect, null)
+                        }
+                    }
+                }
+
+                // PRESIDENT PHOTO / SECRETARY PHOTO
+                zoneType.contains("photo") -> {
+                    presidentPhotoBitmap?.let { photo ->
+                        if (shape == "circle") {
+                            drawCircleBitmap(canvas, photo, x, y, min(w, h), borderWidth, borderColorInt)
+                        } else {
+                            val destRect = RectF(x, y, x + w, y + h)
+                            canvas.drawBitmap(photo, null, destRect, null)
+                            if (borderWidth > 0) {
+                                val strokePaint = Paint().apply {
+                                    style = Paint.Style.STROKE
+                                    strokeWidth = borderWidth.toFloat()
+                                    color = borderColorInt
+                                    isAntiAlias = true
+                                }
+                                canvas.drawRect(destRect, strokePaint)
+                            }
+                        }
+                    }
+                }
+
+                // TEXT FIELDS
+                else -> {
+                    val text = fieldValues[zoneType] ?: layer.label ?: ""
+                    if (text.isNotBlank()) {
+                        drawWrappedText(
+                            canvas = canvas,
+                            text = text,
+                            x = x,
+                            y = y,
+                            maxWidth = w,
+                            maxHeight = h,
+                            textColor = parseHexColor(layer.textColor, Color.WHITE),
+                            fontSize = (layer.fontSize ?: 24).toFloat() * 1.5f,
+                            align = layer.textAlign ?: "left",
+                            hasShadow = layer.hasShadow != false
+                        )
+                    }
+                }
+            }
         }
 
         return resultBitmap
     }
 
-    /**
-     * Save generated bitmap to cache file ready for WhatsApp/Social share intent
-     */
+    private fun drawCircleBitmap(canvas: Canvas, bitmap: Bitmap, x: Float, y: Float, size: Float, borderWidth: Int, borderColor: Int) {
+        val radius = size / 2f
+        val cx = x + radius
+        val cy = y + radius
+
+        val output = Bitmap.createBitmap(size.toInt(), size.toInt(), Bitmap.Config.ARGB_8888)
+        val circleCanvas = Canvas(output)
+        val paint = Paint().apply { isAntiAlias = true }
+
+        circleCanvas.drawCircle(radius, radius, radius, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        circleCanvas.drawBitmap(bitmap, null, RectF(0f, 0f, size, size), paint)
+
+        canvas.drawBitmap(output, x, y, null)
+
+        if (borderWidth > 0) {
+            val borderPaint = Paint().apply {
+                style = Paint.Style.STROKE
+                strokeWidth = borderWidth.toFloat()
+                color = borderColor
+                isAntiAlias = true
+            }
+            canvas.drawCircle(cx, cy, radius, borderPaint)
+        }
+    }
+
+    private fun drawWrappedText(
+        canvas: Canvas,
+        text: String,
+        x: Float,
+        y: Float,
+        maxWidth: Float,
+        maxHeight: Float,
+        textColor: Int,
+        fontSize: Float,
+        align: String,
+        hasShadow: Boolean
+    ) {
+        val paint = Paint().apply {
+            color = textColor
+            textSize = fontSize
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            isAntiAlias = true
+            if (hasShadow) {
+                setShadowLayer(6f, 2f, 2f, Color.argb(200, 0, 0, 0))
+            }
+            textAlign = when (align.lowercase()) {
+                "center" -> Paint.Align.CENTER
+                "right" -> Paint.Align.RIGHT
+                else -> Paint.Align.LEFT
+            }
+        }
+
+        val anchorX = when (align.lowercase()) {
+            "center" -> x + (maxWidth / 2f)
+            "right" -> x + maxWidth
+            else -> x
+        }
+
+        val words = text.split(" ")
+        var line = ""
+        var currentY = y + fontSize
+        val lineHeight = fontSize * 1.3f
+
+        for (word in words) {
+            val testLine = if (line.isEmpty()) word else "$line $word"
+            if (paint.measureText(testLine) > maxWidth && line.isNotEmpty()) {
+                canvas.drawText(line, anchorX, currentY, paint)
+                line = word
+                currentY += lineHeight
+                if (currentY > y + maxHeight) break
+            } else {
+                line = testLine
+            }
+        }
+        if (line.isNotEmpty() && currentY <= y + maxHeight + lineHeight) {
+            canvas.drawText(line, anchorX, currentY, paint)
+        }
+    }
+
+    private fun parseHexColor(hex: String?, fallback: Int): Int {
+        if (hex.isNullOrBlank()) return fallback
+        return try {
+            Color.parseColor(hex)
+        } catch (_: Exception) {
+            fallback
+        }
+    }
+
     fun saveBitmapToCache(bitmap: Bitmap, filename: String = "jci_flyer.png"): File {
         val file = File(context.cacheDir, filename)
         FileOutputStream(file).use { out ->
