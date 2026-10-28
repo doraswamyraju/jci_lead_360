@@ -22,8 +22,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     var token by remember { mutableStateOf<String?>(null) }
                     var userRole by remember { mutableStateOf("PRESIDENT") }
-                    var userName by remember { mutableStateOf("JC Doraswamy Raju") }
-                    var userChapter by remember { mutableStateOf("JCI Bangalore Garden City") }
+                    var userName by remember { mutableStateOf("JC President") }
+                    var userChapter by remember { mutableStateOf("JCI Chapter") }
 
                     if (token == null) {
                         LoginScreen(
@@ -35,11 +35,13 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     } else {
-                        // Direct to President Flyer Studio with live templates
                         PresidentFlyerStudioScreen(
                             token = token!!,
                             presidentName = userName,
-                            chapterName = userChapter
+                            chapterName = userChapter,
+                            onLogout = {
+                                token = null
+                            }
                         )
                     }
                 }

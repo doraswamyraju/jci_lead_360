@@ -44,3 +44,4 @@ data class TemplatesResponse(
     val count: Int,
     val templates: List<TemplateModel>
 )
+

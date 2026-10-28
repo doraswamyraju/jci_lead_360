@@ -4,11 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -16,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -28,49 +25,40 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.jci2027.lead360.engine.AndroidFlyerRenderer
 import com.jci2027.lead360.model.TemplateModel
-import com.jci2027.lead360.model.TemplatesResponse
 import com.jci2027.lead360.network.ApiService
 import com.jci2027.lead360.share.AndroidShareManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-/**
- * Native Android Dynamic Flyer Studio for Chapter Presidents
- * 1. Automatically fetches official live templates from the Hostinger VPS backend
- * 2. Displays auto-branding for the logged-in President
- * 3. Builds instant clean input fields for event variables (Date, Time, Venue, Chief Guest, Theme)
- * 4. Renders live high-res canvas composite in real-time as the President types
- * 5. 1-Tap 300 DPI Export & Direct WhatsApp Intent Sharing
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresidentFlyerStudioScreen(
     token: String,
     presidentName: String,
     chapterName: String,
-    baseUrl: String = "https://lead.sriddha.com"
+    baseUrl: String = "https://lead.sriddha.com",
+    onLogout: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     val flyerRenderer = remember { AndroidFlyerRenderer(context) }
 
     var templates by remember { mutableStateOf<List<TemplateModel>>(emptyList()) }
     var selectedTemplate by remember { mutableStateOf<TemplateModel?>(null) }
     var isLoadingTemplates by remember { mutableStateOf(true) }
+    var fetchErrorMessage by remember { mutableStateOf<String?>(null) }
 
     // Dynamic field values
     val fieldValues = remember { mutableStateMapOf<String, String>() }
 
     // Rendered Composite Bitmap
     var compositeBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var isCompositing by remember { mutableStateOf(false) }
+    var isRendering by remember { mutableStateOf(false) }
 
-    // Cached Base & Logo Bitmaps
+    // Cached Base Bitmap
     var cachedBaseBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     // Load templates from API
@@ -87,18 +75,25 @@ fun PresidentFlyerStudioScreen(
 
                 val api = retrofit.create(ApiService::class.java)
                 val response = api.getTemplates("Bearer $token")
-                if (response.isSuccessful && response.body()?.templates?.isNotEmpty() == true) {
-                    val list = response.body()!!.templates
-                    withContext(Dispatchers.Main) {
-                        templates = list
-                        selectedTemplate = list.first()
-                        initDefaultFieldValues(list.first(), presidentName, fieldValues)
-                        isLoadingTemplates = false
+                withContext(Dispatchers.Main) {
+                    isLoadingTemplates = false
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val list = response.body()!!.templates
+                        if (list.isNotEmpty()) {
+                            templates = list
+                            selectedTemplate = list.first()
+                            initDefaultFieldValues(list.first(), presidentName, fieldValues)
+                        } else {
+                            fetchErrorMessage = "No flyer templates published yet by Super Admin."
+                        }
+                    } else {
+                        fetchErrorMessage = "Server returned code ${response.code()}: ${response.message()}"
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     isLoadingTemplates = false
+                    fetchErrorMessage = "Connection error: ${e.localizedMessage ?: "Unable to load templates from $baseUrl"}"
                 }
             }
         }
@@ -107,8 +102,10 @@ fun PresidentFlyerStudioScreen(
     // Load base image when selected template changes
     LaunchedEffect(selectedTemplate) {
         val tpl = selectedTemplate ?: return@LaunchedEffect
-        val imageUrl = if (tpl.baseImageUrl.startsWith("http")) tpl.baseImageUrl else "$baseUrl${tpl.baseImageUrl}"
+        val rawUrl = tpl.baseImageUrl
+        val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
 
+        isRendering = true
         withContext(Dispatchers.IO) {
             try {
                 val loader = ImageLoader(context)
@@ -120,11 +117,20 @@ fun PresidentFlyerStudioScreen(
                 val bmp = (result as? BitmapDrawable)?.bitmap
                 withContext(Dispatchers.Main) {
                     cachedBaseBitmap = bmp
-                    triggerComposite(flyerRenderer, tpl, bmp, fieldValues) { resultBmp ->
-                        compositeBitmap = resultBmp
+                    if (bmp != null) {
+                        triggerComposite(flyerRenderer, tpl, bmp, fieldValues) { resultBmp ->
+                            compositeBitmap = resultBmp
+                            isRendering = false
+                        }
+                    } else {
+                        isRendering = false
                     }
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    isRendering = false
+                }
+            }
         }
     }
 
@@ -140,10 +146,17 @@ fun PresidentFlyerStudioScreen(
                             color = Color.White
                         )
                         Text(
-                            text = "$chapterName • Year 2027",
+                            text = "$chapterName • 2027",
                             fontSize = 11.sp,
                             color = Color(0xFFBAE6FD)
                         )
+                    }
+                },
+                actions = {
+                    if (onLogout != null) {
+                        TextButton(onClick = onLogout) {
+                            Text("Logout", color = Color(0xFFFCA5A5), fontWeight = FontWeight.Bold)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -159,7 +172,47 @@ fun PresidentFlyerStudioScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = Color(0xFF0097D8))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = Color(0xFF0097D8))
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "Loading official 2027 templates from VPS...",
+                        color = Color(0xFF64748B),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+            return@Scaffold
+        }
+
+        if (fetchErrorMessage != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("⚠️ Notice", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = fetchErrorMessage!!,
+                            color = Color(0xFF64748B),
+                            fontSize = 13.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
             }
             return@Scaffold
         }
@@ -201,8 +254,8 @@ fun PresidentFlyerStudioScreen(
                             color = Color(0x330097D8)
                         ) {
                             Text(
-                                text = "INSTANT PREVIEW",
-                                color = Color(0xFF38BDF8),
+                                text = if (isRendering) "RENDERING..." else "300 DPI READY",
+                                color = if (isRendering) Color(0xFFF59E0B) else Color(0xFF38BDF8),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -333,7 +386,7 @@ fun PresidentFlyerStudioScreen(
                 }
             }
 
-            // 3. Dynamic Variables Form (Customized without styling burdens)
+            // 3. Dynamic Variables Form
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
