@@ -2,10 +2,9 @@
  * Advanced Interactive Dynamic Flyer Template Studio
  * Features:
  * - Real upload to VPS /api/upload
- * - Interactive Drag-and-Drop and Resizable Zone Markers
- * - Direct visual manipulation (drag, corner-resize, boundary constraints)
- * - Layer Property Inspector (custom label, type, font size, color, delete)
- * - Saved Templates List (browse, preview, delete existing templates)
+ * - Ultra-responsive drag & resize engine (pointer events, 4 corner handles, live inspection)
+ * - Layer Property Inspector (custom label, type, manual coordinates, delete)
+ * - Saved Templates List (browse, edit in studio, delete)
  * - Instant Live Test Compositor Preview
  * - Direct coordinate sync with CanvasRenderer ({ type, x, y, width, height })
  */
@@ -82,24 +81,24 @@ export function renderTemplateMarker(container, onSavedCallback) {
           </div>
 
           <!-- Main Layout: Canvas on Left, Selected Zone Inspector on Right -->
-          <div style="display: grid; grid-template-columns: minmax(300px, 1fr) 280px; gap: 20px; align-items: start;">
+          <div style="display: grid; grid-template-columns: minmax(320px, 1fr) 290px; gap: 20px; align-items: start;">
             <!-- Interactive Visual Canvas Container -->
             <div style="position: relative; overflow: auto; max-height: 640px; border: 2px dashed #94a3b8; border-radius: 12px; background: #0f172a; text-align: center; padding: 20px; user-select: none;">
               <div id="canvas-container" style="position: relative; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                 <img id="base-preview-img" style="max-width: 100%; display: block; border-radius: 6px;" draggable="false" />
-                <div id="layers-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;"></div>
+                <div id="layers-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; overflow: hidden;"></div>
               </div>
             </div>
 
             <!-- Property Inspector Panel -->
-            <div id="zone-inspector" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 18px;">
+            <div id="zone-inspector" style="background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: var(--shadow-sm);">
               <h4 style="font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <span>Zone Properties</span>
+                <span>Zone Inspector</span>
                 <span id="active-zone-badge" style="font-size: 10px; background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-weight: 600;">None selected</span>
               </h4>
 
               <div id="inspector-content" style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 30px 10px;">
-                Click any zone on the flyer to drag, resize, or customize properties.
+                👉 Click any zone box directly on the flyer image to drag, resize, or adjust position.
               </div>
 
               <div id="inspector-controls" style="display: none; flex-direction: column; gap: 12px;">
@@ -108,32 +107,35 @@ export function renderTemplateMarker(container, onSavedCallback) {
                   <input type="text" id="prop-type" class="form-control" style="font-size: 12px; padding: 6px 10px; background: #f1f5f9;" readonly />
                 </div>
                 <div>
-                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Display Label</label>
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Label Text</label>
                   <input type="text" id="prop-label" class="form-control" style="font-size: 12px; padding: 6px 10px;" />
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                   <div>
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">X Position</label>
-                    <input type="text" id="prop-x" class="form-control" style="font-size: 12px; padding: 6px 8px;" readonly />
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">X (%)</label>
+                    <input type="number" id="prop-x-input" step="0.5" min="0" max="95" class="form-control" style="font-size: 12px; padding: 6px 8px;" />
                   </div>
                   <div>
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Y Position</label>
-                    <input type="text" id="prop-y" class="form-control" style="font-size: 12px; padding: 6px 8px;" readonly />
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Y (%)</label>
+                    <input type="number" id="prop-y-input" step="0.5" min="0" max="95" class="form-control" style="font-size: 12px; padding: 6px 8px;" />
                   </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                   <div>
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Width</label>
-                    <input type="text" id="prop-w" class="form-control" style="font-size: 12px; padding: 6px 8px;" readonly />
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Width (%)</label>
+                    <input type="number" id="prop-w-input" step="0.5" min="5" max="100" class="form-control" style="font-size: 12px; padding: 6px 8px;" />
                   </div>
                   <div>
-                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Height</label>
-                    <input type="text" id="prop-h" class="form-control" style="font-size: 12px; padding: 6px 8px;" readonly />
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Height (%)</label>
+                    <input type="number" id="prop-h-input" step="0.5" min="3" max="100" class="form-control" style="font-size: 12px; padding: 6px 8px;" />
                   </div>
                 </div>
-                <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                <div id="prop-pixel-summary" style="font-size: 11px; color: var(--text-muted); background: #f8fafc; padding: 6px 8px; border-radius: 6px; text-align: center;">
+                  Pixels: 0 × 0 at (0, 0)
+                </div>
+                <div style="margin-top: 6px;">
                   <button id="btn-delete-selected-zone" style="background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%;">
-                    ✕ Delete This Zone
+                    ✕ Delete Selected Zone
                   </button>
                 </div>
               </div>
@@ -163,7 +165,7 @@ export function renderTemplateMarker(container, onSavedCallback) {
           <h4 style="font-weight: 800; font-size: 16px; color: var(--dark);">Instant Compositor Test Preview</h4>
           <button id="btn-close-modal" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #64748b;">✕</button>
         </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">This demonstrates how dynamic data (dummy photo, logo, president name, venue) renders over your marked zones with exact coordinate alignment.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Demonstrates real Canvas composite output with your configured zone coordinates.</p>
         <div style="background: #0f172a; border-radius: 8px; padding: 12px; text-align: center;">
           <canvas id="test-preview-canvas" style="max-width: 100%; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.5);"></canvas>
         </div>
@@ -200,10 +202,11 @@ export function renderTemplateMarker(container, onSavedCallback) {
   const inspectorControls = document.getElementById('inspector-controls');
   const propType = document.getElementById('prop-type');
   const propLabel = document.getElementById('prop-label');
-  const propX = document.getElementById('prop-x');
-  const propY = document.getElementById('prop-y');
-  const propW = document.getElementById('prop-w');
-  const propH = document.getElementById('prop-h');
+  const propXInput = document.getElementById('prop-x-input');
+  const propYInput = document.getElementById('prop-y-input');
+  const propWInput = document.getElementById('prop-w-input');
+  const propHInput = document.getElementById('prop-h-input');
+  const propPixelSummary = document.getElementById('prop-pixel-summary');
   const btnDeleteSelected = document.getElementById('btn-delete-selected-zone');
 
   // Modal test preview
@@ -232,7 +235,7 @@ export function renderTemplateMarker(container, onSavedCallback) {
     loadSavedTemplates();
   });
 
-  // Dropzone interactions
+  // Dropzone file upload
   dropzoneBox.addEventListener('click', () => fileInput.click());
   dropzoneBox.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -291,7 +294,7 @@ export function renderTemplateMarker(container, onSavedCallback) {
     }
   }
 
-  // Zone Buttons: Add Zone to Canvas
+  // Zone creation buttons
   container.querySelectorAll('.btn-zone').forEach(btn => {
     btn.style.padding = '7px 14px';
     btn.style.borderRadius = '20px';
@@ -308,16 +311,15 @@ export function renderTemplateMarker(container, onSavedCallback) {
 
   function addZoneLayer(type, label) {
     const isImage = type.includes('logo') || type.includes('photo');
-    const defaultW = isImage ? 22 : 45;
-    const defaultH = type.includes('photo') ? 22 : (type.includes('logo') ? 16 : 9);
+    const defaultW = isImage ? 20 : 40;
+    const defaultH = type.includes('photo') ? 20 : (type.includes('logo') ? 14 : 8);
 
     const newLayer = {
-      id: `layer_${Date.now()}_${Math.floor(Math.random()*1000)}`,
+      id: `layer_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       type,
       label,
-      // Store percentages (0 to 100) for responsive UI
-      xPercent: Math.min(70, 10 + (layers.length * 6) % 50),
-      yPercent: Math.min(70, 15 + (layers.length * 10) % 55),
+      xPercent: Math.min(75, 10 + (layers.length * 6) % 55),
+      yPercent: Math.min(75, 12 + (layers.length * 9) % 55),
       wPercent: defaultW,
       hPercent: defaultH
     };
@@ -328,7 +330,7 @@ export function renderTemplateMarker(container, onSavedCallback) {
     updateInspector();
   }
 
-  // Render Zone Overlays with Drag & Corner Resizing
+  // Render Zone Overlays with Drag & 4-Corner Resizing
   function renderLayers() {
     layersOverlay.innerHTML = '';
     layersCount.textContent = `${layers.length} zones mapped and ready for export`;
@@ -346,7 +348,7 @@ export function renderTemplateMarker(container, onSavedCallback) {
       el.style.width = `${l.wPercent}%`;
       el.style.height = `${l.hPercent}%`;
       el.style.border = isSelected ? '2px solid #F37023' : '2px dashed #0097D8';
-      el.style.backgroundColor = isSelected ? 'rgba(243, 112, 35, 0.4)' : 'rgba(0, 151, 216, 0.35)';
+      el.style.backgroundColor = isSelected ? 'rgba(243, 112, 35, 0.45)' : 'rgba(0, 151, 216, 0.35)';
       el.style.borderRadius = isPhoto ? '50%' : '6px';
       el.style.color = '#ffffff';
       el.style.fontSize = '11px';
@@ -354,136 +356,170 @@ export function renderTemplateMarker(container, onSavedCallback) {
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.style.cursor = 'move';
+      el.style.cursor = 'grab';
       el.style.userSelect = 'none';
+      el.style.touchAction = 'none';
       el.style.textShadow = '0 1px 3px rgba(0,0,0,0.9)';
-      el.style.boxShadow = isSelected ? '0 0 10px rgba(243, 112, 35, 0.8)' : 'none';
-      el.textContent = l.label;
+      el.style.boxShadow = isSelected ? '0 0 12px rgba(243, 112, 35, 0.9)' : 'none';
+      el.style.boxSizing = 'border-box';
 
-      // Add Corner Resize Handle (bottom-right)
-      const resizer = document.createElement('div');
-      resizer.className = 'zone-resizer-se';
-      resizer.style.position = 'absolute';
-      resizer.style.right = '-5px';
-      resizer.style.bottom = '-5px';
-      resizer.style.width = '12px';
-      resizer.style.height = '12px';
-      resizer.style.backgroundColor = isSelected ? '#F37023' : '#0097D8';
-      resizer.style.border = '2px solid #ffffff';
-      resizer.style.borderRadius = '3px';
-      resizer.style.cursor = 'se-resize';
-      resizer.style.zIndex = '10';
-      el.appendChild(resizer);
+      // Label text node
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = l.label;
+      labelSpan.style.pointerEvents = 'none';
+      el.appendChild(labelSpan);
 
-      // Attach Drag & Resize Interaction
-      setupInteractiveZone(el, resizer, l);
+      // Add 4-Corner Handles when selected
+      if (isSelected) {
+        ['nw', 'ne', 'se', 'sw'].forEach(pos => {
+          const handle = document.createElement('div');
+          handle.className = `zone-handle handle-${pos}`;
+          handle.dataset.handle = pos;
+          handle.style.position = 'absolute';
+          handle.style.width = '10px';
+          handle.style.height = '10px';
+          handle.style.backgroundColor = '#ffffff';
+          handle.style.border = '2px solid #F37023';
+          handle.style.borderRadius = '2px';
+          handle.style.zIndex = '10';
 
+          if (pos.includes('n')) handle.style.top = '-5px';
+          if (pos.includes('s')) handle.style.bottom = '-5px';
+          if (pos.includes('w')) handle.style.left = '-5px';
+          if (pos.includes('e')) handle.style.right = '-5px';
+
+          handle.style.cursor = `${pos}-resize`;
+          el.appendChild(handle);
+        });
+      }
+
+      setupPointerInteractions(el, l);
       layersOverlay.appendChild(el);
     });
   }
 
-  function setupInteractiveZone(el, resizer, layer) {
-    // Select on click
-    el.addEventListener('mousedown', (e) => {
-      if (e.target === resizer) return; // handled by resizer
+  // Robust Unified Pointer Events for Instant Movement & Resizing
+  function setupPointerInteractions(el, layer) {
+    el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
-      selectedLayerId = layer.id;
-      renderLayers();
-      updateInspector();
+      e.preventDefault();
 
-      // Begin dragging
-      const containerRect = layersOverlay.getBoundingClientRect();
-      const startMouseX = e.clientX;
-      const startMouseY = e.clientY;
-      const startLeft = (layer.xPercent / 100) * containerRect.width;
-      const startTop = (layer.yPercent / 100) * containerRect.height;
+      // If clicked on a resize handle
+      const handleType = e.target.dataset.handle;
+      const isHandle = !!handleType;
 
-      function onMouseMove(moveEvent) {
-        const dx = moveEvent.clientX - startMouseX;
-        const dy = moveEvent.clientY - startMouseY;
+      if (selectedLayerId !== layer.id) {
+        selectedLayerId = layer.id;
+        renderLayers();
+        updateInspector();
+        return;
+      }
 
-        let newLeft = startLeft + dx;
-        let newTop = startTop + dy;
+      const overlayRect = layersOverlay.getBoundingClientRect();
+      const startPointerX = e.clientX;
+      const startPointerY = e.clientY;
 
-        // Boundaries constraint
-        const boxWidth = (layer.wPercent / 100) * containerRect.width;
-        const boxHeight = (layer.hPercent / 100) * containerRect.height;
-        newLeft = Math.max(0, Math.min(newLeft, containerRect.width - boxWidth));
-        newTop = Math.max(0, Math.min(newTop, containerRect.height - boxHeight));
+      const startLeft = (layer.xPercent / 100) * overlayRect.width;
+      const startTop = (layer.yPercent / 100) * overlayRect.height;
+      const startWidth = (layer.wPercent / 100) * overlayRect.width;
+      const startHeight = (layer.hPercent / 100) * overlayRect.height;
 
-        layer.xPercent = (newLeft / containerRect.width) * 100;
-        layer.yPercent = (newTop / containerRect.height) * 100;
+      el.setPointerCapture(e.pointerId);
+      if (!isHandle) el.style.cursor = 'grabbing';
 
-        el.style.left = `${layer.xPercent}%`;
-        el.style.top = `${layer.yPercent}%`;
+      function onPointerMove(moveEvent) {
+        moveEvent.preventDefault();
+        const dx = moveEvent.clientX - startPointerX;
+        const dy = moveEvent.clientY - startPointerY;
+
+        if (!isHandle) {
+          // DRAG OPERATION
+          let newLeft = startLeft + dx;
+          let newTop = startTop + dy;
+
+          newLeft = Math.max(0, Math.min(newLeft, overlayRect.width - startWidth));
+          newTop = Math.max(0, Math.min(newTop, overlayRect.height - startHeight));
+
+          layer.xPercent = (newLeft / overlayRect.width) * 100;
+          layer.yPercent = (newTop / overlayRect.height) * 100;
+
+          el.style.left = `${layer.xPercent}%`;
+          el.style.top = `${layer.yPercent}%`;
+        } else {
+          // RESIZE OPERATION
+          let newL = startLeft;
+          let newT = startTop;
+          let newW = startWidth;
+          let newH = startHeight;
+
+          if (handleType === 'se') {
+            newW = Math.max(20, startWidth + dx);
+            newH = Math.max(16, startHeight + dy);
+          } else if (handleType === 'sw') {
+            newW = Math.max(20, startWidth - dx);
+            newH = Math.max(16, startHeight + dy);
+            newL = startLeft + (startWidth - newW);
+          } else if (handleType === 'ne') {
+            newW = Math.max(20, startWidth + dx);
+            newH = Math.max(16, startHeight - dy);
+            newT = startTop + (startHeight - newH);
+          } else if (handleType === 'nw') {
+            newW = Math.max(20, startWidth - dx);
+            newH = Math.max(16, startHeight - dy);
+            newL = startLeft + (startWidth - newW);
+            newT = startTop + (startHeight - newH);
+          }
+
+          // Boundary constraints
+          newL = Math.max(0, newL);
+          newT = Math.max(0, newT);
+          if (newL + newW > overlayRect.width) newW = overlayRect.width - newL;
+          if (newT + newH > overlayRect.height) newH = overlayRect.height - newT;
+
+          layer.xPercent = (newL / overlayRect.width) * 100;
+          layer.yPercent = (newT / overlayRect.height) * 100;
+          layer.wPercent = (newW / overlayRect.width) * 100;
+          layer.hPercent = (newH / overlayRect.height) * 100;
+
+          el.style.left = `${layer.xPercent}%`;
+          el.style.top = `${layer.yPercent}%`;
+          el.style.width = `${layer.wPercent}%`;
+          el.style.height = `${layer.hPercent}%`;
+        }
+
         updateInspectorCoords();
       }
 
-      function onMouseUp() {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+      function onPointerUp(upEvent) {
+        try { el.releasePointerCapture(upEvent.pointerId); } catch (_) {}
+        if (!isHandle) el.style.cursor = 'grab';
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
       }
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-    });
-
-    // Resize interaction
-    resizer.addEventListener('mousedown', (e) => {
-      e.stopPropagation();
-      selectedLayerId = layer.id;
-      renderLayers();
-      updateInspector();
-
-      const containerRect = layersOverlay.getBoundingClientRect();
-      const startMouseX = e.clientX;
-      const startMouseY = e.clientY;
-      const startW = (layer.wPercent / 100) * containerRect.width;
-      const startH = (layer.hPercent / 100) * containerRect.height;
-
-      function onResizeMove(moveEvent) {
-        const dx = moveEvent.clientX - startMouseX;
-        const dy = moveEvent.clientY - startMouseY;
-
-        let newW = Math.max(20, startW + dx);
-        let newH = Math.max(20, startH + dy);
-
-        // Constrain max width/height to canvas limits
-        const leftPx = (layer.xPercent / 100) * containerRect.width;
-        const topPx = (layer.yPercent / 100) * containerRect.height;
-        newW = Math.min(newW, containerRect.width - leftPx);
-        newH = Math.min(newH, containerRect.height - topPx);
-
-        layer.wPercent = (newW / containerRect.width) * 100;
-        layer.hPercent = (newH / containerRect.height) * 100;
-
-        el.style.width = `${layer.wPercent}%`;
-        el.style.height = `${layer.hPercent}%`;
-        updateInspectorCoords();
-      }
-
-      function onResizeUp() {
-        window.removeEventListener('mousemove', onResizeMove);
-        window.removeEventListener('mouseup', onResizeUp);
-      }
-
-      window.addEventListener('mousemove', onResizeMove);
-      window.addEventListener('mouseup', onResizeUp);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
     });
   }
 
+  // Update Inspector Inputs
   function updateInspectorCoords() {
     const l = layers.find(item => item.id === selectedLayerId);
     if (!l) return;
+
+    propXInput.value = l.xPercent.toFixed(1);
+    propYInput.value = l.yPercent.toFixed(1);
+    propWInput.value = l.wPercent.toFixed(1);
+    propHInput.value = l.hPercent.toFixed(1);
+
     const realX = Math.round((l.xPercent / 100) * naturalWidth);
     const realY = Math.round((l.yPercent / 100) * naturalHeight);
     const realW = Math.round((l.wPercent / 100) * naturalWidth);
     const realH = Math.round((l.hPercent / 100) * naturalHeight);
 
-    propX.value = `${realX}px (${l.xPercent.toFixed(1)}%)`;
-    propY.value = `${realY}px (${l.yPercent.toFixed(1)}%)`;
-    propW.value = `${realW}px (${l.wPercent.toFixed(1)}%)`;
-    propH.value = `${realH}px (${l.hPercent.toFixed(1)}%)`;
+    propPixelSummary.textContent = `Pixels: ${realW} × ${realH} at (${realX}, ${realY})`;
   }
 
   function updateInspector() {
@@ -509,13 +545,37 @@ export function renderTemplateMarker(container, onSavedCallback) {
     updateInspectorCoords();
   }
 
-  // Inspector label change
+  // Inspector manual adjustments (typing exact percentages)
+  [propXInput, propYInput, propWInput, propHInput].forEach(input => {
+    input.addEventListener('input', () => {
+      const l = layers.find(item => item.id === selectedLayerId);
+      if (!l) return;
+
+      l.xPercent = parseFloat(propXInput.value) || 0;
+      l.yPercent = parseFloat(propYInput.value) || 0;
+      l.wPercent = parseFloat(propWInput.value) || 10;
+      l.hPercent = parseFloat(propHInput.value) || 5;
+
+      const el = layersOverlay.querySelector(`[data-id="${l.id}"]`);
+      if (el) {
+        el.style.left = `${l.xPercent}%`;
+        el.style.top = `${l.yPercent}%`;
+        el.style.width = `${l.wPercent}%`;
+        el.style.height = `${l.hPercent}%`;
+      }
+      updateInspectorCoords();
+    });
+  });
+
+  // Rename label in Inspector
   propLabel.addEventListener('input', (e) => {
     const l = layers.find(item => item.id === selectedLayerId);
     if (l) {
       l.label = e.target.value;
       const el = layersOverlay.querySelector(`[data-id="${l.id}"]`);
-      if (el) el.firstChild.textContent = l.label;
+      if (el && el.querySelector('span')) {
+        el.querySelector('span').textContent = l.label;
+      }
     }
   });
 
@@ -530,7 +590,7 @@ export function renderTemplateMarker(container, onSavedCallback) {
 
   // Clear all zones
   document.getElementById('btn-clear-zones').addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear all mapped zones?')) {
+    if (confirm('Clear all mapped zones on this flyer?')) {
       layers = [];
       selectedLayerId = null;
       renderLayers();
@@ -676,11 +736,10 @@ export function renderTemplateMarker(container, onSavedCallback) {
           </div>
         `).join('');
 
-        // Attach action handlers for saved templates
         savedList.querySelectorAll('.btn-delete-tpl').forEach(btn => {
           btn.addEventListener('click', async () => {
             const id = btn.getAttribute('data-id');
-            if (confirm('Are you sure you want to delete this template from the production database?')) {
+            if (confirm('Delete this template from the production database?')) {
               await fetch(`/api/templates/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -714,9 +773,8 @@ export function renderTemplateMarker(container, onSavedCallback) {
     naturalWidth = tpl.dimensions?.width || 1080;
     naturalHeight = tpl.dimensions?.height || 1080;
 
-    // Convert saved layers to display percentage layers if not present
     layers = (tpl.layers || []).map(l => ({
-      id: l.id || `layer_${Date.now()}_${Math.floor(Math.random()*1000)}`,
+      id: l.id || `layer_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       type: l.type,
       label: l.label || l.type,
       xPercent: l.xPercent ?? ((l.x / naturalWidth) * 100),
@@ -730,10 +788,9 @@ export function renderTemplateMarker(container, onSavedCallback) {
     renderLayers();
     updateInspector();
 
-    // Switch back to create tab
     tabBtnCreate.click();
   }
 
-  // Initial load of count
+  // Initial load
   loadSavedTemplates();
 }
