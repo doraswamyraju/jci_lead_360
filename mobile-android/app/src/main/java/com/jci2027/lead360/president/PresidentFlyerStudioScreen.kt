@@ -1,10 +1,11 @@
 package com.jci2027.lead360.president
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -38,7 +39,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.Calendar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresidentFlyerStudioScreen(
     token: String,
@@ -54,10 +57,61 @@ fun PresidentFlyerStudioScreen(
     var isLoadingTemplates by remember { mutableStateOf(true) }
     var fetchErrorMessage by remember { mutableStateOf<String?>(null) }
 
+    // Categories Filter
+    val categories = listOf("All", "⭐ 100% Efficiency", "🏛️ GBM & Meetings", "🎓 Training", "🌍 Special Days", "🤝 Community")
+    var selectedCategory by remember { mutableStateOf("All") }
+
+    // Aspect Ratio Selector: 1:1 Square vs 4:5 Portrait Story
+    var selectedAspectSquare by remember { mutableStateOf(true) }
+
     val fieldValues = remember { mutableStateMapOf<String, String>() }
     var compositeBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isRendering by remember { mutableStateOf(false) }
     var cachedBaseBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    // Quick Venue Presets
+    val venuePresets = listOf("Hotel Royal Grand, Main Hall", "Rotary Convention Center", "Chapter Secretariat", "Online Zoom Meeting")
+
+    // Native Date & Time Dialog Helpers
+    val calendarInstance = Calendar.getInstance()
+    var selectedDateString by remember { mutableStateOf("15th Jan 2027") }
+    var selectedTimeString by remember { mutableStateOf("6:30 PM") }
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+            val suffix = when (dayOfMonth) {
+                1, 21, 31 -> "st"
+                2, 22 -> "nd"
+                3, 23 -> "rd"
+                else -> "th"
+            }
+            selectedDateString = "$dayOfMonth$suffix ${months[month]} $year"
+            val combined = "$selectedDateString • $selectedTimeString"
+            fieldValues["event_date_time"] = combined
+            selectedTemplate?.let { tpl ->
+                triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
+            }
+        },
+        2027, 0, 15
+    )
+
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _, hourOfDay, minute ->
+            val amPm = if (hourOfDay < 12) "AM" else "PM"
+            val displayHour = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
+            val displayMinute = String.format("%02d", minute)
+            selectedTimeString = "$displayHour:$displayMinute $amPm"
+            val combined = "$selectedDateString • $selectedTimeString"
+            fieldValues["event_date_time"] = combined
+            selectedTemplate?.let { tpl ->
+                triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
+            }
+        },
+        18, 30, false
+    )
 
     // Load templates from API
     LaunchedEffect(Unit) {
@@ -150,6 +204,16 @@ fun PresidentFlyerStudioScreen(
         return
     }
 
+    // Filter templates based on category chip
+    val filteredTemplates = remember(templates, selectedCategory) {
+        if (selectedCategory == "All") {
+            templates
+        } else {
+            val key = selectedCategory.replace("⭐", "").replace("🏛️", "").replace("🎓", "").replace("🌍", "").replace("🤝", "").trim()
+            templates.filter { it.category?.contains(key, ignoreCase = true) == true }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -159,10 +223,10 @@ fun PresidentFlyerStudioScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        // 1. Live Composite Preview Viewport
+        // 1. Live Composite Preview Viewport with Aspect Ratio Switch
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF091322)),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
@@ -175,12 +239,24 @@ fun PresidentFlyerStudioScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Live 300 DPI Flyer Composite",
-                        color = Color(0xFF94A3B8),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    // Aspect ratio chips
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = if (selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
+                            modifier = Modifier.clickable { selectedAspectSquare = true }
+                        ) {
+                            Text("1:1 Square", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = if (!selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
+                            modifier = Modifier.clickable { selectedAspectSquare = false }
+                        ) {
+                            Text("4:5 Status", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                        }
+                    }
+
                     Surface(
                         shape = RoundedCornerShape(4.dp),
                         color = Color(0x330097D8)
@@ -195,7 +271,7 @@ fun PresidentFlyerStudioScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 if (compositeBitmap != null) {
                     Image(
@@ -220,7 +296,7 @@ fun PresidentFlyerStudioScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // 1-Tap Action Buttons
+                // 1-Tap Action Dispatchers
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -231,7 +307,7 @@ fun PresidentFlyerStudioScreen(
                                 val file = flyerRenderer.saveBitmapToCache(bmp)
                                 val date = fieldValues["event_date_time"] ?: ""
                                 val venue = fieldValues["event_venue"] ?: ""
-                                val caption = "🏛️ *$chapterName*\n📢 *${selectedTemplate?.title ?: "JCI Event"}*\n\n📅 Date: $date\n📍 Venue: $venue\n👤 President: $presidentName\n\n_Generated via JCI LEAD360 Mobile_"
+                                val caption = "🏛️ *$chapterName*\n📢 *${selectedTemplate?.title ?: "JCI Official Event"}*\n\n📅 Date: $date\n📍 Venue: $venue\n👤 President: $presidentName\n\n_Generated via JCI LEAD360 Mobile_"
                                 AndroidShareManager.shareToWhatsApp(context, file, caption)
                             }
                         },
@@ -239,7 +315,7 @@ fun PresidentFlyerStudioScreen(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("💬 WhatsApp", fontWeight = FontWeight.Bold)
+                        Text("💬 WhatsApp Share", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     }
 
                     Button(
@@ -252,26 +328,54 @@ fun PresidentFlyerStudioScreen(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("⬇️ Save", fontWeight = FontWeight.Bold)
+                        Text("⬇️ Save Image", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     }
                 }
             }
         }
 
-        // 2. Horizontal Template Carousel
+        // 2. Category Filter Chips & Horizontal Template Carousel
         Column {
             Text(
-                text = "SELECT OFFICIAL FLYER TEMPLATE",
+                text = "EXPLORE FLYER TEMPLATES",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF475569),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
+            // Category Chips Row
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                items(categories) { cat ->
+                    val isCatSelected = selectedCategory == cat
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (isCatSelected) Color(0xFF0097D8) else Color.White,
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isCatSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
+                        ),
+                        modifier = Modifier.clickable { selectedCategory = cat }
+                    ) {
+                        Text(
+                            text = cat,
+                            fontSize = 11.sp,
+                            fontWeight = if (isCatSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                            color = if (isCatSelected) Color.White else Color(0xFF475569),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+
+            // Cards Carousel
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(templates) { tpl ->
+                items(if (filteredTemplates.isNotEmpty()) filteredTemplates else templates) { tpl ->
                     val isSelected = (tpl.id == selectedTemplate?.id)
                     val rawUrl = tpl.baseImageUrl
                     val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
@@ -322,22 +426,22 @@ fun PresidentFlyerStudioScreen(
             }
         }
 
-        // 3. Dynamic Variables Form
+        // 3. Smart Quick Event Variables (Date/Time Picker Dialogs + Venue Quick Select)
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "EVENT VARIABLES",
+                    text = "QUICK MEETING DETAILS",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF475569)
                 )
                 Text(
-                    text = "Type your details below to update the flyer preview instantly:",
+                    text = "Tap buttons below to set Date & Time without typing manually:",
                     fontSize = 12.sp,
                     color = Color(0xFF64748B),
                     modifier = Modifier.padding(vertical = 4.dp)
@@ -345,9 +449,56 @@ fun PresidentFlyerStudioScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // Date & Time Picker Triggers
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { datePickerDialog.show() },
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("📅 $selectedDateString", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = { timePickerDialog.show() },
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("⏰ $selectedTimeString", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Venue Quick Presets
+                Text("QUICK VENUE PRESETS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                ) {
+                    items(venuePresets) { vp ->
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFF1F5F9),
+                            modifier = Modifier.clickable {
+                                fieldValues["event_venue"] = vp
+                                selectedTemplate?.let { tpl ->
+                                    triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
+                                }
+                            }
+                        ) {
+                            Text(vp, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF334155), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                        }
+                    }
+                }
+
+                // Dynamic Remaining Fields (e.g. Chief Guest, Custom Theme)
                 selectedTemplate?.layers?.forEach { layer ->
                     val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
-                    if (!zoneType.contains("logo") && !zoneType.contains("photo")) {
+                    if (!zoneType.contains("logo") && !zoneType.contains("photo") && zoneType != "event_date_time") {
                         val currentVal = fieldValues[zoneType] ?: ""
 
                         OutlinedTextField(
@@ -384,7 +535,7 @@ private fun initDefaultFieldValues(
         if (fieldValues[zoneType] == null) {
             fieldValues[zoneType] = when (zoneType) {
                 "president_name" -> presidentName
-                "event_date_time" -> "Sunday, 15th Jan 2027 • 6:30 PM"
+                "event_date_time" -> "Friday, 15th Jan 2027 • 6:30 PM"
                 "event_venue" -> "Hotel Royal Grand, Main Hall"
                 "chief_guest" -> "JC Sen. Guest of Honour, Zone President"
                 else -> layer.label ?: "Installation Ceremony"

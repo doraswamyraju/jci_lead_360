@@ -213,3 +213,4 @@ fun NotificationCenterModal(onClose: () -> Unit) {
         }
     }
 }
+

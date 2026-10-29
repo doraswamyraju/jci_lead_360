@@ -17,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.jci2027.lead360.auth.LoginScreen
 import com.jci2027.lead360.navigation.Screen
 import com.jci2027.lead360.president.PresidentFlyerStudioScreen
@@ -25,7 +24,7 @@ import com.jci2027.lead360.screens.DashboardOverviewScreen
 import com.jci2027.lead360.screens.FramesScreen
 import com.jci2027.lead360.screens.InteractiveCalendarScreen
 import com.jci2027.lead360.screens.LgbAndPstManagementScreen
-import com.jci2027.lead360.screens.NotificationCenterModal
+import com.jci2027.lead360.screens.NotificationCenterBottomSheet
 import com.jci2027.lead360.screens.ProfileScreen
 import kotlinx.coroutines.launch
 
@@ -53,7 +52,7 @@ class MainActivity : ComponentActivity() {
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val coroutineScope = rememberCoroutineScope()
                     var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
-                    var showNotificationModal by remember { mutableStateOf(false) }
+                    var showNotificationBottomSheet by remember { mutableStateOf(false) }
 
                     // Navigation items for BottomBar & Drawer
                     val bottomNavItems = listOf(
@@ -64,11 +63,11 @@ class MainActivity : ComponentActivity() {
                         Screen.Frames
                     )
 
-                    // Notification Modal
-                    if (showNotificationModal) {
-                        Dialog(onDismissRequest = { showNotificationModal = false }) {
-                            NotificationCenterModal(onClose = { showNotificationModal = false })
-                        }
+                    // Modal BottomSheet Notification Center
+                    if (showNotificationBottomSheet) {
+                        NotificationCenterBottomSheet(
+                            onDismiss = { showNotificationBottomSheet = false }
+                        )
                     }
 
                     ModalNavigationDrawer(
@@ -78,7 +77,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.width(300.dp),
                                 drawerContainerColor = Color(0xFF091322)
                             ) {
-                                // Drawer Header with JCI LEAD360 Official Logo Pill
+                                // Drawer Header with Logo Pill -> Tap takes user Home
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -88,7 +87,12 @@ class MainActivity : ComponentActivity() {
                                     Surface(
                                         shape = RoundedCornerShape(10.dp),
                                         color = Color.White,
-                                        modifier = Modifier.padding(bottom = 14.dp)
+                                        modifier = Modifier
+                                            .padding(bottom = 14.dp)
+                                            .clickable {
+                                                currentScreen = Screen.Dashboard
+                                                coroutineScope.launch { drawerState.close() }
+                                            }
                                     ) {
                                         Image(
                                             painter = painterResource(id = R.drawable.lead360_logo),
@@ -158,7 +162,7 @@ class MainActivity : ComponentActivity() {
 
                                 Spacer(modifier = Modifier.weight(1f))
 
-                                // Sign Out
+                                // Sign Out in Drawer
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -180,32 +184,32 @@ class MainActivity : ComponentActivity() {
                             topBar = {
                                 TopAppBar(
                                     title = {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Logo only (no duplicate text), clicking logo takes user Home
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.clickable { currentScreen = Screen.Dashboard }
+                                        ) {
                                             Surface(
                                                 shape = RoundedCornerShape(6.dp),
                                                 color = Color.White,
+                                                shadowElevation = 2.dp,
                                                 modifier = Modifier.padding(end = 10.dp)
                                             ) {
                                                 Image(
                                                     painter = painterResource(id = R.drawable.lead360_logo),
-                                                    contentDescription = "Logo",
-                                                    modifier = Modifier.height(28.dp).padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    contentDescription = "LEAD360 Home",
+                                                    modifier = Modifier
+                                                        .height(30.dp)
+                                                        .padding(horizontal = 8.dp, vertical = 3.dp)
                                                 )
                                             }
-                                            Column {
-                                                Text(
-                                                    text = "JCI LEAD360",
-                                                    fontSize = 15.sp,
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = Color.White
-                                                )
-                                                Text(
-                                                    text = userChapter,
-                                                    fontSize = 11.sp,
-                                                    color = Color(0xFFBAE6FD),
-                                                    maxLines = 1
-                                                )
-                                            }
+                                            Text(
+                                                text = userChapter,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFFBAE6FD),
+                                                maxLines = 1
+                                            )
                                         }
                                     },
                                     navigationIcon = {
@@ -216,20 +220,24 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     actions = {
-                                        // Notification Bell
-                                        IconButton(onClick = { showNotificationModal = true }) {
+                                        // Notification Bell -> Opens BottomSheet
+                                        IconButton(onClick = { showNotificationBottomSheet = true }) {
                                             Text("🔔", fontSize = 18.sp)
                                         }
-                                        // Profile Avatar
+                                        // Profile Avatar Shortcut
                                         IconButton(onClick = { currentScreen = Screen.Profile }) {
                                             Box(
                                                 modifier = Modifier
-                                                    .size(32.dp)
-                                                    .background(Color(0xFF0097D8), RoundedCornerShape(16.dp)),
+                                                    .size(30.dp)
+                                                    .background(Color(0xFF0097D8), RoundedCornerShape(15.dp)),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(userName.firstOrNull()?.toString() ?: "P", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                             }
+                                        }
+                                        // Direct TopBar Sign-Out / Logout Icon
+                                        IconButton(onClick = { token = null }) {
+                                            Text("🚪", fontSize = 18.sp)
                                         }
                                     },
                                     colors = TopAppBarDefaults.topAppBarColors(
