@@ -35,10 +35,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                var token by remember { mutableStateOf<String?>(null) }
-                var userRole by remember { mutableStateOf("PRESIDENT") }
-                var userName by remember { mutableStateOf("JC Doraswamy Raju") }
-                var userChapter by remember { mutableStateOf("JCI Tirupati Innovations") }
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val prefs = remember { context.getSharedPreferences("lead360_auth_prefs", android.content.Context.MODE_PRIVATE) }
+                
+                var token by remember { mutableStateOf<String?>(prefs.getString("auth_token", null)) }
+                var userRole by remember { mutableStateOf(prefs.getString("auth_role", "PRESIDENT") ?: "PRESIDENT") }
+                var userName by remember { mutableStateOf(prefs.getString("auth_name", "JC Doraswamy Raju") ?: "JC Doraswamy Raju") }
+                var userChapter by remember { mutableStateOf(prefs.getString("auth_chapter", "JCI Tirupati Innovations") ?: "JCI Tirupati Innovations") }
 
                 if (token == null) {
                     LoginScreen(
@@ -169,6 +172,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
+                                            prefs.edit().clear().apply()
                                             token = null
                                             coroutineScope.launch { drawerState.close() }
                                         }
@@ -229,16 +233,35 @@ class MainActivity : ComponentActivity() {
                                         IconButton(onClick = { currentScreen = Screen.Profile }) {
                                             Box(
                                                 modifier = Modifier
-                                                    .size(30.dp)
-                                                    .background(Color(0xFF0097D8), RoundedCornerShape(15.dp)),
+                                                    .size(32.dp)
+                                                    .background(Color(0xFF0097D8), RoundedCornerShape(16.dp)),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(userName.firstOrNull()?.toString() ?: "P", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                             }
                                         }
-                                        // Direct TopBar Sign-Out / Logout Icon
-                                        IconButton(onClick = { token = null }) {
-                                            Text("🚪", fontSize = 18.sp)
+                                        // Modern Outlined Sign-Out Pill Button
+                                        IconButton(
+                                            onClick = {
+                                                // Clear saved session and logout
+                                                val prefs = getSharedPreferences("lead360_auth_prefs", android.content.Context.MODE_PRIVATE)
+                                                prefs.edit().clear().apply()
+                                                token = null
+                                            }
+                                        ) {
+                                            Surface(
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = Color(0xFF1E293B),
+                                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                                            ) {
+                                                Text(
+                                                    text = "Logout",
+                                                    color = Color(0xFFFCA5A5),
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                                                )
+                                            }
                                         }
                                     },
                                     colors = TopAppBarDefaults.topAppBarColors(

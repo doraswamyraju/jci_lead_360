@@ -1,20 +1,26 @@
 package com.jci2027.lead360.auth
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jci2027.lead360.R
@@ -29,17 +35,30 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 /**
- * Premium Modern Android Login Screen
- * Displays official high-res JCI LEAD360 logo, clean inputs, and role routing.
+ * Polished, high-executive Android Login Screen
+ * Features:
+ * - Brand official LEAD360 logo banner
+ * - Password visibility toggle (eye icon)
+ * - "Remember Login Details" SharedPreferences persistence
+ * - Clean "Sign In" button text with elegant state handling
  */
 @Composable
 fun LoginScreen(
     onLoginSuccess: (token: String, role: String, name: String, chapterName: String) -> Unit,
     baseUrl: String = "https://lead.sriddha.com"
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val prefs = remember { context.getSharedPreferences("lead360_auth_prefs", Context.MODE_PRIVATE) }
+
+    val savedEmail = remember { prefs.getString("saved_email", "") ?: "" }
+    val savedPassword = remember { prefs.getString("saved_password", "") ?: "" }
+    val savedRemember = remember { prefs.getBoolean("remember_credentials", false) }
+
+    var email by remember { mutableStateOf(savedEmail) }
+    var password by remember { mutableStateOf(savedPassword) }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+    var rememberMe by remember { mutableStateOf(savedRemember) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -58,19 +77,19 @@ fun LoginScreen(
                 .fillMaxWidth(0.92f)
                 .padding(vertical = 24.dp)
                 .verticalScroll(rememberScrollState()),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 14.dp)
         ) {
             Column(
                 modifier = Modifier.padding(26.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Official JCI LEAD360 Brand Logo in White Card
+                // Official JCI LEAD360 Brand Logo in Elegant Pill
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = Color.White,
-                    shadowElevation = 4.dp,
+                    shadowElevation = 3.dp,
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
                         .padding(bottom = 18.dp)
@@ -80,8 +99,8 @@ fun LoginScreen(
                         contentDescription = "JCI LEAD360 Official Logo",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .padding(8.dp)
+                            .height(58.dp)
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
                     )
                 }
 
@@ -98,6 +117,7 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 2.dp, bottom = 22.dp)
                 )
 
+                // Email / Username Input
                 OutlinedTextField(
                     value = email,
                     onValueChange = {
@@ -112,6 +132,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
+                // Password Input with Visibility Toggle (Eye Icon)
                 OutlinedTextField(
                     value = password,
                     onValueChange = {
@@ -119,11 +140,42 @@ fun LoginScreen(
                         errorMessage = null
                     },
                     label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                            Icon(
+                                imageVector = if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                                tint = Color(0xFF64748B)
+                            )
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp)
                 )
+
+                // Remember Login Details Toggle
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color(0xFF0097D8)
+                        )
+                    )
+                    Text(
+                        text = "Save login details on this device",
+                        fontSize = 12.sp,
+                        color = Color(0xFF334155),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
 
                 if (errorMessage != null) {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -135,8 +187,9 @@ fun LoginScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
+                // Clean "Sign In" Button
                 Button(
                     onClick = {
                         if (email.isBlank() || password.isBlank()) {
@@ -169,6 +222,24 @@ fun LoginScreen(
                                     val name = user?.name ?: "Chapter President"
                                     val chapter = user?.chapterName ?: "JCI Chapter"
 
+                                    // Persist or clear saved credentials
+                                    prefs.edit().apply {
+                                        if (rememberMe) {
+                                            putString("saved_email", email.trim())
+                                            putString("saved_password", password)
+                                            putBoolean("remember_credentials", true)
+                                        } else {
+                                            remove("saved_email")
+                                            remove("saved_password")
+                                            putBoolean("remember_credentials", false)
+                                        }
+                                        // Save active session token
+                                        putString("auth_token", token)
+                                        putString("auth_role", role)
+                                        putString("auth_name", name)
+                                        putString("auth_chapter", chapter)
+                                    }.apply()
+
                                     isLoading = false
                                     onLoginSuccess(token, role, name, chapter)
                                 } else {
@@ -191,7 +262,7 @@ fun LoginScreen(
                     if (isLoading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Sign In to Command Portal", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("Sign In", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
 
