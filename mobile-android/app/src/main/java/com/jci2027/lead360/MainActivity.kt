@@ -384,7 +384,9 @@ class MainActivity : ComponentActivity() {
                                     Screen.Flyers -> PresidentFlyerStudioScreen(
                                         token = token!!,
                                         presidentName = userName,
-                                        chapterName = userChapter
+                                        chapterName = userChapter,
+                                        chapterLogoBitmap = chapterLogoBitmap,
+                                        presidentPhotoBitmap = userProfileBitmap
                                     )
                                     Screen.AiFlyer -> AiFlyerStudioScreen(
                                         presidentName = userName,

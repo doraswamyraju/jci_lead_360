@@ -9,11 +9,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,13 +22,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -52,6 +55,8 @@ fun PresidentFlyerStudioScreen(
     token: String,
     presidentName: String,
     chapterName: String,
+    chapterLogoBitmap: Bitmap? = null,
+    presidentPhotoBitmap: Bitmap? = null,
     baseUrl: String = "https://lead.sriddha.com"
 ) {
     val context = LocalContext.current
@@ -71,6 +76,9 @@ fun PresidentFlyerStudioScreen(
 
     // Aspect Ratio Selector: 1:1 Square vs 4:5 Portrait Story
     var selectedAspectSquare by remember { mutableStateOf(true) }
+
+    // Full-screen Zoom Modal State
+    var showFullScreenZoom by remember { mutableStateOf(false) }
 
     val fieldValues = remember { mutableStateMapOf<String, String>() }
     var compositeBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -99,7 +107,7 @@ fun PresidentFlyerStudioScreen(
             val combined = "$selectedDateString • $selectedTimeString"
             fieldValues["event_date_time"] = combined
             selectedTemplate?.let { tpl ->
-                triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
+                triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, chapterLogoBitmap, presidentPhotoBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
             }
         },
         2027, 0, 15
@@ -115,7 +123,7 @@ fun PresidentFlyerStudioScreen(
             val combined = "$selectedDateString • $selectedTimeString"
             fieldValues["event_date_time"] = combined
             selectedTemplate?.let { tpl ->
-                triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
+                triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, chapterLogoBitmap, presidentPhotoBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
             }
         },
         18, 30, false
@@ -178,7 +186,7 @@ fun PresidentFlyerStudioScreen(
                 withContext(Dispatchers.Main) {
                     cachedBaseBitmap = bmp
                     if (bmp != null) {
-                        triggerComposite(flyerRenderer, tpl, bmp, fieldValues) { resultBmp ->
+                        triggerComposite(flyerRenderer, tpl, bmp, chapterLogoBitmap, presidentPhotoBitmap, fieldValues) { resultBmp ->
                             compositeBitmap = resultBmp
                             isRendering = false
                         }
@@ -327,15 +335,59 @@ fun PresidentFlyerStudioScreen(
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
                                 Column {
-                                    AsyncImage(
-                                        model = imageUrl,
-                                        contentDescription = tpl.title,
+                                    Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(130.dp)
-                                            .background(Color(0xFF091322)),
-                                        contentScale = ContentScale.Crop
-                                    )
+                                            .background(Color(0xFF091322))
+                                    ) {
+                                        AsyncImage(
+                                            model = imageUrl,
+                                            contentDescription = tpl.title,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+
+                                        // Marked fields overlay on top of template creative
+                                        tpl.layers?.let { layers ->
+                                            Box(modifier = Modifier.fillMaxSize()) {
+                                                layers.forEach { layer ->
+                                                    val zoneType = (layer.type ?: layer.key ?: "").lowercase()
+                                                    val xPct = if (layer.xPercent > 0f) layer.xPercent else ((layer.x / 1080f) * 100f)
+                                                    val yPct = if (layer.yPercent > 0f) layer.yPercent else ((layer.y / 1080f) * 100f)
+
+                                                    val badgeText = when {
+                                                        zoneType.contains("logo") -> "🏛️ Logo"
+                                                        zoneType.contains("photo") -> "👤 Photo"
+                                                        zoneType.contains("date") -> "📅 Date"
+                                                        zoneType.contains("venue") -> "📍 Venue"
+                                                        zoneType.contains("president") -> "👤 President"
+                                                        else -> layer.label ?: "✏️ Text"
+                                                    }
+
+                                                    Surface(
+                                                        shape = RoundedCornerShape(4.dp),
+                                                        color = Color(0xCC091322),
+                                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8)),
+                                                        modifier = Modifier
+                                                            .offset(
+                                                                x = ((xPct / 100f) * 140).dp,
+                                                                y = ((yPct / 100f) * 90).dp
+                                                            )
+                                                    ) {
+                                                        Text(
+                                                            text = badgeText,
+                                                            fontSize = 7.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color(0xFFBAE6FD),
+                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                                            maxLines = 1
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     Column(modifier = Modifier.padding(10.dp)) {
                                         Text(tpl.title, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, color = Color(0xFF0F172A))
                                         Text(tpl.category ?: "General", fontSize = 10.sp, color = Color(0xFF64748B))
@@ -396,41 +448,82 @@ fun PresidentFlyerStudioScreen(
                             }
                         }
 
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = Color(0xFF1E293B)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Text(
-                                text = selectedTemplate?.title ?: "Select Template",
-                                color = Color(0xFFBAE6FD),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                maxLines = 1
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Color(0xFF1E293B)
+                            ) {
+                                Text(
+                                    text = selectedTemplate?.title ?: "Select Template",
+                                    color = Color(0xFFBAE6FD),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    maxLines = 1
+                                )
+                            }
+
+                            // Full screen & Zoom trigger button
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Color(0xFF0097D8),
+                                modifier = Modifier.clickable { showFullScreenZoom = true }
+                            ) {
+                                Text(
+                                    text = "🔍 Zoom / Fullscreen",
+                                    color = Color.White,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Composite Visual Canvas
+                    // Composite Visual Canvas (Clickable to open Fullscreen Zoom)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(if (selectedAspectSquare) 1f else 0.8f)
                             .background(Color(0xFF040810), RoundedCornerShape(10.dp))
-                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp)),
+                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
+                            .clickable {
+                                if (compositeBitmap != null) {
+                                    showFullScreenZoom = true
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         if (isRendering) {
                             CircularProgressIndicator(color = Color(0xFF0097D8))
                         } else if (compositeBitmap != null) {
-                            Image(
-                                bitmap = compositeBitmap!!.asImageBitmap(),
-                                contentDescription = "Live Customized Flyer",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
-                            )
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Image(
+                                    bitmap = compositeBitmap!!.asImageBitmap(),
+                                    contentDescription = "Live Customized Flyer",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+
+                                Surface(
+                                    shape = RoundedCornerShape(topStart = 8.dp),
+                                    color = Color(0xCC091322),
+                                    modifier = Modifier.align(Alignment.BottomEnd)
+                                ) {
+                                    Text(
+                                        "🔍 Tap to Zoom",
+                                        color = Color(0xFFBAE6FD),
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                                    )
+                                }
+                            }
                         } else {
                             Text("Rendering custom flyer...", color = Color(0xFF64748B), fontSize = 12.sp)
                         }
@@ -607,7 +700,7 @@ fun PresidentFlyerStudioScreen(
                                 modifier = Modifier.clickable {
                                     fieldValues["event_venue"] = vp
                                     selectedTemplate?.let { tpl ->
-                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
+                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, chapterLogoBitmap, presidentPhotoBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
                                     }
                                 }
                             ) {
@@ -627,7 +720,7 @@ fun PresidentFlyerStudioScreen(
                                 onValueChange = { newVal ->
                                     fieldValues[zoneType] = newVal
                                     selectedTemplate?.let { tpl ->
-                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { resultBmp ->
+                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, chapterLogoBitmap, presidentPhotoBitmap, fieldValues) { resultBmp ->
                                             compositeBitmap = resultBmp
                                         }
                                     }
@@ -638,6 +731,99 @@ fun PresidentFlyerStudioScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fullscreen Interactive Zoom Dialog Modal
+        if (showFullScreenZoom && compositeBitmap != null) {
+            var scale by remember { mutableFloatStateOf(1f) }
+            var offset by remember { mutableStateOf(Offset.Zero) }
+            val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+                scale = (scale * zoomChange).coerceIn(1f, 5f)
+                offset += offsetChange
+            }
+
+            Dialog(
+                onDismissRequest = { showFullScreenZoom = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
+                ) {
+                    // Zoomable Image
+                    Image(
+                        bitmap = compositeBitmap!!.asImageBitmap(),
+                        contentDescription = "Zoomed Flyer Creative",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .transformable(state = state)
+                            .graphicsLayer(
+                                scaleX = scale,
+                                scaleY = scale,
+                                translationX = offset.x,
+                                translationY = offset.y
+                            ),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    // Controls Header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0x99000000)
+                        ) {
+                            Text(
+                                text = "Pinch to Zoom (${String.format("%.1f", scale)}x)",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // Reset Zoom Button
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0xFF0097D8),
+                                modifier = Modifier.clickable {
+                                    scale = 1f
+                                    offset = Offset.Zero
+                                }
+                            ) {
+                                Text(
+                                    text = "Reset",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+
+                            // Close Button
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0xFFDC2626),
+                                modifier = Modifier.clickable { showFullScreenZoom = false }
+                            ) {
+                                Text(
+                                    text = "✕ Close",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -670,6 +856,8 @@ private fun triggerComposite(
     renderer: AndroidFlyerRenderer,
     template: TemplateModel,
     baseBitmap: Bitmap?,
+    chapterLogoBitmap: Bitmap?,
+    presidentPhotoBitmap: Bitmap?,
     fieldValues: Map<String, String>,
     onComplete: (Bitmap) -> Unit
 ) {
@@ -677,8 +865,8 @@ private fun triggerComposite(
     val result = renderer.compositeDynamicFlyer(
         template = template,
         baseBitmap = baseBitmap,
-        chapterLogoBitmap = null,
-        presidentPhotoBitmap = null,
+        chapterLogoBitmap = chapterLogoBitmap,
+        presidentPhotoBitmap = presidentPhotoBitmap,
         fieldValues = fieldValues
     )
     onComplete(result)

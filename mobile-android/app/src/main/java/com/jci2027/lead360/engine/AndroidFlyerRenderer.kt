@@ -36,10 +36,11 @@ class AndroidFlyerRenderer(private val context: Context) {
         template.layers?.forEach { layer ->
             val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
 
-            val x = (layer.xPercent / 100f) * width
-            val y = (layer.yPercent / 100f) * height
-            val w = (layer.wPercent / 100f) * width
-            val h = (layer.hPercent / 100f) * height
+            // Support both percentage (0-100) and absolute pixel coordinates from backend
+            val x = if (layer.xPercent > 0f) (layer.xPercent / 100f) * width else layer.x
+            val y = if (layer.yPercent > 0f) (layer.yPercent / 100f) * height else layer.y
+            val w = if (layer.wPercent > 0f) (layer.wPercent / 100f) * width else (if (layer.width > 0f) layer.width else 200f)
+            val h = if (layer.hPercent > 0f) (layer.hPercent / 100f) * height else (if (layer.height > 0f) layer.height else 80f)
 
             val shape = layer.shape ?: if (zoneType.contains("photo")) "circle" else "rectangle"
             val borderWidth = layer.borderWidth ?: if (zoneType.contains("photo")) 4 else 0
@@ -58,8 +59,8 @@ class AndroidFlyerRenderer(private val context: Context) {
                     }
                 }
 
-                // PRESIDENT PHOTO / SECRETARY PHOTO
-                zoneType.contains("photo") -> {
+                // PRESIDENT PHOTO / SECRETARY PHOTO / SPEAKER PHOTO
+                zoneType.contains("photo") || zoneType.contains("president_photo") || zoneType.contains("speaker") -> {
                     presidentPhotoBitmap?.let { photo ->
                         if (shape == "circle") {
                             drawCircleBitmap(canvas, photo, x, y, min(w, h), borderWidth, borderColorInt)
