@@ -34,9 +34,9 @@ import kotlinx.coroutines.launch
 
 data class TeamMemberItem(
     val id: String = "",
-    val role: String,
+    var role: String,
     var name: String,
-    val email: String,
+    var email: String,
     var phone: String,
     var photoUri: Uri? = null,
     val status: String = "Active"
@@ -54,7 +54,7 @@ fun LgbAndPstManagementScreen(
     val coroutineScope = rememberCoroutineScope()
     val logoGenerator = remember { JciLogoGenerator(context) }
 
-    // 0: Directory, 1: Grant Access, 2: Official Logo Generator (logo.jciath.be replica), 3: LO Profile
+    // 0: Directory, 1: Grant Access, 2: Official Logo Generator (logo.jciath.be replica)
     var selectedTab by remember { mutableStateOf(0) }
 
     // Form inputs for creating credentials
@@ -77,41 +77,221 @@ fun LgbAndPstManagementScreen(
     // 7 visual cases from logo.jciath.be
     val logoCases = remember { JciLogoGenerator.CaseStyle.values() }
 
-    // LO Profile details state
-    var loZone by remember { mutableStateOf("Zone IV") }
-    var loEmail by remember { mutableStateOf("info@jcitirupati.com") }
-    var loPhone by remember { mutableStateOf("+91 98765 43210") }
-    var loLogoUri by remember { mutableStateOf<Uri?>(null) }
-    var isSavedLo by remember { mutableStateOf(false) }
-
-    // Executive team list
+    // Executive team list (LGB & PST)
     val currentTeam = remember {
         mutableStateListOf(
             TeamMemberItem("usr_1", "PRESIDENT", presidentName, "president@jcitirupati.com", "+91 98765 43210"),
             TeamMemberItem("usr_2", "SECRETARY", "JC Secretary 2027", "secretary@jcitirupati.com", "+91 98765 43211"),
-            TeamMemberItem("usr_3", "TREASURER", "JC Treasurer 2027", "treasurer@jcitirupati.com", "+91 98765 43212")
+            TeamMemberItem("usr_3", "TREASURER", "JC Treasurer 2027", "treasurer@jcitirupati.com", "+91 98765 43212"),
+            TeamMemberItem("usr_4", "VP MANAGEMENT", "JC Vice President 1", "vp.mgmt@jcitirupati.com", "+91 98765 43213"),
+            TeamMemberItem("usr_5", "VP COMMUNITY", "JC Vice President 2", "vp.comm@jcitirupati.com", "+91 98765 43214"),
+            TeamMemberItem("usr_6", "VP INDIVIDUAL", "JC Vice President 3", "vp.ind@jcitirupati.com", "+91 98765 43215"),
+            TeamMemberItem("usr_7", "VP INTERNATIONAL", "JC Vice President 4", "vp.intl@jcitirupati.com", "+91 98765 43216")
         )
     }
 
-    // Image pickers
-    val chapterLogoPicker = rememberLauncherForActivityResult(
+    // Modal BottomSheet State for Officer Details (Edit, Update, Delete)
+    var selectedMemberForSheet by remember { mutableStateOf<TeamMemberItem?>(null) }
+    var showMemberBottomSheet by remember { mutableStateOf(false) }
+
+    // Temporary editing state for bottom sheet
+    var editName by remember { mutableStateOf("") }
+    var editRole by remember { mutableStateOf("") }
+    var editEmail by remember { mutableStateOf("") }
+    var editPhone by remember { mutableStateOf("") }
+    var editPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    val sheetPhotoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            loLogoUri = uri
-            Toast.makeText(context, "Chapter Logo selected!", Toast.LENGTH_SHORT).show()
+            editPhotoUri = uri
+            Toast.makeText(context, "Photo selected!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    var selectedOfficerIndex by remember { mutableStateOf<Int?>(null) }
-    val officerPhotoPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        val idx = selectedOfficerIndex
-        if (uri != null && idx != null && idx < currentTeam.size) {
-            val member = currentTeam[idx]
-            currentTeam[idx] = member.copy(photoUri = uri)
-            Toast.makeText(context, "Updated photo for ${member.name}!", Toast.LENGTH_SHORT).show()
+    // Modal Bottom Sheet Implementation
+    if (showMemberBottomSheet && selectedMemberForSheet != null) {
+        val member = selectedMemberForSheet!!
+        ModalBottomSheet(
+            onDismissRequest = { showMemberBottomSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Officer Profile Details",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Text(
+                            text = "View, edit or remove member from Chapter LGB / PST",
+                            fontSize = 11.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFFE0F2FE)
+                    ) {
+                        Text(
+                            text = editRole,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF0369A1),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Divider(color = Color(0xFFF1F5F9))
+
+                // Avatar / Photo Picker
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF8FAFC), RoundedCornerShape(12.dp))
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE2E8F0))
+                            .clickable { sheetPhotoPicker.launch("image/*") }
+                            .border(2.dp, Color(0xFF0097D8), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (editPhotoUri != null) {
+                            AsyncImage(
+                                model = editPhotoUri,
+                                contentDescription = "Officer Photo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text("📷", fontSize = 24.sp)
+                        }
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Officer Photograph", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF0F172A))
+                        Text("High-res portrait for flyers & invitations", fontSize = 11.sp, color = Color(0xFF64748B))
+                    }
+
+                    OutlinedButton(
+                        onClick = { sheetPhotoPicker.launch("image/*") },
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Text(if (editPhotoUri != null) "Change" else "Upload", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Edit Fields
+                OutlinedTextField(
+                    value = editName,
+                    onValueChange = { editName = it },
+                    label = { Text("Full Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = editPhone,
+                    onValueChange = { editPhone = it },
+                    label = { Text("Phone / WhatsApp Number") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = editEmail,
+                    onValueChange = { editEmail = it },
+                    label = { Text("Login Email Address") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = editRole,
+                    onValueChange = { editRole = it },
+                    label = { Text("Designation / Role") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Action Buttons: Update / Save & Delete
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Delete Button (Disabled for President)
+                    if (member.role != "PRESIDENT") {
+                        Button(
+                            onClick = {
+                                currentTeam.removeAll { it.id == member.id }
+                                showMemberBottomSheet = false
+                                Toast.makeText(context, "Removed ${member.name} from board", Toast.LENGTH_SHORT).show()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEE2E2)),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f).height(48.dp)
+                        ) {
+                            Text("🗑️ Delete", color = Color(0xFFDC2626), fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    // Save / Update Button
+                    Button(
+                        onClick = {
+                            val idx = currentTeam.indexOfFirst { it.id == member.id }
+                            if (idx != -1) {
+                                currentTeam[idx] = member.copy(
+                                    name = editName.trim(),
+                                    phone = editPhone.trim(),
+                                    email = editEmail.trim(),
+                                    role = editRole.trim(),
+                                    photoUri = editPhotoUri
+                                )
+                                showMemberBottomSheet = false
+                                Toast.makeText(context, "✓ Details updated successfully!", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.weight(if (member.role != "PRESIDENT") 1.8f else 1f).height(48.dp)
+                    ) {
+                        Text("Save & Update Officer", fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
         }
     }
 
@@ -132,41 +312,17 @@ fun LgbAndPstManagementScreen(
             elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "🏛️ Chapter Leadership Suite",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "$chapterName • Year 2027 Administration",
-                            fontSize = 12.sp,
-                            color = Color(0xFF94A3B8)
-                        )
-                    }
-
-                    // LO Logo thumbnail if available
-                    if (loLogoUri != null) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color.White,
-                            modifier = Modifier.size(46.dp)
-                        ) {
-                            AsyncImage(
-                                model = loLogoUri,
-                                contentDescription = "Chapter Logo",
-                                modifier = Modifier.fillMaxSize().padding(3.dp),
-                                contentScale = ContentScale.Fit
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = "🏛️ PST & LGB Management Suite",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+                Text(
+                    text = "$chapterName • Year 2027 Executive Board",
+                    fontSize = 12.sp,
+                    color = Color(0xFF94A3B8)
+                )
 
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -182,8 +338,7 @@ fun LgbAndPstManagementScreen(
                     listOf(
                         "👥 PST & LGB Directory",
                         "🔑 Grant Access",
-                        "🎨 Logo Generator",
-                        "🏢 Chapter & LO Profile"
+                        "🎨 Logo Generator"
                     ).forEachIndexed { idx, label ->
                         val isSelected = selectedTab == idx
                         Tab(
@@ -210,94 +365,101 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 0: Board Directory with Photo & Profile Upload
+        // TAB 0: Board Directory with 1-Tap Bottom Sheet Inspector
         if (selectedTab == 0) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "PST OFFICERS & LOCAL GOVERNING BOARD (${currentTeam.size})",
-                    fontSize = 11.sp,
+                    text = "EXECUTIVE DIRECTORY (${currentTeam.size}) • TAP MEMBER TO EDIT OR DELETE",
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF64748B)
                 )
 
-                currentTeam.forEachIndexed { index, member ->
+                currentTeam.forEach { member ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedMemberForSheet = member
+                                editName = member.name
+                                editRole = member.role
+                                editEmail = member.email
+                                editPhone = member.phone
+                                editPhotoUri = member.photoUri
+                                showMemberBottomSheet = true
+                            },
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    modifier = Modifier.weight(1f)
+                                // Avatar Photo
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFE2E8F0)),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    // Officer Photo / Avatar
-                                    Box(
-                                        modifier = Modifier
-                                            .size(54.dp)
-                                            .clip(CircleShape)
-                                            .background(Color(0xFFE2E8F0))
-                                            .clickable {
-                                                selectedOfficerIndex = index
-                                                officerPhotoPicker.launch("image/*")
-                                            },
-                                        contentAlignment = Alignment.Center
+                                    if (member.photoUri != null) {
+                                        AsyncImage(
+                                            model = member.photoUri,
+                                            contentDescription = member.name,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    } else {
+                                        Text(
+                                            text = member.name.firstOrNull()?.toString() ?: "O",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 20.sp,
+                                            color = Color(0xFF0097D8)
+                                        )
+                                    }
+                                }
+
+                                Column {
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0xFFE0F2FE),
+                                        modifier = Modifier.padding(bottom = 3.dp)
                                     ) {
-                                        if (member.photoUri != null) {
-                                            AsyncImage(
-                                                model = member.photoUri,
-                                                contentDescription = member.name,
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentScale = ContentScale.Crop
-                                            )
-                                        } else {
-                                            Text("📷", fontSize = 20.sp)
-                                        }
+                                        Text(
+                                            member.role,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color(0xFF0369A1),
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
                                     }
-
-                                    Column {
-                                        Surface(
-                                            shape = RoundedCornerShape(4.dp),
-                                            color = Color(0xFFE0F2FE),
-                                            modifier = Modifier.padding(bottom = 3.dp)
-                                        ) {
-                                            Text(
-                                                member.role,
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = Color(0xFF0369A1),
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                        Text(member.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
-                                        Text(member.phone, fontSize = 11.sp, color = Color(0xFF64748B))
-                                        Text(member.email, fontSize = 11.sp, color = Color(0xFF64748B))
-                                    }
+                                    Text(member.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                    Text(member.phone, fontSize = 11.sp, color = Color(0xFF64748B))
                                 }
+                            }
 
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = Color(0xFFF1F5F9),
-                                    modifier = Modifier.clickable {
-                                        selectedOfficerIndex = index
-                                        officerPhotoPicker.launch("image/*")
-                                    }
-                                ) {
-                                    Text(
-                                        text = if (member.photoUri != null) "Change Photo" else "+ Upload Photo",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF0284C7),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
-                                    )
-                                }
+                            // View / Edit indicator arrow
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Color(0xFFF1F5F9)
+                            ) {
+                                Text(
+                                    text = "Edit ⚙️",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0284C7),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
                             }
                         }
                     }
@@ -429,7 +591,7 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 2: Exact replica of https://logo.jciath.be/ with genuine JCI crest & safe download
+        // TAB 2: Exact replica of https://logo.jciath.be/
         if (selectedTab == 2) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Header & Inputs (Centered Line 1 and optional Line 2)
@@ -638,131 +800,6 @@ fun LgbAndPstManagementScreen(
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        // TAB 3: LO Profile & Chapter Details + LOGO UPLOAD
-        if (selectedTab == 3) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Text("🏛️ Local Organization (LO) Profile", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
-                    Text("Official parameters and chapter branding managed by Chapter President.", fontSize = 12.sp, color = Color(0xFF64748B), modifier = Modifier.padding(bottom = 14.dp))
-
-                    // Chapter Logo Upload Section
-                    Text("OFFICIAL CHAPTER LOGO", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF475569))
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFFF1F5F9), RoundedCornerShape(10.dp))
-                            .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(10.dp))
-                            .clickable { chapterLogoPicker.launch("image/*") }
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color.White,
-                            modifier = Modifier.size(60.dp)
-                        ) {
-                            if (loLogoUri != null) {
-                                AsyncImage(
-                                    model = loLogoUri,
-                                    contentDescription = "Selected Chapter Logo",
-                                    modifier = Modifier.fillMaxSize().padding(4.dp),
-                                    contentScale = ContentScale.Fit
-                                )
-                            } else {
-                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                    Text("📷", fontSize = 24.sp)
-                                }
-                            }
-                        }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = if (loLogoUri != null) "Logo Uploaded" else "Tap to Upload Chapter Logo",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                color = Color(0xFF0F172A)
-                            )
-                            Text(
-                                text = "PNG, JPG, or SVG with transparent background recommended",
-                                fontSize = 11.sp,
-                                color = Color(0xFF64748B)
-                            )
-                        }
-
-                        Button(
-                            onClick = { chapterLogoPicker.launch("image/*") },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                        ) {
-                            Text(if (loLogoUri != null) "Replace" else "Browse", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    OutlinedTextField(
-                        value = chapterName,
-                        onValueChange = {},
-                        label = { Text("Chapter Organization Name") },
-                        enabled = false,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        value = loZone,
-                        onValueChange = { loZone = it },
-                        label = { Text("JCI Zone / Region") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        value = loEmail,
-                        onValueChange = { loEmail = it },
-                        label = { Text("Chapter Official Email") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        value = loPhone,
-                        onValueChange = { loPhone = it },
-                        label = { Text("Chapter Official Phone") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    Button(
-                        onClick = {
-                            isSavedLo = true
-                            Toast.makeText(context, "Chapter profile saved successfully!", Toast.LENGTH_SHORT).show()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
-                    ) {
-                        Text(if (isSavedLo) "✓ Chapter Profile Saved" else "Save Chapter Profile & Logo", fontWeight = FontWeight.Bold)
                     }
                 }
             }

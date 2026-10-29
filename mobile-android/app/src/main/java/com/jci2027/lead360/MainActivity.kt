@@ -240,26 +240,26 @@ class MainActivity : ComponentActivity() {
                                                 Text(userName.firstOrNull()?.toString() ?: "P", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                             }
                                         }
-                                        // Modern Outlined Sign-Out Pill Button
+                                        // Modern Circular Logout Button with Exit Icon
                                         IconButton(
                                             onClick = {
-                                                // Clear saved session and logout
                                                 val prefs = getSharedPreferences("lead360_auth_prefs", android.content.Context.MODE_PRIVATE)
                                                 prefs.edit().clear().apply()
                                                 token = null
                                             }
                                         ) {
-                                            Surface(
-                                                shape = RoundedCornerShape(8.dp),
-                                                color = Color(0xFF1E293B),
-                                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(34.dp)
+                                                    .background(Color(0xFF271317), RoundedCornerShape(17.dp))
+                                                    .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.5f), RoundedCornerShape(17.dp)),
+                                                contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
-                                                    text = "Logout",
-                                                    color = Color(0xFFFCA5A5),
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                                                    text = "⏻",
+                                                    color = Color(0xFFF87171),
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.ExtraBold
                                                 )
                                             }
                                         }

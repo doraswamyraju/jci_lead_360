@@ -4,11 +4,16 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,6 +61,9 @@ fun PresidentFlyerStudioScreen(
     var selectedTemplate by remember { mutableStateOf<TemplateModel?>(null) }
     var isLoadingTemplates by remember { mutableStateOf(true) }
     var fetchErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Mode: 0: Template Explorer Grid, 1: Live Editor & Compositor
+    var activeStudioTab by remember { mutableStateOf(0) }
 
     // Categories Filter
     val categories = listOf("All", "⭐ 100% Efficiency", "🏛️ GBM & Meetings", "🎓 Training", "🌍 Special Days", "🤝 Community")
@@ -223,300 +231,414 @@ fun PresidentFlyerStudioScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        // 1. Live Composite Preview Viewport with Aspect Ratio Switch
+        // Top Studio Navigation Switcher (Catalogue vs Live Studio)
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF091322)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF091322))
         ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                listOf(
+                    Pair("✨ Live Studio & Editor", 0),
+                    Pair("📂 Template Catalogue (${templates.size})", 1)
+                ).forEach { (label, idx) ->
+                    val isSel = activeStudioTab == idx
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isSel) Color(0xFF0097D8) else Color.Transparent,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { activeStudioTab = idx }
+                    ) {
+                        Box(modifier = Modifier.padding(vertical = 10.dp), contentAlignment = Alignment.Center) {
+                            Text(label, color = if (isSel) Color.White else Color(0xFF94A3B8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // VIEW 1: Full Template Catalogue Grid
+        if (activeStudioTab == 1) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "SELECT ANY OFFICIAL TEMPLATE TO CUSTOMIZE",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF64748B)
+                )
+
+                // Category Chips Row
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(categories) { cat ->
+                        val isCatSelected = selectedCategory == cat
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (isCatSelected) Color(0xFF0097D8) else Color.White,
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                if (isCatSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
+                            ),
+                            modifier = Modifier.clickable { selectedCategory = cat }
+                        ) {
+                            Text(
+                                text = cat,
+                                fontSize = 11.sp,
+                                fontWeight = if (isCatSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                                color = if (isCatSelected) Color.White else Color(0xFF475569),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Grid of templates
+                filteredTemplates.chunked(2).forEach { rowTemplates ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        rowTemplates.forEach { tpl ->
+                            val rawUrl = tpl.baseImageUrl
+                            val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
+                            val isSelected = tpl.id == selectedTemplate?.id
+
+                            Card(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable {
+                                        selectedTemplate = tpl
+                                        initDefaultFieldValues(tpl, presidentName, fieldValues)
+                                        activeStudioTab = 0
+                                    },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    2.dp,
+                                    if (isSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column {
+                                    AsyncImage(
+                                        model = imageUrl,
+                                        contentDescription = tpl.title,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(130.dp)
+                                            .background(Color(0xFF091322)),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    Column(modifier = Modifier.padding(10.dp)) {
+                                        Text(tpl.title, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, color = Color(0xFF0F172A))
+                                        Text(tpl.category ?: "General", fontSize = 10.sp, color = Color(0xFF64748B))
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = Color(0xFFE0F2FE),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("Customize ⚡", textAlign = androidx.compose.ui.text.style.TextAlign.Center, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0284C7), modifier = Modifier.padding(vertical = 4.dp))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (rowTemplates.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
+
+        // VIEW 0: Live Studio & Compositor
+        if (activeStudioTab == 0) {
+            // 1. Live Composite Preview Viewport with Aspect Ratio Switch
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF091322)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Aspect ratio chips
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = if (selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
+                                modifier = Modifier.clickable { selectedAspectSquare = true }
+                            ) {
+                                Text("1:1 Square", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = if (!selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
+                                modifier = Modifier.clickable { selectedAspectSquare = false }
+                            ) {
+                                Text("4:5 Story", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color(0xFF1E293B)
+                        ) {
+                            Text(
+                                text = selectedTemplate?.title ?: "Select Template",
+                                color = Color(0xFFBAE6FD),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                maxLines = 1
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Composite Visual Canvas
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(if (selectedAspectSquare) 1f else 0.8f)
+                            .background(Color(0xFF040810), RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isRendering) {
+                            CircularProgressIndicator(color = Color(0xFF0097D8))
+                        } else if (compositeBitmap != null) {
+                            Image(
+                                bitmap = compositeBitmap!!.asImageBitmap(),
+                                contentDescription = "Live Customized Flyer",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        } else {
+                            Text("Rendering custom flyer...", color = Color(0xFF64748B), fontSize = 12.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Export / Share Actions (Crash-Proof Android Gallery & WhatsApp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                compositeBitmap?.let { bmp ->
+                                    val file = flyerRenderer.saveBitmapToCache(bmp)
+                                    val date = fieldValues["event_date_time"] ?: ""
+                                    val venue = fieldValues["event_venue"] ?: ""
+                                    val caption = "🏛️ *$chapterName*\n📢 *${selectedTemplate?.title ?: "JCI Official Event"}*\n\n📅 Date: $date\n📍 Venue: $venue\n👤 President: $presidentName\n\n_Generated via JCI LEAD360 Mobile_"
+                                    AndroidShareManager.shareToWhatsApp(context, file, caption)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("💬 WhatsApp Share", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                compositeBitmap?.let { bmp ->
+                                    val filename = "${selectedTemplate?.title ?: "JCI_Flyer"}_${System.currentTimeMillis()}.png"
+                                    AndroidShareManager.saveBitmapToGallery(context, bmp, filename, Bitmap.CompressFormat.PNG)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("⬇️ Save to Gallery", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
+
+            // Quick Horizontal Switcher for other templates in category
+            Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Aspect ratio chips
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = if (selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
-                            modifier = Modifier.clickable { selectedAspectSquare = true }
-                        ) {
-                            Text("1:1 Square", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                        }
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = if (!selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
-                            modifier = Modifier.clickable { selectedAspectSquare = false }
-                        ) {
-                            Text("4:5 Status", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                        }
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = Color(0x330097D8)
-                    ) {
-                        Text(
-                            text = if (isRendering) "COMPOSITING..." else "300 DPI READY",
-                            color = if (isRendering) Color(0xFFF59E0B) else Color(0xFF38BDF8),
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                if (compositeBitmap != null) {
-                    Image(
-                        bitmap = compositeBitmap!!.asImageBitmap(),
-                        contentDescription = "Flyer Preview",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 260.dp, max = 340.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                    Text(
+                        text = "QUICK TEMPLATE SELECTOR",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF475569)
                     )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(260.dp)
-                            .background(Color(0xFF1E293B), RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Color(0xFF0097D8))
-                    }
+                    Text(
+                        text = "View All ➔",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0284C7),
+                        modifier = Modifier.clickable { activeStudioTab = 1 }
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // 1-Tap Action Dispatchers
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
+                LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            compositeBitmap?.let { bmp ->
-                                val file = flyerRenderer.saveBitmapToCache(bmp)
-                                val date = fieldValues["event_date_time"] ?: ""
-                                val venue = fieldValues["event_venue"] ?: ""
-                                val caption = "🏛️ *$chapterName*\n📢 *${selectedTemplate?.title ?: "JCI Official Event"}*\n\n📅 Date: $date\n📍 Venue: $venue\n👤 President: $presidentName\n\n_Generated via JCI LEAD360 Mobile_"
-                                AndroidShareManager.shareToWhatsApp(context, file, caption)
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("💬 WhatsApp Share", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    }
+                    items(filteredTemplates) { tpl ->
+                        val isSelected = (tpl.id == selectedTemplate?.id)
+                        val rawUrl = tpl.baseImageUrl
+                        val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
 
-                    Button(
-                        onClick = {
-                            compositeBitmap?.let { bmp ->
-                                flyerRenderer.saveBitmapToCache(bmp)
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("⬇️ Save Image", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    }
-                }
-            }
-        }
-
-        // 2. Category Filter Chips & Horizontal Template Carousel
-        Column {
-            Text(
-                text = "EXPLORE FLYER TEMPLATES",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF475569),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            // Category Chips Row
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 12.dp)
-            ) {
-                items(categories) { cat ->
-                    val isCatSelected = selectedCategory == cat
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isCatSelected) Color(0xFF0097D8) else Color.White,
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            if (isCatSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
-                        ),
-                        modifier = Modifier.clickable { selectedCategory = cat }
-                    ) {
-                        Text(
-                            text = cat,
-                            fontSize = 11.sp,
-                            fontWeight = if (isCatSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                            color = if (isCatSelected) Color.White else Color(0xFF475569),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
-                }
-            }
-
-            // Cards Carousel
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(if (filteredTemplates.isNotEmpty()) filteredTemplates else templates) { tpl ->
-                    val isSelected = (tpl.id == selectedTemplate?.id)
-                    val rawUrl = tpl.baseImageUrl
-                    val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
-
-                    Card(
-                        modifier = Modifier
-                            .width(140.dp)
-                            .clickable {
-                                selectedTemplate = tpl
-                                initDefaultFieldValues(tpl, presidentName, fieldValues)
-                            },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        border = androidx.compose.foundation.BorderStroke(
-                            width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
-                    ) {
-                        Column {
-                            AsyncImage(
-                                model = imageUrl,
-                                contentDescription = tpl.title,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(120.dp)
-                                    .background(Color(0xFF091322)),
-                                contentScale = ContentScale.Crop
+                        Card(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .clickable {
+                                    selectedTemplate = tpl
+                                    initDefaultFieldValues(tpl, presidentName, fieldValues)
+                                },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            border = androidx.compose.foundation.BorderStroke(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
                             )
-                            Column(modifier = Modifier.padding(8.dp)) {
+                        ) {
+                            Column {
+                                AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = tpl.title,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(80.dp)
+                                        .background(Color(0xFF091322)),
+                                    contentScale = ContentScale.Crop
+                                )
                                 Text(
                                     text = tpl.title,
-                                    fontSize = 11.sp,
+                                    fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    color = if (isSelected) Color(0xFF0097D8) else Color(0xFF0F172A)
-                                )
-                                Text(
-                                    text = tpl.category ?: "General",
-                                    fontSize = 9.sp,
-                                    color = Color(0xFF64748B),
-                                    maxLines = 1
+                                    color = if (isSelected) Color(0xFF0097D8) else Color(0xFF0F172A),
+                                    modifier = Modifier.padding(6.dp)
                                 )
                             }
                         }
                     }
                 }
             }
-        }
 
-        // 3. Smart Quick Event Variables (Date/Time Picker Dialogs + Venue Quick Select)
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "QUICK MEETING DETAILS",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF475569)
-                )
-                Text(
-                    text = "Tap buttons below to set Date & Time without typing manually:",
-                    fontSize = 12.sp,
-                    color = Color(0xFF64748B),
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+            // Smart Event Details Form (Date/Time Picker Dialogs + Venue Quick Select)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "CUSTOMIZE MEETING & EVENT DETAILS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF475569)
+                    )
+                    Text(
+                        text = "Modify details below; composite updates automatically in real-time:",
+                        fontSize = 12.sp,
+                        color = Color(0xFF64748B),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                // Date & Time Picker Triggers
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = { datePickerDialog.show() },
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
+                    // Date & Time Picker Triggers
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("📅 $selectedDateString", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    OutlinedButton(
-                        onClick = { timePickerDialog.show() },
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("⏰ $selectedTimeString", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Venue Quick Presets
-                Text("QUICK VENUE PRESETS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-                ) {
-                    items(venuePresets) { vp ->
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFFF1F5F9),
-                            modifier = Modifier.clickable {
-                                fieldValues["event_venue"] = vp
-                                selectedTemplate?.let { tpl ->
-                                    triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
-                                }
-                            }
+                        OutlinedButton(
+                            onClick = { datePickerDialog.show() },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Text(vp, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF334155), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            Text("📅 $selectedDateString", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        OutlinedButton(
+                            onClick = { timePickerDialog.show() },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("⏰ $selectedTimeString", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
-                }
 
-                // Dynamic Remaining Fields (e.g. Chief Guest, Custom Theme)
-                selectedTemplate?.layers?.forEach { layer ->
-                    val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
-                    if (!zoneType.contains("logo") && !zoneType.contains("photo") && zoneType != "event_date_time") {
-                        val currentVal = fieldValues[zoneType] ?: ""
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                        OutlinedTextField(
-                            value = currentVal,
-                            onValueChange = { newVal ->
-                                fieldValues[zoneType] = newVal
-                                selectedTemplate?.let { tpl ->
-                                    triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { resultBmp ->
-                                        compositeBitmap = resultBmp
+                    // Venue Quick Presets
+                    Text("QUICK VENUE PRESETS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                    ) {
+                        items(venuePresets) { vp ->
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xFFF1F5F9),
+                                modifier = Modifier.clickable {
+                                    fieldValues["event_venue"] = vp
+                                    selectedTemplate?.let { tpl ->
+                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { bmp -> compositeBitmap = bmp }
                                     }
                                 }
-                            },
-                            label = { Text(layer.label ?: zoneType.replace("_", " ").uppercase()) },
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        )
+                            ) {
+                                Text(vp, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF334155), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            }
+                        }
+                    }
+
+                    // Dynamic Remaining Fields (e.g. Chief Guest, Custom Theme)
+                    selectedTemplate?.layers?.forEach { layer ->
+                        val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
+                        if (!zoneType.contains("logo") && !zoneType.contains("photo") && zoneType != "event_date_time") {
+                            val currentVal = fieldValues[zoneType] ?: ""
+
+                            OutlinedTextField(
+                                value = currentVal,
+                                onValueChange = { newVal ->
+                                    fieldValues[zoneType] = newVal
+                                    selectedTemplate?.let { tpl ->
+                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { resultBmp ->
+                                            compositeBitmap = resultBmp
+                                        }
+                                    }
+                                },
+                                label = { Text(layer.label ?: zoneType.replace("_", " ").uppercase()) },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            )
+                        }
                     }
                 }
             }
