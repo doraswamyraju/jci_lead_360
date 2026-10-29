@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -132,7 +129,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Password Input with Visibility Toggle (Eye Icon)
+                // Password Input with Visibility Toggle
                 OutlinedTextField(
                     value = password,
                     onValueChange = {
@@ -143,10 +140,9 @@ fun LoginScreen(
                     visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                            Icon(
-                                imageVector = if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
-                                tint = Color(0xFF64748B)
+                            Text(
+                                text = if (isPasswordVisible) "🙈" else "👁️",
+                                fontSize = 16.sp
                             )
                         }
                     },
