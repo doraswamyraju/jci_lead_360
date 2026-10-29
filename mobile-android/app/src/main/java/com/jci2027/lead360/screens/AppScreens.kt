@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +26,126 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+
+/**
+ * JCI Photo Frames Maker Screen
+ */
+@Composable
+fun FramesScreen() {
+    val context = LocalContext.current
+    var selectedPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            selectedPhotoUri = uri
+            Toast.makeText(context, "Photo loaded into frame!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val framesList = listOf(
+        "🎂 Birthday Greetings Frame 2027",
+        "🏆 Outstanding Achievement Frame",
+        "🏛️ Official Installation Ceremony Frame",
+        "🌟 Leader of the Month Recognition",
+        "🌍 World Earth Day Celebration Frame"
+    )
+    var selectedFrame by remember { mutableStateOf(framesList[0]) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8FAFC))
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF091322))
+        ) {
+            Column(modifier = Modifier.padding(18.dp)) {
+                Text("📸 JCI Photo Frame Maker", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                Text("Select official JCI 2027 photo frames for birthdays, greetings & achievements.", color = Color(0xFF94A3B8), fontSize = 12.sp)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
+                        .background(Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                        .border(2.dp, Color(0xFF0097D8), RoundedCornerShape(12.dp))
+                        .clickable { photoPicker.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (selectedPhotoUri != null) {
+                        AsyncImage(
+                            model = selectedPhotoUri,
+                            contentDescription = "Framed Photo",
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("🖼️", fontSize = 40.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Tap to pick portrait photo", color = Color(0xFF94A3B8), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text("Selected Frame: $selectedFrame", color = Color(0xFFBAE6FD), fontSize = 11.sp)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Button(
+                    onClick = { photoPicker.launch("image/*") },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth().height(44.dp)
+                ) {
+                    Text(if (selectedPhotoUri != null) "Change Photo" else "Select Photo from Gallery", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
+        // Available Frames Selector
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("SELECT OFFICIAL 2027 FRAME", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF475569))
+                Spacer(modifier = Modifier.height(10.dp))
+
+                framesList.forEach { frameTitle ->
+                    val isSel = selectedFrame == frameTitle
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isSel) Color(0xFFE0F2FE) else Color(0xFFF8FAFC),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSel) Color(0xFF0097D8) else Color(0xFFE2E8F0)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable { selectedFrame = frameTitle }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(frameTitle, fontSize = 12.sp, fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium, color = if (isSel) Color(0xFF0369A1) else Color(0xFF334155))
+                            if (isSel) Text("✓ Selected", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0097D8))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 /**
  * President Profile & Chapter LO Settings Screen
