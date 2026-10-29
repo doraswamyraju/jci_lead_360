@@ -4,8 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -16,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.jci2027.lead360.engine.AndroidFlyerRenderer
@@ -34,14 +39,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresidentFlyerStudioScreen(
     token: String,
     presidentName: String,
     chapterName: String,
-    baseUrl: String = "https://lead.sriddha.com",
-    onLogout: (() -> Unit)? = null
+    baseUrl: String = "https://lead.sriddha.com"
 ) {
     val context = LocalContext.current
     val flyerRenderer = remember { AndroidFlyerRenderer(context) }
@@ -51,14 +54,9 @@ fun PresidentFlyerStudioScreen(
     var isLoadingTemplates by remember { mutableStateOf(true) }
     var fetchErrorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Dynamic field values
     val fieldValues = remember { mutableStateMapOf<String, String>() }
-
-    // Rendered Composite Bitmap
     var compositeBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isRendering by remember { mutableStateOf(false) }
-
-    // Cached Base Bitmap
     var cachedBaseBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     // Load templates from API
@@ -87,13 +85,13 @@ fun PresidentFlyerStudioScreen(
                             fetchErrorMessage = "No flyer templates published yet by Super Admin."
                         }
                     } else {
-                        fetchErrorMessage = "Server returned code ${response.code()}: ${response.message()}"
+                        fetchErrorMessage = "Server response: ${response.code()}"
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     isLoadingTemplates = false
-                    fetchErrorMessage = "Connection error: ${e.localizedMessage ?: "Unable to load templates from $baseUrl"}"
+                    fetchErrorMessage = "Connection error: ${e.localizedMessage ?: "Failed to reach server"}"
                 }
             }
         }
@@ -126,7 +124,7 @@ fun PresidentFlyerStudioScreen(
                         isRendering = false
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
                     isRendering = false
                 }
@@ -134,307 +132,245 @@ fun PresidentFlyerStudioScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "⚡ JCI 1-Tap Flyer Studio",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "$chapterName • 2027",
-                            fontSize = 11.sp,
-                            color = Color(0xFFBAE6FD)
-                        )
-                    }
-                },
-                actions = {
-                    if (onLogout != null) {
-                        TextButton(onClick = onLogout) {
-                            Text("Logout", color = Color(0xFFFCA5A5), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF091428)
-                )
-            )
-        }
-    ) { paddingValues ->
-        if (isLoadingTemplates) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = Color(0xFF0097D8))
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Text(
-                        text = "Loading official 2027 templates from VPS...",
-                        color = Color(0xFF64748B),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+    if (isLoadingTemplates) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(color = Color(0xFF0097D8))
+                Spacer(modifier = Modifier.height(14.dp))
+                Text("Loading official 2027 templates...", color = Color(0xFF64748B), fontSize = 13.sp)
             }
-            return@Scaffold
         }
+        return
+    }
 
-        if (fetchErrorMessage != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("⚠️ Notice", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = fetchErrorMessage!!,
-                            color = Color(0xFF64748B),
-                            fontSize = 13.sp,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
-                }
-            }
-            return@Scaffold
+    if (fetchErrorMessage != null) {
+        Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            Text(fetchErrorMessage!!, color = Color(0xFFDC2626), fontSize = 13.sp)
         }
+        return
+    }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF8FAFC))
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8FAFC))
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+
+        // 1. Live Composite Preview Viewport
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF091322)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
-
-            // 1. Live Composite Preview Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF091322)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            Column(
+                modifier = Modifier.padding(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Text(
+                        text = "Live 300 DPI Flyer Composite",
+                        color = Color(0xFF94A3B8),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = Color(0x330097D8)
                     ) {
                         Text(
-                            text = "Live 300 DPI Flyer Composite",
-                            color = Color(0xFF94A3B8),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            text = if (isRendering) "COMPOSITING..." else "300 DPI READY",
+                            color = if (isRendering) Color(0xFFF59E0B) else Color(0xFF38BDF8),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = Color(0x330097D8)
-                        ) {
-                            Text(
-                                text = if (isRendering) "RENDERING..." else "300 DPI READY",
-                                color = if (isRendering) Color(0xFFF59E0B) else Color(0xFF38BDF8),
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    if (compositeBitmap != null) {
-                        Image(
-                            bitmap = compositeBitmap!!.asImageBitmap(),
-                            contentDescription = "Flyer Preview",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 260.dp, max = 340.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(260.dp)
-                                .background(Color(0xFF1E293B), RoundedCornerShape(8.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = Color(0xFF0097D8))
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // 1-Tap Action Buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                if (compositeBitmap != null) {
+                    Image(
+                        bitmap = compositeBitmap!!.asImageBitmap(),
+                        contentDescription = "Flyer Preview",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 260.dp, max = 340.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(260.dp)
+                            .background(Color(0xFF1E293B), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Button(
-                            onClick = {
-                                compositeBitmap?.let { bmp ->
-                                    val file = flyerRenderer.saveBitmapToCache(bmp)
-                                    val date = fieldValues["event_date_time"] ?: ""
-                                    val venue = fieldValues["event_venue"] ?: ""
-                                    val caption = "🏛️ *$chapterName*\n📢 *${selectedTemplate?.title ?: "JCI Event"}*\n\n📅 Date: $date\n📍 Venue: $venue\n👤 President: $presidentName\n\n_Generated via JCI LEAD360 Mobile_"
-                                    AndroidShareManager.shareToWhatsApp(context, file, caption)
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("💬 WhatsApp", fontWeight = FontWeight.Bold)
-                        }
+                        CircularProgressIndicator(color = Color(0xFF0097D8))
+                    }
+                }
 
-                        Button(
-                            onClick = {
-                                compositeBitmap?.let { bmp ->
-                                    flyerRenderer.saveBitmapToCache(bmp)
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("⬇️ Save", fontWeight = FontWeight.Bold)
-                        }
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 1-Tap Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            compositeBitmap?.let { bmp ->
+                                val file = flyerRenderer.saveBitmapToCache(bmp)
+                                val date = fieldValues["event_date_time"] ?: ""
+                                val venue = fieldValues["event_venue"] ?: ""
+                                val caption = "🏛️ *$chapterName*\n📢 *${selectedTemplate?.title ?: "JCI Event"}*\n\n📅 Date: $date\n📍 Venue: $venue\n👤 President: $presidentName\n\n_Generated via JCI LEAD360 Mobile_"
+                                AndroidShareManager.shareToWhatsApp(context, file, caption)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("💬 WhatsApp", fontWeight = FontWeight.Bold)
+                    }
+
+                    Button(
+                        onClick = {
+                            compositeBitmap?.let { bmp ->
+                                flyerRenderer.saveBitmapToCache(bmp)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("⬇️ Save", fontWeight = FontWeight.Bold)
                     }
                 }
             }
+        }
 
-            // 2. Select Template Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+        // 2. Horizontal Template Carousel
+        Column {
+            Text(
+                text = "SELECT OFFICIAL FLYER TEMPLATE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF475569),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "1. CHOOSE OFFICIAL TEMPLATE",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF475569)
-                    )
+                items(templates) { tpl ->
+                    val isSelected = (tpl.id == selectedTemplate?.id)
+                    val rawUrl = tpl.baseImageUrl
+                    val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    templates.forEach { tpl ->
-                        val isSelected = (tpl.id == selectedTemplate?.id)
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .clickable {
-                                    selectedTemplate = tpl
-                                    initDefaultFieldValues(tpl, presidentName, fieldValues)
-                                },
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (isSelected) Color(0xFFE0F2FE) else Color(0xFFF8FAFC),
-                            border = androidx.compose.foundation.BorderStroke(
-                                width = 1.dp,
-                                color = if (isSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
+                    Card(
+                        modifier = Modifier
+                            .width(140.dp)
+                            .clickable {
+                                selectedTemplate = tpl
+                                initDefaultFieldValues(tpl, presidentName, fieldValues)
+                            },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        border = androidx.compose.foundation.BorderStroke(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) Color(0xFF0097D8) else Color(0xFFE2E8F0)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
+                    ) {
+                        Column {
+                            AsyncImage(
+                                model = imageUrl,
+                                contentDescription = tpl.title,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                                    .background(Color(0xFF091322)),
+                                contentScale = ContentScale.Crop
                             )
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        text = tpl.title,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isSelected) Color(0xFF0369A1) else Color(0xFF1E293B)
-                                    )
-                                    Text(
-                                        text = tpl.category ?: "General",
-                                        fontSize = 11.sp,
-                                        color = Color(0xFF64748B)
-                                    )
-                                }
-                                if (isSelected) {
-                                    Text("✓ Selected", color = Color(0xFF0097D8), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                }
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                Text(
+                                    text = tpl.title,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    color = if (isSelected) Color(0xFF0097D8) else Color(0xFF0F172A)
+                                )
+                                Text(
+                                    text = tpl.category ?: "General",
+                                    fontSize = 9.sp,
+                                    color = Color(0xFF64748B),
+                                    maxLines = 1
+                                )
                             }
                         }
                     }
                 }
             }
+        }
 
-            // 3. Dynamic Variables Form
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "2. EVENT DETAILS",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF475569)
-                    )
-                    Text(
-                        text = "The design, layout, and fonts are pre-configured. Simply customize your meeting details below:",
-                        fontSize = 12.sp,
-                        color = Color(0xFF64748B),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
+        // 3. Dynamic Variables Form
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "EVENT VARIABLES",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF475569)
+                )
+                Text(
+                    text = "Type your details below to update the flyer preview instantly:",
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    selectedTemplate?.layers?.forEach { layer ->
-                        val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
-                        if (!zoneType.contains("logo") && !zoneType.contains("photo")) {
-                            val currentVal = fieldValues[zoneType] ?: ""
+                selectedTemplate?.layers?.forEach { layer ->
+                    val zoneType = (layer.type ?: layer.key ?: "custom_text").lowercase()
+                    if (!zoneType.contains("logo") && !zoneType.contains("photo")) {
+                        val currentVal = fieldValues[zoneType] ?: ""
 
-                            OutlinedTextField(
-                                value = currentVal,
-                                onValueChange = { newVal ->
-                                    fieldValues[zoneType] = newVal
-                                    selectedTemplate?.let { tpl ->
-                                        triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { resultBmp ->
-                                            compositeBitmap = resultBmp
-                                        }
+                        OutlinedTextField(
+                            value = currentVal,
+                            onValueChange = { newVal ->
+                                fieldValues[zoneType] = newVal
+                                selectedTemplate?.let { tpl ->
+                                    triggerComposite(flyerRenderer, tpl, cachedBaseBitmap, fieldValues) { resultBmp ->
+                                        compositeBitmap = resultBmp
                                     }
-                                },
-                                label = { Text(layer.label ?: zoneType.replace("_", " ").uppercase()) },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            )
-                        }
+                                }
+                            },
+                            label = { Text(layer.label ?: zoneType.replace("_", " ").uppercase()) },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        )
                     }
                 }
             }
-
         }
+
     }
 }
 
