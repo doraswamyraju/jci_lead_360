@@ -90,11 +90,7 @@ class MainActivity : ComponentActivity() {
                     // Modal BottomSheet Notification Center
                     if (showNotificationBottomSheet) {
                         NotificationCenterBottomSheet(
-                            onDismiss = { showNotificationBottomSheet = false },
-                            onNavigateToCalendar = {
-                                showNotificationBottomSheet = false
-                                currentScreen = Screen.Calendar
-                            }
+                            onDismiss = { showNotificationBottomSheet = false }
                         )
                     }
 
@@ -370,7 +366,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 when (currentScreen) {
                                     Screen.Dashboard -> DashboardOverviewScreen(
-                                        presidentName = userName,
+                                        userName = userName,
                                         chapterName = userChapter,
                                         onNavigateTab = { tabId ->
                                             currentScreen = when (tabId) {
