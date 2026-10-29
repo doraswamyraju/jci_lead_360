@@ -225,7 +225,12 @@ class MainActivity : ComponentActivity() {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    Text("🚪", fontSize = 16.sp)
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_logout),
+                                        contentDescription = "Sign Out",
+                                        tint = Color(0xFFEF4444),
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                     Text("Sign Out", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                 }
                             }
@@ -243,16 +248,15 @@ class MainActivity : ComponentActivity() {
                                             Surface(
                                                 shape = RoundedCornerShape(8.dp),
                                                 color = Color.White,
-                                                shadowElevation = 2.dp,
-                                                modifier = Modifier.padding(end = 10.dp)
+                                                shadowElevation = 2.dp
                                             ) {
                                                 if (chapterLogoBitmap != null) {
                                                     Image(
                                                         bitmap = chapterLogoBitmap.asImageBitmap(),
                                                         contentDescription = userChapter,
                                                         modifier = Modifier
-                                                            .height(34.dp)
-                                                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                                                            .height(36.dp)
+                                                            .padding(horizontal = 8.dp, vertical = 3.dp),
                                                         contentScale = ContentScale.Fit
                                                     )
                                                 } else {
@@ -265,14 +269,6 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 }
                                             }
-
-                                            Text(
-                                                text = userChapter,
-                                                fontSize = 13.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFBAE6FD),
-                                                maxLines = 1
-                                            )
                                         }
                                     },
                                     navigationIcon = {
@@ -311,14 +307,19 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
 
-                                        // Sleek Header Logout Button (Clean standard Material exit icon)
+                                        // Sleek Header Logout Button (Standard exit-to-app logout vector icon)
                                         IconButton(
                                             onClick = {
                                                 prefs.edit().clear().apply()
                                                 token = null
                                             }
                                         ) {
-                                            Text("🚪", fontSize = 18.sp)
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_logout),
+                                                contentDescription = "Log Out",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(22.dp)
+                                            )
                                         }
                                     },
                                     colors = TopAppBarDefaults.topAppBarColors(

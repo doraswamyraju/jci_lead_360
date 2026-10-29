@@ -44,7 +44,11 @@ object InternalPhotoStore {
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream.close()
 
-            val file = File(context.filesDir, fileName)
+            if (bitmap == null) return null
+
+            // Use a timestamped filename to force cache invalidation on update
+            val uniqueFileName = "${System.currentTimeMillis()}_$fileName"
+            val file = File(context.filesDir, uniqueFileName)
             val outputStream = FileOutputStream(file)
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
             outputStream.flush()

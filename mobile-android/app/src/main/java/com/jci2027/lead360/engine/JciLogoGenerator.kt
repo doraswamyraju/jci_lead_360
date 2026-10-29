@@ -3,7 +3,9 @@ package com.jci2027.lead360.engine
 import android.content.Context
 import android.graphics.*
 import android.text.TextPaint
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.PathParser
+import com.jci2027.lead360.R
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -41,6 +43,16 @@ class JciLogoGenerator(private val context: Context) {
         DARK_NAVY(Color.parseColor("#130F2D")),
         JCI_BLUE(Color.parseColor("#0097D7")),
         TRANSPARENT(Color.TRANSPARENT)
+    }
+
+    private val officialTypeface: Typeface by lazy {
+        try {
+            ResourcesCompat.getFont(context, R.font.helvetica_neue_bold)
+                ?: ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_bold)
+                ?: Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        } catch (e: Exception) {
+            Typeface.create("sans-serif", Typeface.BOLD)
+        }
     }
 
     // Cached Official JCI Paths from SVG
@@ -152,8 +164,11 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
         val colorWhite = Color.WHITE
 
         if (caseStyle.isSocial) {
-            // Circle fills the canvas with a safe inset
-            val circleRadius = width * 0.46f
+            // Replica of logo.jciath.be social case styling:
+            // .cases .case.social>div:first-child { margin: 5% 30%; border-radius: 50%; overflow: hidden; }
+            // The JCI logo (.logo) viewBox is 2400 x 1600.
+            // Inside the circle, the full mark is displayed at scale ~0.55 centered, with the chapter name in official font below.
+            val circleRadius = width * 0.42f
             val circleCenterX = width / 2f
             val circleCenterY = height / 2f
 
@@ -175,11 +190,10 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
             canvas.save()
             canvas.clipPath(clipPath)
 
-            // Official JCI mark dimensions in SVG: ~2100 wide x ~600 tall (letters from x=150 to ~2233, y from ~340 to ~985)
-            // Center mark horizontally and place in upper portion of circle
-            val markScale = (circleRadius * 1.15f) / 2400f
+            // Scale and center the JCI corporate mark inside the circular badge
+            val markScale = (circleRadius * 1.05f) / 2400f
             val markOffsetX = circleCenterX - (2400f * markScale / 2f)
-            val markOffsetY = circleCenterY - (1600f * markScale / 2f) - (circleRadius * 0.18f)
+            val markOffsetY = circleCenterY - (1600f * markScale / 2f) - (circleRadius * 0.16f)
 
             val primaryColor = when (caseStyle) {
                 CaseStyle.SOCIAL_WHITE -> colorBlue
@@ -198,23 +212,23 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
                 cyanColor = primaryColor
             )
 
-            // Centered Chapter Name inside circle lower section - preserves exact casing entered by user
+            // Centered Chapter Name inside circle lower section - uses official typeface and exact user casing
             val displayLine1 = if (line1.isBlank()) "Exemple" else line1.trim()
             val displayLine2 = line2.trim()
 
             val socialTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = primaryColor
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                typeface = officialTypeface
                 textAlign = Paint.Align.CENTER
             }
 
             if (displayLine2.isBlank()) {
-                socialTextPaint.textSize = circleRadius * 0.17f
-                canvas.drawText(displayLine1, circleCenterX, circleCenterY + (circleRadius * 0.58f), socialTextPaint)
+                socialTextPaint.textSize = circleRadius * 0.16f
+                canvas.drawText(displayLine1, circleCenterX, circleCenterY + (circleRadius * 0.56f), socialTextPaint)
             } else {
-                socialTextPaint.textSize = circleRadius * 0.14f
-                canvas.drawText(displayLine1, circleCenterX, circleCenterY + (circleRadius * 0.48f), socialTextPaint)
-                canvas.drawText(displayLine2, circleCenterX, circleCenterY + (circleRadius * 0.68f), socialTextPaint)
+                socialTextPaint.textSize = circleRadius * 0.13f
+                canvas.drawText(displayLine1, circleCenterX, circleCenterY + (circleRadius * 0.46f), socialTextPaint)
+                canvas.drawText(displayLine2, circleCenterX, circleCenterY + (circleRadius * 0.66f), socialTextPaint)
             }
 
             canvas.restore()
@@ -275,10 +289,10 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
             cyanColor = cyanColor
         )
 
-        // Draw Chapter Name Typography
+        // Draw Chapter Name Typography using official Helvetica Neue / JCI standard typeface
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = textColor
-            typeface = Typeface.create("sans-serif", Typeface.BOLD)
+            typeface = officialTypeface
             textAlign = Paint.Align.LEFT
         }
 
