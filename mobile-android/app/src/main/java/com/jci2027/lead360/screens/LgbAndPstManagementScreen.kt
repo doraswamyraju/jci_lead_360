@@ -1,6 +1,10 @@
 package com.jci2027.lead360.screens
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,19 +13,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jci2027.lead360.network.ApiService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.jci2027.lead360.engine.JciLogoGenerator
+import com.jci2027.lead360.share.AndroidShareManager
 
 data class TeamMemberItem(
     val role: String,
@@ -39,8 +40,11 @@ fun LgbAndPstManagementScreen(
     presidentName: String,
     baseUrl: String = "https://lead.sriddha.com"
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var selectedTab by remember { mutableStateOf(0) } // 0: Directory, 1: Create Credentials, 2: Chapter Details
+    val context = LocalContext.current
+    val logoGenerator = remember { JciLogoGenerator(context) }
+
+    // 0: Directory, 1: Grant Access, 2: Official Logo Generator, 3: LO Profile
+    var selectedTab by remember { mutableStateOf(0) }
 
     // Form inputs for creating credentials
     var newMemberName by remember { mutableStateOf("") }
@@ -51,6 +55,20 @@ fun LgbAndPstManagementScreen(
     var isSubmitting by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var isError by remember { mutableStateOf(false) }
+
+    // Logo Generator State
+    var customLogoChapterName by remember { mutableStateOf(chapterName) }
+    var selectedLogoTheme by remember { mutableStateOf(JciLogoGenerator.LogoTheme.JCI_BLUE) }
+    var generatedLogoBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    // Re-generate logo when parameters change
+    LaunchedEffect(customLogoChapterName, selectedLogoTheme) {
+        val bmp = logoGenerator.generateOfficialChapterLogo(
+            chapterName = customLogoChapterName,
+            theme = selectedLogoTheme
+        )
+        generatedLogoBitmap = bmp
+    }
 
     // LO Profile details state
     var loZone by remember { mutableStateOf("Zone IV") }
@@ -83,13 +101,13 @@ fun LgbAndPstManagementScreen(
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
-                Text("👥 Leadership & Team Command", color = Color(0xFF94A3B8), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("👥 Leadership, Team & Brand Asset Hub", color = Color(0xFF94A3B8), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Text(chapterName, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                Text("Manage LGB, create PST access credentials & update LO profile", color = Color(0xFF38BDF8), fontSize = 12.sp)
+                Text("LGB board, PST credentials, official vector logo generator & profile", color = Color(0xFF38BDF8), fontSize = 12.sp)
             }
         }
 
-        // Tab Selector (Directory vs Create Access vs LO Details)
+        // 4-Tab Navigation Selector (Directory | Access | Logo Gen | Profile)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +115,7 @@ fun LgbAndPstManagementScreen(
                 .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            listOf("LGB Directory", "Grant Access", "LO Profile").forEachIndexed { index, label ->
+            listOf("LGB Directory", "Grant Access", "🎨 Logo Gen", "LO Profile").forEachIndexed { index, label ->
                 val isSelected = selectedTab == index
                 Surface(
                     modifier = Modifier
@@ -111,7 +129,7 @@ fun LgbAndPstManagementScreen(
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             text = label,
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
                             color = if (isSelected) Color(0xFF0097D8) else Color(0xFF64748B)
                         )
@@ -161,7 +179,7 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 1: Create Login Credentials for PST
+        // TAB 1: Grant Access / Create Login Credentials for PST
         if (selectedTab == 1) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -253,14 +271,9 @@ fun LgbAndPstManagementScreen(
                                 isError = true
                                 return@Button
                             }
-                            isSubmitting = true
-                            statusMessage = null
-
-                            // Local append and dispatch
                             currentTeam.add(
                                 TeamMemberItem(newMemberRole, newMemberName, newMemberEmail, newMemberPhone)
                             )
-                            isSubmitting = false
                             isError = false
                             statusMessage = "✓ Successfully generated $newMemberRole account credentials!"
                             newMemberName = ""
@@ -279,8 +292,141 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 2: LO Profile & Chapter Details
+        // TAB 2: JCI Official Logo Lockup Generator (Equivalent to logo.jciath.be)
         if (selectedTab == 2) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Text(
+                        text = "🎨 Official JCI Chapter Logo Generator",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Text(
+                        text = "Generates high-resolution corporate-identity compliant chapter lockup logos (inspired by logo.jciath.be).",
+                        fontSize = 12.sp,
+                        color = Color(0xFF64748B),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    // Logo Canvas Preview Display Box
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .background(
+                                if (selectedLogoTheme.isDarkBg) Color(0xFF091322) else Color(0xFFF1F5F9),
+                                RoundedCornerShape(10.dp)
+                            )
+                            .border(
+                                1.dp,
+                                Color(0xFFCBD5E1),
+                                RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (generatedLogoBitmap != null) {
+                            Image(
+                                bitmap = generatedLogoBitmap!!.asImageBitmap(),
+                                contentDescription = "Generated JCI Logo",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp)
+                            )
+                        } else {
+                            CircularProgressIndicator(color = Color(0xFF0097D8))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Chapter Name Input
+                    OutlinedTextField(
+                        value = customLogoChapterName,
+                        onValueChange = { customLogoChapterName = it },
+                        label = { Text("Chapter Organization Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Theme Selector Chips
+                    Text("SELECT BRAND COLOR VARIANT", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF64748B))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(
+                            Pair("Official Blue", JciLogoGenerator.LogoTheme.JCI_BLUE),
+                            Pair("JCI Navy", JciLogoGenerator.LogoTheme.JCI_NAVY),
+                            Pair("Black", JciLogoGenerator.LogoTheme.MONOCHROME_BLACK),
+                            Pair("White", JciLogoGenerator.LogoTheme.MONOCHROME_WHITE)
+                        ).forEach { (label, theme) ->
+                            val isSel = selectedLogoTheme == theme
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (isSel) Color(0xFF0097D8) else Color(0xFFF8FAFC),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, if (isSel) Color(0xFF0097D8) else Color(0xFFE2E8F0)),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { selectedLogoTheme = theme }
+                            ) {
+                                Box(modifier = Modifier.padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+                                    Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (isSel) Color.White else Color(0xFF334155))
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // 1-Tap Action: Export & Share Transparent PNG
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                generatedLogoBitmap?.let { bmp ->
+                                    val file = logoGenerator.saveLogoToCache(bmp, "${customLogoChapterName}_Official_Logo.png")
+                                    val caption = "🏛️ Official Compliant Logo for *$customLogoChapterName*\nGenerated via JCI LEAD360 Platform"
+                                    AndroidShareManager.shareToWhatsApp(context, file, caption)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("💬 WhatsApp", fontWeight = FontWeight.Bold)
+                        }
+
+                        Button(
+                            onClick = {
+                                generatedLogoBitmap?.let { bmp ->
+                                    logoGenerator.saveLogoToCache(bmp, "${customLogoChapterName}_Official_Logo.png")
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("⬇️ Save PNG", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // TAB 3: LO Profile & Chapter Details
+        if (selectedTab == 3) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -289,7 +435,7 @@ fun LgbAndPstManagementScreen(
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("🏛️ Local Organization (LO) Details", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
-                    Text("Keep chapter branding and zone contacts synchronized for dynamic flyer auto-fill.", fontSize = 12.sp, color = Color(0xFF64748B), modifier = Modifier.padding(bottom = 14.dp))
+                    Text("Official chapter parameters managed by Chapter President.", fontSize = 12.sp, color = Color(0xFF64748B), modifier = Modifier.padding(bottom = 14.dp))
 
                     OutlinedTextField(
                         value = chapterName,
@@ -350,4 +496,3 @@ fun LgbAndPstManagementScreen(
 
     }
 }
-
