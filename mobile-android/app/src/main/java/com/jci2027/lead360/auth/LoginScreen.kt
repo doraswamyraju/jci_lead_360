@@ -1,18 +1,23 @@
 package com.jci2027.lead360.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jci2027.lead360.R
 import com.jci2027.lead360.network.ApiService
 import com.jci2027.lead360.network.LoginRequest
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +29,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 /**
- * Real Production Android Login Screen
- * Authenticates with live Hostinger backend (https://lead.sriddha.com)
- * Handles token generation, role verification, and error feedback.
+ * Premium Modern Android Login Screen
+ * Displays official high-res JCI LEAD360 logo, clean inputs, and role routing.
  */
 @Composable
 fun LoginScreen(
@@ -44,7 +48,7 @@ fun LoginScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF091428), Color(0xFF0097D8))
+                    colors = listOf(Color(0xFF091428), Color(0xFF0F264A), Color(0xFF0097D8))
                 )
             ),
         contentAlignment = Alignment.Center
@@ -52,26 +56,46 @@ fun LoginScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .padding(16.dp),
-            shape = RoundedCornerShape(18.dp),
+                .padding(vertical = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
         ) {
             Column(
                 modifier = Modifier.padding(26.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Official JCI LEAD360 Brand Logo in White Card
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White,
+                    shadowElevation = 4.dp,
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
+                        .padding(bottom = 18.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.lead360_logo),
+                        contentDescription = "JCI LEAD360 Official Logo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .padding(8.dp)
+                    )
+                }
+
                 Text(
-                    text = "JCI LEAD360",
-                    fontSize = 24.sp,
+                    text = "President & Leader Hub",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF0F172A)
                 )
                 Text(
-                    text = "President & PST Command Portal • 2027",
+                    text = "Empowering Chapter Leadership • Year 2027",
                     fontSize = 12.sp,
                     color = Color(0xFF64748B),
-                    modifier = Modifier.padding(bottom = 22.dp)
+                    modifier = Modifier.padding(top = 2.dp, bottom = 22.dp)
                 )
 
                 OutlinedTextField(
@@ -80,9 +104,10 @@ fun LoginScreen(
                         email = it
                         errorMessage = null
                     },
-                    label = { Text("Email or Username") },
+                    label = { Text("Leader Email or Phone") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -96,7 +121,8 @@ fun LoginScreen(
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
                 )
 
                 if (errorMessage != null) {
@@ -109,7 +135,7 @@ fun LoginScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
@@ -147,7 +173,7 @@ fun LoginScreen(
                                     onLoginSuccess(token, role, name, chapter)
                                 } else {
                                     isLoading = false
-                                    errorMessage = response.body()?.message ?: "Invalid email or password. Status: ${response.code()}"
+                                    errorMessage = response.body()?.message ?: "Invalid email or password (Code ${response.code()})"
                                 }
                             } catch (e: Exception) {
                                 isLoading = false
@@ -165,9 +191,17 @@ fun LoginScreen(
                     if (isLoading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Sign In to Command Hub", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("Sign In to Command Portal", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                 }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Text(
+                    text = "Hostinger VPS Port 5087 Isolated • JCI India",
+                    fontSize = 11.sp,
+                    color = Color(0xFF94A3B8)
+                )
             }
         }
     }
