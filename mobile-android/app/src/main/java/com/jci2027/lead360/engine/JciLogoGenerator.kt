@@ -105,3 +105,4 @@ class JciLogoGenerator(private val context: Context) {
         return file
     }
 }
+

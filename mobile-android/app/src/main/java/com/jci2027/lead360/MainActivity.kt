@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.jci2027.lead360.auth.LoginScreen
 import com.jci2027.lead360.navigation.Screen
 import com.jci2027.lead360.president.PresidentFlyerStudioScreen
+import com.jci2027.lead360.screens.AiFlyerStudioScreen
 import com.jci2027.lead360.screens.DashboardOverviewScreen
 import com.jci2027.lead360.screens.FramesScreen
 import com.jci2027.lead360.screens.InteractiveCalendarScreen
@@ -54,13 +55,13 @@ class MainActivity : ComponentActivity() {
                     var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
                     var showNotificationBottomSheet by remember { mutableStateOf(false) }
 
-                    // Navigation items for BottomBar & Drawer
+                    // Navigation items for BottomBar
                     val bottomNavItems = listOf(
                         Screen.Dashboard,
                         Screen.Flyers,
+                        Screen.AiFlyer,
                         Screen.Calendar,
-                        Screen.Lgb,
-                        Screen.Frames
+                        Screen.Lgb
                     )
 
                     // Modal BottomSheet Notification Center
@@ -135,6 +136,7 @@ class MainActivity : ComponentActivity() {
                                 val drawerItems = listOf(
                                     Screen.Dashboard,
                                     Screen.Flyers,
+                                    Screen.AiFlyer,
                                     Screen.Calendar,
                                     Screen.Lgb,
                                     Screen.Frames,
@@ -184,7 +186,6 @@ class MainActivity : ComponentActivity() {
                             topBar = {
                                 TopAppBar(
                                     title = {
-                                        // Logo only (no duplicate text), clicking logo takes user Home
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.clickable { currentScreen = Screen.Dashboard }
@@ -283,6 +284,7 @@ class MainActivity : ComponentActivity() {
                                         onNavigateTab = { tabId ->
                                             currentScreen = when (tabId) {
                                                 "flyers" -> Screen.Flyers
+                                                "ai_flyer" -> Screen.AiFlyer
                                                 "calendar" -> Screen.Calendar
                                                 "lgb" -> Screen.Lgb
                                                 "frames" -> Screen.Frames
@@ -292,6 +294,10 @@ class MainActivity : ComponentActivity() {
                                     )
                                     Screen.Flyers -> PresidentFlyerStudioScreen(
                                         token = token!!,
+                                        presidentName = userName,
+                                        chapterName = userChapter
+                                    )
+                                    Screen.AiFlyer -> AiFlyerStudioScreen(
                                         presidentName = userName,
                                         chapterName = userChapter
                                     )
