@@ -90,7 +90,11 @@ This document captures all enhancements, architectural updates, fixes, and new f
 
 ### Two-Mode Switcher in `PresidentFlyerStudioScreen`
 - **📂 Template Catalogue**: Browse categorized templates (Business, Training, Community, International, Celebrations).
+  - Displays marked customizable field badges directly on top of each creative preview (e.g. `🏛️ Logo`, `👤 Photo`, `📅 Date`, `📍 Venue`, `👤 President`) so users immediately see what can be customized.
+  - Tapping any template creative immediately activates the Live Studio with all pre-filled fields.
 - **✨ Live Studio**: Real-time canvas preview of selected templates with live text inputs, date/time pickers, and instant generation.
+  - **Mapped Chapter Logo & President Photo**: Wired `chapterLogoBitmap` and `presidentPhotoBitmap` into `triggerComposite` and `AndroidFlyerRenderer`. Both now accurately composite into template zones.
+  - **Full-Screen Interactive Zoom**: Added full-screen interactive preview dialog with multi-touch pinch-to-zoom (up to 5x), two-finger pan/drag, reset button, and zoom scale indicator. Accessible via the **"🔍 Zoom / Fullscreen"** button or by tapping directly on the live flyer preview.
 
 ### WhatsApp Sharing & Media Storage (Crash-Free)
 - Integrated Android `FileProvider` (`res/xml/file_paths.xml`) and `MediaStore` gallery insertion in `AndroidShareManager.kt`.
@@ -124,3 +128,4 @@ This document captures all enhancements, architectural updates, fixes, and new f
 - `c27e5e1`: Fixed JCI official vector paths, registered `FileProvider` for WhatsApp share, added LO logo upload.
 - `e3cab2e`: Fixed Compose icon dependency issues with zero-overhead inline toggle.
 - `29b674a`: Added password visibility, "Remember Me", "Sign In" button, and initial `logo.jciath.be` replica.
+
