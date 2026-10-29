@@ -1,9 +1,13 @@
 package com.jci2027.lead360.screens
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,12 +24,48 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import java.io.File
+import java.io.FileOutputStream
+
+/**
+ * Helper to persist user photos to internal app storage so they never disappear on app restart
+ */
+object InternalPhotoStore {
+    fun saveImageToInternalStorage(context: Context, uri: Uri, fileName: String): String? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+
+            val file = File(context.filesDir, fileName)
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun loadBitmapFromInternalStorage(path: String?): Bitmap? {
+        if (path.isNullOrBlank()) return null
+        val file = File(path)
+        return if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else {
+            null
+        }
+    }
+}
 
 /**
  * JCI Photo Frames Maker Screen
@@ -159,33 +199,41 @@ fun ProfileScreen(
     name: String,
     chapterName: String,
     role: String,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onProfileUpdated: (updatedName: String, updatedChapter: String, photoPath: String?, logoPath: String?) -> Unit = { _, _, _, _ -> }
 ) {
     val context = LocalContext.current
-    val prefs = remember { context.getSharedPreferences("lead360_auth_prefs", android.content.Context.MODE_PRIVATE) }
+    val prefs = remember { context.getSharedPreferences("lead360_auth_prefs", Context.MODE_PRIVATE) }
+
+    // Saved internal paths
+    var savedPresidentPhotoPath by remember { mutableStateOf(prefs.getString("president_photo_path", null)) }
+    var savedChapterLogoPath by remember { mutableStateOf(prefs.getString("chapter_logo_path", null)) }
 
     // President Profile State
     var presidentNameInput by remember { mutableStateOf(prefs.getString("auth_name", name) ?: name) }
     var presidentPhone by remember { mutableStateOf(prefs.getString("auth_phone", "+91 98765 43210") ?: "+91 98765 43210") }
     var presidentEmail by remember { mutableStateOf(prefs.getString("saved_email", "president@jcitirupati.com") ?: "president@jcitirupati.com") }
-    var presidentPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     // Chapter LO Profile State
     var chapterNameInput by remember { mutableStateOf(prefs.getString("auth_chapter", chapterName) ?: chapterName) }
     var chapterZone by remember { mutableStateOf(prefs.getString("chapter_zone", "Zone IV") ?: "Zone IV") }
     var chapterEmail by remember { mutableStateOf(prefs.getString("chapter_email", "info@jcitirupati.com") ?: "info@jcitirupati.com") }
     var chapterPhone by remember { mutableStateOf(prefs.getString("chapter_phone", "+91 98765 43210") ?: "+91 98765 43210") }
-    var chapterLogoUri by remember { mutableStateOf<Uri?>(null) }
 
     var isSaved by remember { mutableStateOf(false) }
 
-    // Photo Launchers
+    // Photo Launchers that immediately write to persistent internal storage
     val presidentPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            presidentPhotoUri = uri
-            Toast.makeText(context, "President photo selected!", Toast.LENGTH_SHORT).show()
+            val savedPath = InternalPhotoStore.saveImageToInternalStorage(context, uri, "president_profile_photo.png")
+            if (savedPath != null) {
+                savedPresidentPhotoPath = savedPath
+                prefs.edit().putString("president_photo_path", savedPath).apply()
+                onProfileUpdated(presidentNameInput, chapterNameInput, savedPath, savedChapterLogoPath)
+                Toast.makeText(context, "✓ President portrait saved!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -193,9 +241,22 @@ fun ProfileScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            chapterLogoUri = uri
-            Toast.makeText(context, "Chapter logo selected!", Toast.LENGTH_SHORT).show()
+            val savedPath = InternalPhotoStore.saveImageToInternalStorage(context, uri, "chapter_official_logo.png")
+            if (savedPath != null) {
+                savedChapterLogoPath = savedPath
+                prefs.edit().putString("chapter_logo_path", savedPath).apply()
+                onProfileUpdated(presidentNameInput, chapterNameInput, savedPresidentPhotoPath, savedPath)
+                Toast.makeText(context, "✓ Chapter logo saved! Now displayed in TopBar.", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    val presidentBitmap = remember(savedPresidentPhotoPath) {
+        InternalPhotoStore.loadBitmapFromInternalStorage(savedPresidentPhotoPath)
+    }
+
+    val chapterLogoBitmap = remember(savedChapterLogoPath) {
+        InternalPhotoStore.loadBitmapFromInternalStorage(savedChapterLogoPath)
     }
 
     Column(
@@ -222,17 +283,17 @@ fun ProfileScreen(
                 // Photo with tap to change
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(86.dp)
                         .clip(CircleShape)
                         .background(Color(0xFF1E293B))
                         .clickable { presidentPhotoLauncher.launch("image/*") }
-                        .border(2.dp, Color(0xFF0097D8), CircleShape),
+                        .border(3.dp, Color(0xFF0097D8), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (presidentPhotoUri != null) {
-                        AsyncImage(
-                            model = presidentPhotoUri,
-                            contentDescription = "President Photo",
+                    if (presidentBitmap != null) {
+                        Image(
+                            bitmap = presidentBitmap.asImageBitmap(),
+                            contentDescription = "President Portrait",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
@@ -240,7 +301,7 @@ fun ProfileScreen(
                         Text(
                             text = presidentNameInput.firstOrNull()?.toString() ?: "P",
                             color = Color.White,
-                            fontSize = 32.sp,
+                            fontSize = 34.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
                     }
@@ -249,7 +310,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(presidentNameInput, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                Text(chapterNameInput, fontSize = 13.sp, color = Color(0xFF94A3B8))
+                Text(chapterNameInput, fontSize = 13.sp, color = Color(0xFFBAE6FD))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -267,9 +328,9 @@ fun ProfileScreen(
                 }
 
                 Text(
-                    text = "Tap photo above to upload new portrait",
+                    text = "Tap portrait above to update profile photo",
                     fontSize = 10.sp,
-                    color = Color(0xFF64748B),
+                    color = Color(0xFF94A3B8),
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -284,13 +345,13 @@ fun ProfileScreen(
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Text(
-                    text = "🏛️ Local Organization (LO) Details",
+                    text = "🏛️ Local Organization (LO) Chapter Profile",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF0F172A)
                 )
                 Text(
-                    text = "Configure your official chapter identity and branding",
+                    text = "Configure your official chapter logo & parameters (shown in TopBar)",
                     fontSize = 11.sp,
                     color = Color(0xFF64748B),
                     modifier = Modifier.padding(bottom = 14.dp)
@@ -312,31 +373,32 @@ fun ProfileScreen(
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = Color.White,
-                        modifier = Modifier.size(50.dp)
+                        shadowElevation = 1.dp,
+                        modifier = Modifier.size(54.dp)
                     ) {
-                        if (chapterLogoUri != null) {
-                            AsyncImage(
-                                model = chapterLogoUri,
+                        if (chapterLogoBitmap != null) {
+                            Image(
+                                bitmap = chapterLogoBitmap.asImageBitmap(),
                                 contentDescription = "Chapter Logo",
                                 modifier = Modifier.fillMaxSize().padding(4.dp),
                                 contentScale = ContentScale.Fit
                             )
                         } else {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                Text("🖼️", fontSize = 20.sp)
+                                Text("🏛️", fontSize = 24.sp)
                             }
                         }
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (chapterLogoUri != null) "Chapter Logo Attached" else "Upload Chapter Logo",
+                            text = if (chapterLogoBitmap != null) "Chapter Logo Attached" else "Upload Chapter Logo",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             color = Color(0xFF0F172A)
                         )
                         Text(
-                            text = "Used in flyer headers and official communications",
+                            text = "Replaces LEAD360 logo in TopBar and appears on flyers",
                             fontSize = 10.sp,
                             color = Color(0xFF64748B)
                         )
@@ -348,7 +410,7 @@ fun ProfileScreen(
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                     ) {
-                        Text(if (chapterLogoUri != null) "Change" else "Browse", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text(if (chapterLogoBitmap != null) "Change" else "Browse", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -462,6 +524,7 @@ fun ProfileScreen(
                             putString("chapter_email", chapterEmail.trim())
                             putString("chapter_phone", chapterPhone.trim())
                         }.apply()
+                        onProfileUpdated(presidentNameInput.trim(), chapterNameInput.trim(), savedPresidentPhotoPath, savedChapterLogoPath)
                         isSaved = true
                         Toast.makeText(context, "✓ President & LO Details Saved Successfully!", Toast.LENGTH_SHORT).show()
                     },
@@ -491,7 +554,7 @@ fun ProfileScreen(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.fillMaxWidth().height(46.dp)
                 ) {
-                    Text("🚪 Sign Out from Device", color = Color(0xFFDC2626), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Sign Out from Device", color = Color(0xFFDC2626), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
             }
         }
