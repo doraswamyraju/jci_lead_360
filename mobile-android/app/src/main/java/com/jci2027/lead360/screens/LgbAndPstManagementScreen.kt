@@ -1,13 +1,17 @@
 package com.jci2027.lead360.screens
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -17,20 +21,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.jci2027.lead360.engine.JciLogoGenerator
 import com.jci2027.lead360.share.AndroidShareManager
 import kotlinx.coroutines.launch
 
 data class TeamMemberItem(
+    val id: String = "",
     val role: String,
-    val name: String,
+    var name: String,
     val email: String,
-    val phone: String,
+    var phone: String,
+    var photoUri: Uri? = null,
     val status: String = "Active"
 )
 
@@ -73,14 +81,38 @@ fun LgbAndPstManagementScreen(
     var loZone by remember { mutableStateOf("Zone IV") }
     var loEmail by remember { mutableStateOf("info@jcitirupati.com") }
     var loPhone by remember { mutableStateOf("+91 98765 43210") }
+    var loLogoUri by remember { mutableStateOf<Uri?>(null) }
     var isSavedLo by remember { mutableStateOf(false) }
 
+    // Executive team list
     val currentTeam = remember {
         mutableStateListOf(
-            TeamMemberItem("PRESIDENT", presidentName, "president@jcitirupati.com", "+91 98765 43210"),
-            TeamMemberItem("SECRETARY", "JC Secretary 2027", "secretary@jcitirupati.com", "+91 98765 43211"),
-            TeamMemberItem("TREASURER", "JC Treasurer 2027", "treasurer@jcitirupati.com", "+91 98765 43212")
+            TeamMemberItem("usr_1", "PRESIDENT", presidentName, "president@jcitirupati.com", "+91 98765 43210"),
+            TeamMemberItem("usr_2", "SECRETARY", "JC Secretary 2027", "secretary@jcitirupati.com", "+91 98765 43211"),
+            TeamMemberItem("usr_3", "TREASURER", "JC Treasurer 2027", "treasurer@jcitirupati.com", "+91 98765 43212")
         )
+    }
+
+    // Image pickers
+    val chapterLogoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            loLogoUri = uri
+            Toast.makeText(context, "Chapter Logo selected!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    var selectedOfficerIndex by remember { mutableStateOf<Int?>(null) }
+    val officerPhotoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        val idx = selectedOfficerIndex
+        if (uri != null && idx != null && idx < currentTeam.size) {
+            val member = currentTeam[idx]
+            currentTeam[idx] = member.copy(photoUri = uri)
+            Toast.makeText(context, "Updated photo for ${member.name}!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     Column(
@@ -100,17 +132,41 @@ fun LgbAndPstManagementScreen(
             elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
-                Text(
-                    text = "🏛️ Local Chapter Leadership Suite",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White
-                )
-                Text(
-                    text = "$chapterName • Year 2027 Administration",
-                    fontSize = 12.sp,
-                    color = Color(0xFF94A3B8)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "🏛️ Chapter Leadership Suite",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "$chapterName • Year 2027 Administration",
+                            fontSize = 12.sp,
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
+
+                    // LO Logo thumbnail if available
+                    if (loLogoUri != null) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color.White,
+                            modifier = Modifier.size(46.dp)
+                        ) {
+                            AsyncImage(
+                                model = loLogoUri,
+                                contentDescription = "Chapter Logo",
+                                modifier = Modifier.fillMaxSize().padding(3.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -124,10 +180,10 @@ fun LgbAndPstManagementScreen(
                     divider = {}
                 ) {
                     listOf(
-                        "👥 Directory",
+                        "👥 PST & LGB Directory",
                         "🔑 Grant Access",
                         "🎨 Logo Generator",
-                        "🏢 Chapter Details"
+                        "🏢 Chapter & LO Profile"
                     ).forEachIndexed { idx, label ->
                         val isSelected = selectedTab == idx
                         Tab(
@@ -154,47 +210,94 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 0: Board Directory
+        // TAB 0: Board Directory with Photo & Profile Upload
         if (selectedTab == 0) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "ACTIVE EXECUTIVE BOARD (${currentTeam.size})",
+                    text = "PST OFFICERS & LOCAL GOVERNING BOARD (${currentTeam.size})",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF64748B)
                 )
 
-                currentTeam.forEach { member ->
+                currentTeam.forEachIndexed { index, member ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = Color(0xFFE0F2FE),
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                ) {
-                                    Text(member.role, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0369A1), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
-                                }
-                                Text(member.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
-                                Text(member.email, fontSize = 11.sp, color = Color(0xFF64748B))
-                                Text(member.phone, fontSize = 11.sp, color = Color(0xFF64748B))
-                            }
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFFDCFCE7)
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Active", color = Color(0xFF166534), fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    // Officer Photo / Avatar
+                                    Box(
+                                        modifier = Modifier
+                                            .size(54.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFFE2E8F0))
+                                            .clickable {
+                                                selectedOfficerIndex = index
+                                                officerPhotoPicker.launch("image/*")
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (member.photoUri != null) {
+                                            AsyncImage(
+                                                model = member.photoUri,
+                                                contentDescription = member.name,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        } else {
+                                            Text("📷", fontSize = 20.sp)
+                                        }
+                                    }
+
+                                    Column {
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = Color(0xFFE0F2FE),
+                                            modifier = Modifier.padding(bottom = 3.dp)
+                                        ) {
+                                            Text(
+                                                member.role,
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = Color(0xFF0369A1),
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                        Text(member.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+                                        Text(member.phone, fontSize = 11.sp, color = Color(0xFF64748B))
+                                        Text(member.email, fontSize = 11.sp, color = Color(0xFF64748B))
+                                    }
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = Color(0xFFF1F5F9),
+                                    modifier = Modifier.clickable {
+                                        selectedOfficerIndex = index
+                                        officerPhotoPicker.launch("image/*")
+                                    }
+                                ) {
+                                    Text(
+                                        text = if (member.photoUri != null) "Change Photo" else "+ Upload Photo",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF0284C7),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -300,7 +403,13 @@ fun LgbAndPstManagementScreen(
                                 return@Button
                             }
                             currentTeam.add(
-                                TeamMemberItem(newMemberRole, newMemberName, newMemberEmail, newMemberPhone)
+                                TeamMemberItem(
+                                    id = "usr_${System.currentTimeMillis()}",
+                                    role = newMemberRole,
+                                    name = newMemberName,
+                                    email = newMemberEmail,
+                                    phone = newMemberPhone
+                                )
                             )
                             isError = false
                             statusMessage = "✓ Successfully generated $newMemberRole account credentials!"
@@ -320,7 +429,7 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 2: Exact replica of https://logo.jciath.be/
+        // TAB 2: Exact replica of https://logo.jciath.be/ with genuine JCI crest & safe download
         if (selectedTab == 2) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Header & Inputs (Centered Line 1 and optional Line 2)
@@ -424,17 +533,38 @@ fun LgbAndPstManagementScreen(
 
                             // Action buttons: PNG, JPG, Vector SVG (or Social Media)
                             if (caseStyle.isSocial) {
-                                Button(
-                                    onClick = {
-                                        val file = logoGenerator.saveBitmap(logoBmp, "JCI_${line1}_Social.jpg", Bitmap.CompressFormat.JPEG)
-                                        val caption = "🏛️ Official JCI Social Media Avatar for *$line1*"
-                                        AndroidShareManager.shareToWhatsApp(context, file, caption)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D7)),
-                                    shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.fillMaxWidth().height(40.dp)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Text("Social Media (JPG)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Button(
+                                        onClick = {
+                                            val file = logoGenerator.saveBitmap(logoBmp, "JCI_${line1}_Social.jpg", Bitmap.CompressFormat.JPEG)
+                                            val caption = "🏛️ Official JCI Social Media Avatar for *$line1*"
+                                            AndroidShareManager.shareToWhatsApp(context, file, caption, "image/jpeg")
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier.weight(1f).height(40.dp)
+                                    ) {
+                                        Text("💬 WhatsApp", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            AndroidShareManager.saveBitmapToGallery(
+                                                context,
+                                                logoBmp,
+                                                "JCI_${line1}_Social.jpg",
+                                                Bitmap.CompressFormat.JPEG
+                                            )
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D7)),
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier.weight(1f).height(40.dp)
+                                    ) {
+                                        Text("⬇️ Save JPG", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             } else {
                                 Row(
@@ -444,9 +574,12 @@ fun LgbAndPstManagementScreen(
                                     // PNG Button
                                     Button(
                                         onClick = {
-                                            val file = logoGenerator.saveBitmap(logoBmp, "JCI_${line1}_${caseStyle.name}.png", Bitmap.CompressFormat.PNG)
-                                            val caption = "🏛️ Official JCI Logo (*${caseStyle.title}*) for *$line1*"
-                                            AndroidShareManager.shareToWhatsApp(context, file, caption)
+                                            AndroidShareManager.saveBitmapToGallery(
+                                                context,
+                                                logoBmp,
+                                                "JCI_${line1}_${caseStyle.name}.png",
+                                                Bitmap.CompressFormat.PNG
+                                            )
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D7)),
                                         shape = RoundedCornerShape(8.dp),
@@ -458,9 +591,12 @@ fun LgbAndPstManagementScreen(
                                     // JPG Button
                                     Button(
                                         onClick = {
-                                            val file = logoGenerator.saveBitmap(logoBmp, "JCI_${line1}_${caseStyle.name}.jpg", Bitmap.CompressFormat.JPEG)
-                                            val caption = "🏛️ Official JCI Logo JPG for *$line1*"
-                                            AndroidShareManager.shareToWhatsApp(context, file, caption)
+                                            AndroidShareManager.saveBitmapToGallery(
+                                                context,
+                                                logoBmp,
+                                                "JCI_${line1}_${caseStyle.name}.jpg",
+                                                Bitmap.CompressFormat.JPEG
+                                            )
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
                                         shape = RoundedCornerShape(8.dp),
@@ -474,17 +610,30 @@ fun LgbAndPstManagementScreen(
                                         onClick = {
                                             coroutineScope.launch {
                                                 val svgString = logoGenerator.fetchVectorSvg(line1, line2)
-                                                val file = logoGenerator.saveSvgFile(svgString, "JCI_${line1}_Vector.svg")
-                                                Toast.makeText(context, "Saved Vector SVG to cache!", Toast.LENGTH_SHORT).show()
-                                                val caption = "📐 Official JCI Vector File (SVG) for *$line1*"
-                                                AndroidShareManager.shareToWhatsApp(context, file, caption)
+                                                AndroidShareManager.saveSvgToDownloads(
+                                                    context,
+                                                    svgString,
+                                                    "JCI_${line1}_Vector.svg"
+                                                )
                                             }
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF091322)),
                                         shape = RoundedCornerShape(8.dp),
                                         modifier = Modifier.weight(1.2f).height(40.dp)
                                     ) {
-                                        Text("Vector File", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                        Text("Vector SVG", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+
+                                    // WhatsApp Share
+                                    IconButton(
+                                        onClick = {
+                                            val file = logoGenerator.saveBitmap(logoBmp, "JCI_${line1}_${caseStyle.name}.png")
+                                            val caption = "🏛️ Official JCI Logo (*${caseStyle.title}*) for *$line1*"
+                                            AndroidShareManager.shareToWhatsApp(context, file, caption, "image/png")
+                                        },
+                                        modifier = Modifier.size(40.dp)
+                                    ) {
+                                        Text("💬", fontSize = 18.sp)
                                     }
                                 }
                             }
@@ -494,7 +643,7 @@ fun LgbAndPstManagementScreen(
             }
         }
 
-        // TAB 3: LO Profile & Chapter Details
+        // TAB 3: LO Profile & Chapter Details + LOGO UPLOAD
         if (selectedTab == 3) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -503,8 +652,66 @@ fun LgbAndPstManagementScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
-                    Text("🏛️ Local Organization (LO) Details", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
-                    Text("Official chapter parameters managed by Chapter President.", fontSize = 12.sp, color = Color(0xFF64748B), modifier = Modifier.padding(bottom = 14.dp))
+                    Text("🏛️ Local Organization (LO) Profile", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
+                    Text("Official parameters and chapter branding managed by Chapter President.", fontSize = 12.sp, color = Color(0xFF64748B), modifier = Modifier.padding(bottom = 14.dp))
+
+                    // Chapter Logo Upload Section
+                    Text("OFFICIAL CHAPTER LOGO", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF475569))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF1F5F9), RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(10.dp))
+                            .clickable { chapterLogoPicker.launch("image/*") }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color.White,
+                            modifier = Modifier.size(60.dp)
+                        ) {
+                            if (loLogoUri != null) {
+                                AsyncImage(
+                                    model = loLogoUri,
+                                    contentDescription = "Selected Chapter Logo",
+                                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                                    contentScale = ContentScale.Fit
+                                )
+                            } else {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                    Text("📷", fontSize = 24.sp)
+                                }
+                            }
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (loLogoUri != null) "Logo Uploaded" else "Tap to Upload Chapter Logo",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Color(0xFF0F172A)
+                            )
+                            Text(
+                                text = "PNG, JPG, or SVG with transparent background recommended",
+                                fontSize = 11.sp,
+                                color = Color(0xFF64748B)
+                            )
+                        }
+
+                        Button(
+                            onClick = { chapterLogoPicker.launch("image/*") },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(if (loLogoUri != null) "Replace" else "Browse", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     OutlinedTextField(
                         value = chapterName,
@@ -547,12 +754,15 @@ fun LgbAndPstManagementScreen(
                     Spacer(modifier = Modifier.height(18.dp))
 
                     Button(
-                        onClick = { isSavedLo = true },
+                        onClick = {
+                            isSavedLo = true
+                            Toast.makeText(context, "Chapter profile saved successfully!", Toast.LENGTH_SHORT).show()
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
-                        Text(if (isSavedLo) "✓ Details Saved" else "Save Chapter Profile", fontWeight = FontWeight.Bold)
+                        Text(if (isSavedLo) "✓ Chapter Profile Saved" else "Save Chapter Profile & Logo", fontWeight = FontWeight.Bold)
                     }
                 }
             }

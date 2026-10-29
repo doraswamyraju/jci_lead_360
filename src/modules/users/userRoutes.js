@@ -176,4 +176,86 @@ router.post('/create-team-member', authenticate, authorizeRoles(ROLES.PRESIDENT)
   }
 });
 
+
+/**
+ * Get Chapter Details & Officers for current authenticated user
+ */
+router.get('/chapter-details', authenticate, (req, res) => {
+  try {
+    const chapterName = req.user.chapterName;
+    const chapters = db.getChapters();
+    let chapter = chapters.find(c => c.name.toLowerCase() === (chapterName || '').toLowerCase());
+    
+    // Team members in chapter
+    const users = db.getUsers().filter(u => u.chapterName && u.chapterName.toLowerCase() === (chapterName || '').toLowerCase());
+    
+    res.json({
+      success: true,
+      chapter: chapter || { name: chapterName, zone: 'Zone IV' },
+      members: users.map(u => ({
+        id: u.id,
+        name: u.name,
+        role: u.role,
+        email: u.email,
+        phone: u.phone,
+        photoUrl: u.photoUrl || null
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * Update Chapter Details (Logo, Zone, Phone, Email)
+ */
+router.post('/chapter-details', authenticate, (req, res) => {
+  try {
+    const { chapterName, zone, phone, email, logoUrl } = req.body;
+    const finalName = chapterName || req.user.chapterName;
+    const chapters = db.getChapters();
+    let chapter = chapters.find(c => c.name.toLowerCase() === (finalName || '').toLowerCase());
+    if (!chapter) {
+      chapter = {
+        id: `chap_${Date.now()}`,
+        name: finalName,
+        createdAt: new Date().toISOString()
+      };
+    }
+    if (zone) chapter.zone = zone;
+    if (phone) chapter.phone = phone;
+    if (email) chapter.email = email;
+    if (logoUrl) chapter.logoUrl = logoUrl;
+    chapter.updatedAt = new Date().toISOString();
+    
+    db.saveChapter(chapter);
+    res.json({ success: true, message: 'Chapter details updated successfully', chapter });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * Update Officer Details (Photo, Name, Phone)
+ */
+router.post('/officer-details', authenticate, (req, res) => {
+  try {
+    const { userId, name, phone, photoUrl, role } = req.body;
+    const user = db.findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Officer not found' });
+    }
+    if (name) user.name = name.trim();
+    if (phone) user.phone = phone.trim();
+    if (photoUrl) user.photoUrl = photoUrl;
+    if (role) user.role = role;
+    user.updatedAt = new Date().toISOString();
+    
+    db.saveUser(user);
+    res.json({ success: true, message: 'Officer profile updated successfully', user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 export default router;

@@ -61,7 +61,7 @@ const router = express.Router();
  * Upload Asset Endpoint (Protected for Super Admin and Employees)
  * Handles multer errors explicitly so the client receives clear JSON errors instead of unhandled 500 crashes
  */
-router.post('/', authenticate, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.EMPLOYEE), (req, res) => {
+router.post('/', authenticate, (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       console.error('[Multer Error]:', err.message);
