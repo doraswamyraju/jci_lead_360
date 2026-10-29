@@ -106,8 +106,8 @@ class JciLogoGenerator(private val context: Context) {
 	.st1{fill:#1197D5;}
 	.st2{fill:#17142C;}
 </style>
-<text x="185" y="1240" font-size="120" font-family="Arial, Helvetica, sans-serif" font-weight="bold" fill="#1197D5">${line1.uppercase()}</text>
-${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" fill=\"#1197D5\">${line2.uppercase()}</text>" else ""}
+<text x="185" y="1240" font-size="120" font-family="Arial, Helvetica, sans-serif" font-weight="bold" fill="#1197D5">${line1.ifBlank { "Exemple" }}</text>
+${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" fill=\"#1197D5\">${line2}</text>" else ""}
 <g class="jci">
     <g>
         <rect class="st2" x="1187.1" y="411.8" width="103.2" height="572.7"/>
@@ -152,7 +152,8 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
         val colorWhite = Color.WHITE
 
         if (caseStyle.isSocial) {
-            val circleRadius = width * 0.40f
+            // Circle fills the canvas with a safe inset
+            val circleRadius = width * 0.46f
             val circleCenterX = width / 2f
             val circleCenterY = height / 2f
 
@@ -167,10 +168,18 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
             }
             canvas.drawCircle(circleCenterX, circleCenterY, circleRadius, circleBgPaint)
 
-            // Scale and draw full mark inside circle
-            val markScale = (circleRadius * 1.5f) / 2400f
+            // Clip drawing to the circle boundary with anti-aliasing
+            val clipPath = Path().apply {
+                addCircle(circleCenterX, circleCenterY, circleRadius, Path.Direction.CW)
+            }
+            canvas.save()
+            canvas.clipPath(clipPath)
+
+            // Official JCI mark dimensions in SVG: ~2100 wide x ~600 tall (letters from x=150 to ~2233, y from ~340 to ~985)
+            // Center mark horizontally and place in upper portion of circle
+            val markScale = (circleRadius * 1.15f) / 2400f
             val markOffsetX = circleCenterX - (2400f * markScale / 2f)
-            val markOffsetY = circleCenterY - (1600f * markScale / 2f) - (circleRadius * 0.12f)
+            val markOffsetY = circleCenterY - (1600f * markScale / 2f) - (circleRadius * 0.18f)
 
             val primaryColor = when (caseStyle) {
                 CaseStyle.SOCIAL_WHITE -> colorBlue
@@ -189,16 +198,26 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
                 cyanColor = primaryColor
             )
 
-            // Centered Chapter Name inside circle lower section
-            if (line1.isNotBlank()) {
-                val socialTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = primaryColor
-                    textSize = circleRadius * 0.18f
-                    typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-                    textAlign = Paint.Align.CENTER
-                }
-                canvas.drawText(line1.uppercase(), circleCenterX, circleCenterY + (circleRadius * 0.70f), socialTextPaint)
+            // Centered Chapter Name inside circle lower section - preserves exact casing entered by user
+            val displayLine1 = if (line1.isBlank()) "Exemple" else line1.trim()
+            val displayLine2 = line2.trim()
+
+            val socialTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = primaryColor
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                textAlign = Paint.Align.CENTER
             }
+
+            if (displayLine2.isBlank()) {
+                socialTextPaint.textSize = circleRadius * 0.17f
+                canvas.drawText(displayLine1, circleCenterX, circleCenterY + (circleRadius * 0.58f), socialTextPaint)
+            } else {
+                socialTextPaint.textSize = circleRadius * 0.14f
+                canvas.drawText(displayLine1, circleCenterX, circleCenterY + (circleRadius * 0.48f), socialTextPaint)
+                canvas.drawText(displayLine2, circleCenterX, circleCenterY + (circleRadius * 0.68f), socialTextPaint)
+            }
+
+            canvas.restore()
             return bitmap
         }
 
@@ -264,7 +283,7 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
         }
 
         val textStartX = 185f * scale
-        val displayLine1 = if (line1.isBlank()) "Exemple" else line1.trim().uppercase()
+        val displayLine1 = if (line1.isBlank()) "Exemple" else line1.trim()
 
         if (line2.isBlank()) {
             textPaint.textSize = 120f * scale
@@ -275,7 +294,7 @@ ${if (line2.isNotBlank()) "<text x=\"185\" y=\"1440\" font-size=\"110\" font-fam
             val line1Y = (1180f * scale) + jciTranslateY
             val line2Y = (1380f * scale) + jciTranslateY
             canvas.drawText(displayLine1, textStartX, line1Y, textPaint)
-            canvas.drawText(line2.trim().uppercase(), textStartX, line2Y, textPaint)
+            canvas.drawText(line2.trim(), textStartX, line2Y, textPaint)
         }
 
         return bitmap

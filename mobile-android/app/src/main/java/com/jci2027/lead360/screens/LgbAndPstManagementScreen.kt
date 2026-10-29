@@ -685,6 +685,7 @@ fun LgbAndPstManagementScreen(
                                 Image(
                                     bitmap = logoBmp.asImageBitmap(),
                                     contentDescription = caseStyle.title,
+                                    contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(8.dp)
