@@ -416,15 +416,15 @@
         const result = await res.json();
 
         if (result.success) {
+          // Immediately trigger the phone contact save action without waiting or requiring an extra tap
+          window.location.href = `/card/${encodeURIComponent(leaderId)}/vcf`;
+
           document.getElementById('form-container').style.display = 'none';
           document.getElementById('success-container').style.display = 'block';
 
-          // Trigger vCard download
-          const blob = new Blob([result.vcard], { type: 'text/vcard;charset=utf-8' });
-          const vcardUrl = URL.createObjectURL(blob);
+          // Also set fallback link in case browser blocked auto-download
           const dlBtn = document.getElementById('download-vcard-btn');
-          dlBtn.href = vcardUrl;
-          dlBtn.download = `${result.leader.name.replace(/\\s+/g, '_')}_JCI.vcf`;
+          dlBtn.href = `/card/${encodeURIComponent(leaderId)}/vcf`;
         } else {
           alert(result.message || 'Error exchanging contact');
           submitBtn.disabled = false;

@@ -404,6 +404,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                     Screen.ScanCard -> ScanCardModuleScreen(
                                         chapterName = userChapter,
+                                        token = token,
                                         onBack = { currentScreen = Screen.Dashboard }
                                     )
                                     Screen.Store -> VendorStoreScreen(

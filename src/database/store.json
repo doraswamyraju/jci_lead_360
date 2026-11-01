@@ -20,7 +20,9 @@
       "chapterId": "chap_tirupati_01",
       "chapterName": "JCI Tirupati Innovations",
       "isActive": true,
-      "createdAt": "2026-10-27T14:10:47.083Z"
+      "createdAt": "2026-10-27T14:10:47.083Z",
+      "photoUrl": "/assets/president_profile.jpg",
+      "profilePhotoUrl": "/assets/president_profile.jpg"
     }
   ],
   "chapters": [

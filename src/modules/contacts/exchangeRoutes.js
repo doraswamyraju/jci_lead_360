@@ -10,11 +10,13 @@ const router = express.Router();
 router.get('/profile/:userId', (req, res) => {
   try {
     const { userId } = req.params;
-    const user = db.findUserById(userId);
+    const users = db.getUsers();
+    // Match by id or fallback to president
+    const user = db.findUserById(userId) || users.find(u => u.role === 'PRESIDENT') || users[0];
+
+    const leaderPhoto = (user && (user.profilePhotoUrl || user.photoUrl)) || '/assets/president_profile.jpg';
     
-    // Also support fallback or president profile
     if (!user) {
-      // Return default leader card if not found
       return res.json({
         success: true,
         leader: {
@@ -26,7 +28,7 @@ router.get('/profile/:userId', (req, res) => {
           phone: '+91 98765 43210',
           email: 'president@jcitirupati.com',
           website: 'https://lead.sriddha.com',
-          photoUrl: '/assets/logo-square.jpg'
+          photoUrl: leaderPhoto
         }
       });
     }
@@ -35,14 +37,14 @@ router.get('/profile/:userId', (req, res) => {
       success: true,
       leader: {
         id: user.id,
-        name: user.name,
-        role: user.role,
+        name: user.name || 'JC Doraswamy Raju Meesala',
+        role: user.role || 'PRESIDENT',
         chapter: user.chapterName || 'JCI Tirupati',
         zone: user.zone || 'Zone XXVI',
         phone: user.phone || '+91 98765 43210',
-        email: user.email,
+        email: user.email || 'president@jcitirupati.com',
         website: 'https://lead.sriddha.com',
-        photoUrl: user.profilePhotoUrl || '/assets/logo-square.jpg'
+        photoUrl: leaderPhoto
       }
     });
   } catch (error) {

@@ -50,9 +50,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.jci2027.lead360.engine.BusinessCardOcrEngine
 import com.jci2027.lead360.engine.CardSnapDeduplicator
+import com.jci2027.lead360.network.ApiService
+import com.jci2027.lead360.network.SaveContactRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -156,6 +160,52 @@ fun ScanCardModuleScreen(
         )
     }
 
+    // Fetch live backend contacts (including contacts saved via reciprocal QR portal)
+    LaunchedEffect(token) {
+        if (!token.isNullOrBlank()) {
+            try {
+                withContext(Dispatchers.IO) {
+                    val retrofit = Retrofit.Builder()
+                        .baseUrl("https://lead.sriddha.com")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build()
+                    val service = retrofit.create(ApiService::class.java)
+                    val response = service.getContacts("Bearer $token")
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val backendList = response.body()?.contacts.orEmpty()
+                        withContext(Dispatchers.Main) {
+                            backendList.forEach { c ->
+                                val exists = contactList.any { 
+                                    it.phone.filter { ch -> ch.isDigit() } == c.phone.filter { ch -> ch.isDigit() } ||
+                                    it.name.equals(c.name, ignoreCase = true)
+                                }
+                                if (!exists) {
+                                    contactList.add(
+                                        0,
+                                        ScannedCardModel(
+                                            id = c.id,
+                                            name = c.name,
+                                            designation = c.designation,
+                                            company = c.company,
+                                            phone = c.phone,
+                                            email = c.email,
+                                            website = c.website,
+                                            address = c.address,
+                                            eventTag = c.eventTag.ifBlank { "QR Contact Exchange" },
+                                            city = c.city,
+                                            confidence = "HIGH"
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Keep local contacts on network issue
+            }
+        }
+    }
     var selectedEventFilter by remember { mutableStateOf("All Events") }
     var searchQuery by remember { mutableStateOf("") }
     var viewContactDetail by remember { mutableStateOf<ScannedCardModel?>(null) }

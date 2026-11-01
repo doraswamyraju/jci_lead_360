@@ -5,10 +5,16 @@ import { authenticate } from '../../middlewares/authMiddleware.js';
 const router = express.Router();
 
 // GET /api/contacts - Retrieve contacts
-router.get('/', authenticate, (req, res) => {
+router.get('/', (req, res, next) => {
+  if (req.headers.authorization) {
+    return authenticate(req, res, next);
+  }
+  next();
+}, (req, res) => {
   try {
     const userId = req.user?.id;
-    const contacts = db.getContacts(userId);
+    // Return all contacts for directory
+    const contacts = db.getContacts(null);
     res.json({
       success: true,
       contacts

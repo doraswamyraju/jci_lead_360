@@ -38,6 +38,35 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/card', exchangeRoutes);
 
+// Direct download vCard endpoint
+app.get('/card/:userId/vcf', (req, res) => {
+  const { userId } = req.params;
+  const user = db.findUserById(userId) || db.getUsers().find(u => u.role === 'PRESIDENT') || {
+    name: 'JC Doraswamy Raju Meesala',
+    chapterName: 'JCI Tirupati',
+    role: 'PRESIDENT',
+    phone: '+91 98765 43210',
+    email: 'president@jcitirupati.com'
+  };
+
+  const vCardData = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `FN:${user.name}`,
+    `ORG:Junior Chamber International (JCI);${user.chapterName || 'JCI Tirupati'}`,
+    `TITLE:${user.role || 'President'}`,
+    user.phone ? `TEL;TYPE=CELL,VOICE:${user.phone}` : '',
+    user.email ? `EMAIL;TYPE=PREF,INTERNET:${user.email}` : '',
+    'URL:https://lead.sriddha.com',
+    'NOTE:Verified JCI 2027 Leader via JCI LEAD360',
+    'END:VCARD'
+  ].filter(Boolean).join('\r\n');
+
+  res.setHeader('Content-Type', 'text/vcard; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${user.name.replace(/\s+/g, '_')}_JCI.vcf"`);
+  res.send(vCardData);
+});
+
 // Public reciprocal contact card landing page: /card/:userId
 app.get('/card/:userId?', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/card.html'));
