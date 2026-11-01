@@ -62,6 +62,9 @@ dependencies {
     // Google ML Kit Text Recognition for Business Card OCR
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
+    // ZXing Core for Dynamic Contact Exchange QR Code Generation
+    implementation("com.google.zxing:core:3.5.3")
+
     // Image loading & Networking
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

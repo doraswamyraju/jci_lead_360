@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.jci2027.lead360.engine.QrCodeGenerator
 import java.io.File
 import java.io.FileOutputStream
 
@@ -271,74 +272,18 @@ fun ProfileScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. Executive Summary Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF091322)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Photo with tap to change
-                Box(
-                    modifier = Modifier
-                        .size(86.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF1E293B))
-                        .clickable { presidentPhotoLauncher.launch("image/*") }
-                        .border(3.dp, Color(0xFF0097D8), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (presidentBitmap != null) {
-                        Image(
-                            bitmap = presidentBitmap.asImageBitmap(),
-                            contentDescription = "President Portrait",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Text(
-                            text = presidentNameInput.firstOrNull()?.toString() ?: "P",
-                            color = Color.White,
-                            fontSize = 34.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(presidentNameInput, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                Text(chapterNameInput, fontSize = 13.sp, color = Color(0xFFBAE6FD))
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF0097D8)
-                ) {
-                    Text(
-                        text = "CHAPTER PRESIDENT • 2027",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-
-                Text(
-                    text = "Tap portrait above to update profile photo",
-                    fontSize = 10.sp,
-                    color = Color(0xFF94A3B8),
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        }
+        // 1. OFFICIAL JCI DIGITAL BUSINESS CARD & MEMBERSHIP ID WITH RECIPROCAL QR
+        JciDigitalBusinessCard(
+            presidentName = presidentNameInput,
+            role = role,
+            chapterName = chapterNameInput,
+            zone = chapterZone,
+            phone = presidentPhone,
+            email = presidentEmail,
+            photoBitmap = presidentBitmap,
+            chapterLogoBitmap = chapterLogoBitmap,
+            onPhotoClick = { presidentPhotoLauncher.launch("image/*") }
+        )
 
         // 2. Local Organization (LO) Chapter Profile Settings
         Card(
@@ -559,6 +504,252 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth().height(46.dp)
                 ) {
                     Text("Sign Out from Device", color = Color(0xFFDC2626), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Official JCI Digital Business Card & Membership ID with Reciprocal QR Code
+ * Designed in compliance with latest JCI Corporate Identity Guidelines
+ */
+@Composable
+fun JciDigitalBusinessCard(
+    presidentName: String,
+    role: String,
+    chapterName: String,
+    zone: String,
+    phone: String,
+    email: String,
+    photoBitmap: Bitmap?,
+    chapterLogoBitmap: Bitmap?,
+    onPhotoClick: () -> Unit
+) {
+    val context = LocalContext.current
+    var isCardFlipped by remember { mutableStateOf(false) }
+
+    // Generate real, dynamic vCard QR code for instant reciprocal exchange
+    val qrBitmap = remember(presidentName, role, chapterName, phone, email) {
+        val vCardString = QrCodeGenerator.buildVCardString(
+            name = presidentName,
+            role = role,
+            chapter = chapterName,
+            phone = phone,
+            email = email,
+            website = "https://lead.sriddha.com"
+        )
+        QrCodeGenerator.generateQrBitmap(vCardString, width = 360, height = 360)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isCardFlipped = !isCardFlipped },
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0097D8))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        listOf(Color(0xFF091322), Color(0xFF0F2547), Color(0xFF0B1930))
+                    )
+                )
+                .padding(20.dp)
+        ) {
+            // Header Bar: Official JCI Brand Lockup + Flipped status pill
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (chapterLogoBitmap != null) {
+                        Image(
+                            bitmap = chapterLogoBitmap.asImageBitmap(),
+                            contentDescription = "Chapter Logo",
+                            modifier = Modifier.size(36.dp).clip(RoundedCornerShape(6.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                        Spacer(Modifier.width(10.dp))
+                    } else {
+                        Surface(
+                            color = Color(0xFF0097D8),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                "JCI",
+                                color = Color.White,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Column {
+                        Text("Junior Chamber International", color = Color(0xFFBAE6FD), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                        Text(chapterName, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                    }
+                }
+
+                Surface(
+                    color = Color(0xFF0097D8).copy(alpha = 0.25f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8))
+                ) {
+                    Text(
+                        if (isCardFlipped) "🔄 QR CODE" else "🔄 TAP TO FLIP",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            if (!isCardFlipped) {
+                // FRONT SIDE: EXECUTIVE BUSINESS CARD
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Portrait Photo with tap-to-change border
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF1E293B))
+                            .border(2.5.dp, Color(0xFF0097D8), CircleShape)
+                            .clickable { onPhotoClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (photoBitmap != null) {
+                            Image(
+                                bitmap = photoBitmap.asImageBitmap(),
+                                contentDescription = "Portrait",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text(
+                                presidentName.take(2).uppercase(),
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            presidentName,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Text(
+                            role,
+                            color = Color(0xFF38BDF8),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Surface(
+                            color = Color(0xFF10B981).copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(4.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF10B981))
+                        ) {
+                            Text(
+                                "MEMBER ID: JCI-2027-${presidentName.take(3).uppercase()}",
+                                color = Color(0xFF34D399),
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = Color(0xFF334155))
+                Spacer(Modifier.height(12.dp))
+
+                // Contact Details
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("📞", fontSize = 13.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Text(phone, color = Color(0xFFE2E8F0), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("✉️", fontSize = 13.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Text(email, color = Color(0xFFE2E8F0), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("📍", fontSize = 13.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Text("$zone • India", color = Color(0xFF94A3B8), fontSize = 12.sp)
+                    }
+                }
+            } else {
+                // BACK SIDE: RECIPROCAL CONTACT EXCHANGE QR CODE
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "RECIPROCAL CONTACT EXCHANGE QR",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Scan to instantly save $presidentName to phone contacts",
+                        color = Color(0xFF94A3B8),
+                        fontSize = 11.sp
+                    )
+
+                    Spacer(Modifier.height(14.dp))
+
+                    // QR Code Frame
+                    Box(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (qrBitmap != null) {
+                            Image(
+                                bitmap = qrBitmap.asImageBitmap(),
+                                contentDescription = "vCard Contact QR Code",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        } else {
+                            Text("QR Code", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "vCard 3.0 Standard • Works on all iOS & Android cameras",
+                        color = Color(0xFF64748B),
+                        fontSize = 10.sp
+                    )
                 }
             }
         }
