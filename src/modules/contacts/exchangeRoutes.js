@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 import { db } from '../../database/db.js';
 
 const router = express.Router();
@@ -53,9 +54,9 @@ router.get('/profile/:userId', (req, res) => {
  * Receives visitor contact details submitted from reciprocal QR exchange portal,
  * saves directly to the Leader's Rolodex directory, and returns the Leader's vCard download.
  */
-router.post('/exchange', (req, res) => {
+router.post('/exchange', async (req, res) => {
   try {
-    const { leaderId, name, phone, email, company, designation, city, notes } = req.body;
+    const { leaderId, name, phone, email, company, designation, city, notes, photoUrl } = req.body;
 
     if (!name && !phone && !email) {
       return res.status(400).json({ success: false, message: 'Please provide at least your Name and Phone or Email' });
@@ -71,6 +72,7 @@ router.post('/exchange', (req, res) => {
       phone: (phone || '').trim(),
       email: (email || '').trim(),
       website: '',
+      photoUrl: photoUrl || '',
       address: city ? `${city.trim()}` : '',
       eventTag: 'QR Reciprocal Exchange',
       locationName: 'Digital Contact Exchange',
@@ -91,7 +93,7 @@ router.post('/exchange', (req, res) => {
       email: ''
     };
 
-    // Build standard RFC vCard 3.0 with photo
+    // Build standard RFC vCard 3.0 with resized JPEG photo
     let photoVcardLine = '';
     const photoPathRel = leader.profilePhotoUrl || leader.photoUrl;
     if (photoPathRel) {
@@ -100,9 +102,11 @@ router.post('/exchange', (req, res) => {
         const fullDiskPath = path.join(process.cwd(), 'public', cleanPath);
         if (fs.existsSync(fullDiskPath)) {
           const fileBuf = fs.readFileSync(fullDiskPath);
-          const ext = path.extname(fullDiskPath).toLowerCase();
-          const mimeType = ext === '.png' ? 'PNG' : 'JPEG';
-          photoVcardLine = `PHOTO;ENCODING=b;TYPE=${mimeType}:${fileBuf.toString('base64')}`;
+          const resizedBuf = await sharp(fileBuf)
+            .resize(320, 320, { fit: 'cover' })
+            .jpeg({ quality: 82 })
+            .toBuffer();
+          photoVcardLine = `PHOTO;ENCODING=b;TYPE=JPEG:${resizedBuf.toString('base64')}`;
         }
       } catch (e) {
         console.error('[Exchange] Error encoding photo into vCard:', e.message);

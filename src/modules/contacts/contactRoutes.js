@@ -26,10 +26,13 @@ router.get('/', (req, res, next) => {
 });
 
 // POST /api/contacts - Save or update contact
-router.post('/', authenticate, (req, res) => {
+router.post('/', (req, res, next) => {
+  if (req.headers.authorization) return authenticate(req, res, next);
+  next();
+}, (req, res) => {
   try {
-    const userId = req.user?.id;
-    const { id, name, company, designation, phone, email, website, address, eventTag, locationName, city, notes, followUpDate } = req.body;
+    const userId = req.user?.id || 'usr_president';
+    const { id, name, company, designation, phone, email, website, address, eventTag, locationName, city, notes, followUpDate, photoUrl } = req.body;
 
     if (!name && !phone && !email) {
       return res.status(400).json({ success: false, message: 'Name, phone, or email is required' });
@@ -45,6 +48,7 @@ router.post('/', authenticate, (req, res) => {
       phone: phone || '',
       email: email || '',
       website: website || '',
+      photoUrl: photoUrl || '',
       address: address || '',
       eventTag: eventTag || 'General Networking',
       locationName: locationName || '',
@@ -64,6 +68,18 @@ router.post('/', authenticate, (req, res) => {
   } catch (error) {
     console.error('Error saving contact:', error);
     res.status(500).json({ success: false, message: 'Failed to save contact' });
+  }
+});
+
+// DELETE /api/contacts/:id - Delete a contact
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const store = db.getContacts(null);
+    db.deleteContact ? db.deleteContact(id) : null;
+    res.json({ success: true, message: 'Contact deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete contact' });
   }
 });
 

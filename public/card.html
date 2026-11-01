@@ -332,6 +332,12 @@
             <input type="text" id="visitor-city" class="form-control" placeholder="e.g. Tirupati / Zonecon" />
           </div>
 
+          <div class="form-group">
+            <label for="visitor-photo">Your Photo / Visiting Card (Optional)</label>
+            <input type="file" id="visitor-photo" class="form-control" accept="image/*" style="padding: 8px 12px; background: #F8FAFC;" />
+            <small style="color: #64748B; font-size: 11px; margin-top: 4px; display: block;">Upload your portrait or visiting card photo to share with Leader</small>
+          </div>
+
           <button type="submit" class="btn-submit" id="btn-submit">
             <span>Exchange & Save Contact</span> →
           </button>
@@ -397,6 +403,25 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Saving details...';
 
+      let uploadedPhotoUrl = '';
+      const photoFileInput = document.getElementById('visitor-photo');
+      if (photoFileInput && photoFileInput.files && photoFileInput.files[0]) {
+        try {
+          const formData = new FormData();
+          formData.append('image', photoFileInput.files[0]);
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+          const uploadJson = await uploadRes.json();
+          if (uploadJson.success && uploadJson.fileUrl) {
+            uploadedPhotoUrl = uploadJson.fileUrl;
+          }
+        } catch (uploadErr) {
+          console.warn('Photo upload skipped or failed:', uploadErr);
+        }
+      }
+
       const payload = {
         leaderId: leaderId,
         name: document.getElementById('visitor-name').value,
@@ -404,7 +429,8 @@
         email: document.getElementById('visitor-email').value,
         company: document.getElementById('visitor-company').value,
         designation: document.getElementById('visitor-role').value,
-        city: document.getElementById('visitor-city').value
+        city: document.getElementById('visitor-city').value,
+        photoUrl: uploadedPhotoUrl
       };
 
       try {

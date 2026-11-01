@@ -10,6 +10,7 @@ import templateRoutes from './modules/templates/templateRoutes.js';
 import uploadRoutes from './modules/upload/uploadRoutes.js';
 import contactRoutes from './modules/contacts/contactRoutes.js';
 import exchangeRoutes from './modules/contacts/exchangeRoutes.js';
+import sharp from 'sharp';
 import { db } from './database/db.js';
 import { seedInitialData } from './database/seed.js';
 
@@ -40,7 +41,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/card', exchangeRoutes);
 
 // Direct download vCard endpoint (100% dynamic from store.json with embedded photo)
-app.get('/card/:userId/vcf', (req, res) => {
+app.get('/card/:userId/vcf', async (req, res) => {
   const { userId } = req.params;
   const users = db.getUsers();
   const user = (userId && db.findUserById(userId)) || users.find(u => u.role === 'PRESIDENT') || users[0];
@@ -49,7 +50,7 @@ app.get('/card/:userId/vcf', (req, res) => {
     return res.status(404).send('Leader not found');
   }
 
-  // Load and embed photo as base64 in vCard if present
+  // Load and embed photo as base64 in vCard (resized to 320x320 JPEG for fast and reliable phone contact rendering)
   let photoVcardLine = '';
   const photoPathRel = user.profilePhotoUrl || user.photoUrl;
   if (photoPathRel) {
@@ -58,10 +59,12 @@ app.get('/card/:userId/vcf', (req, res) => {
       const fullDiskPath = path.join(__dirname, '../public', cleanPath);
       if (fs.existsSync(fullDiskPath)) {
         const fileBuf = fs.readFileSync(fullDiskPath);
-        const ext = path.extname(fullDiskPath).toLowerCase();
-        const mimeType = ext === '.png' ? 'PNG' : 'JPEG';
-        const base64Data = fileBuf.toString('base64');
-        photoVcardLine = `PHOTO;ENCODING=b;TYPE=${mimeType}:${base64Data}`;
+        const resizedBuf = await sharp(fileBuf)
+          .resize(320, 320, { fit: 'cover' })
+          .jpeg({ quality: 82 })
+          .toBuffer();
+        const base64Data = resizedBuf.toString('base64');
+        photoVcardLine = `PHOTO;ENCODING=b;TYPE=JPEG:${base64Data}`;
       }
     } catch (e) {
       console.error('[vCard] Error attaching photo to vCard:', e.message);

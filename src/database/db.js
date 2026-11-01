@@ -140,6 +140,13 @@ export const db = {
     writeStore(store);
     return contact;
   },
+  deleteContact: (id) => {
+    const store = readStore();
+    if (!store.business_contacts) store.business_contacts = [];
+    store.business_contacts = store.business_contacts.filter(c => c.id !== id);
+    writeStore(store);
+    return true;
+  },
   getStats: () => {
     const store = readStore();
     return {

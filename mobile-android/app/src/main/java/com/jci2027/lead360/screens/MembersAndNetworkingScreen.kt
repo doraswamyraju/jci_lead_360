@@ -19,8 +19,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.jci2027.lead360.network.ApiService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -33,7 +35,8 @@ data class MemberModel(
     val email: String,
     val businessName: String,
     val businessCategory: String,
-    val status: String // Active, Pending
+    val status: String, // Active, Pending
+    val photoUrl: String? = null
 )
 
 data class ScannedBusinessCard(
@@ -43,7 +46,8 @@ data class ScannedBusinessCard(
     val designation: String,
     val phone: String,
     val email: String,
-    val scannedAt: String
+    val scannedAt: String,
+    val photoUrl: String? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,6 +61,9 @@ fun MembersAndNetworkingScreen(
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) } // 0: Directory, 1: Pending Approvals, 2: Business Card Scanner
     var showQrDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    var editingMember by remember { mutableStateOf<MemberModel?>(null) }
+    var showAddDialog by remember { mutableStateOf(false) }
 
     val members = remember {
         mutableStateListOf(
@@ -103,6 +110,10 @@ fun MembersAndNetworkingScreen(
                                     it.contactName.equals(c.name, ignoreCase = true)
                                 }
                                 if (!existsInCards && c.name.isNotBlank()) {
+                                    val fullPhoto = if (!c.photoUrl.isNullOrBlank()) {
+                                        if (c.photoUrl.startsWith("http")) c.photoUrl else "https://lead.sriddha.com${c.photoUrl}"
+                                    } else null
+
                                     scannedCards.add(
                                         0,
                                         ScannedBusinessCard(
@@ -112,7 +123,8 @@ fun MembersAndNetworkingScreen(
                                             designation = c.designation.ifBlank { "JCI Network Partner" },
                                             phone = c.phone,
                                             email = c.email,
-                                            scannedAt = "Live Exchange"
+                                            scannedAt = "Live Exchange",
+                                            photoUrl = fullPhoto
                                         )
                                     )
                                 }
@@ -122,6 +134,10 @@ fun MembersAndNetworkingScreen(
                                     it.name.equals(c.name, ignoreCase = true)
                                 }
                                 if (!existsInMembers && c.name.isNotBlank()) {
+                                    val fullPhoto = if (!c.photoUrl.isNullOrBlank()) {
+                                        if (c.photoUrl.startsWith("http")) c.photoUrl else "https://lead.sriddha.com${c.photoUrl}"
+                                    } else null
+
                                     members.add(
                                         0,
                                         MemberModel(
@@ -132,7 +148,8 @@ fun MembersAndNetworkingScreen(
                                             email = c.email,
                                             businessName = c.company.ifBlank { "Independent / Business" },
                                             businessCategory = c.city.ifBlank { "Networking" },
-                                            status = "Active"
+                                            status = "Active",
+                                            photoUrl = fullPhoto
                                         )
                                     )
                                 }
@@ -194,44 +211,111 @@ fun MembersAndNetworkingScreen(
                 Tab(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    text = { Text("📇 Scan Card", fontSize = 12.sp, fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal) }
+                    text = { Text("🤝 Exchange & Cards (${scannedCards.size})", fontSize = 12.sp, fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal) }
                 )
             }
 
             when (selectedTab) {
                 0 -> {
-                    // DIRECTORY
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(members) { member ->
-                            Card(
-                                shape = RoundedCornerShape(14.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
-                                elevation = CardDefaults.cardElevation(1.dp),
-                                modifier = Modifier.fillMaxWidth()
+                    // DIRECTORY WITH FULL CRUD
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("CHAPTER DIRECTORY & NETWORK", fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, color = Color(0xFF64748B))
+                            Button(
+                                onClick = { showAddDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(14.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                Text("+ Add Contact", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            items(members) { member ->
+                                Card(
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    elevation = CardDefaults.cardElevation(1.dp),
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(46.dp)
-                                            .clip(CircleShape)
-                                            .background(Color(0xFFE0F2FE)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(member.name.take(2).uppercase(), fontWeight = FontWeight.Bold, color = Color(0xFF0097D8), fontSize = 15.sp)
-                                    }
-                                    Spacer(Modifier.width(12.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(member.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F172A))
-                                        Text(member.role, fontSize = 12.sp, color = Color(0xFF0097D8), fontWeight = FontWeight.SemiBold)
-                                        Spacer(Modifier.height(4.dp))
-                                        Text("💼 ${member.businessName} • ${member.businessCategory}", fontSize = 11.sp, color = Color(0xFF64748B))
-                                        Text("📞 ${member.phone}", fontSize = 11.sp, color = Color(0xFF475569))
+                                    Column(modifier = Modifier.padding(14.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            if (!member.photoUrl.isNullOrBlank()) {
+                                                AsyncImage(
+                                                    model = member.photoUrl,
+                                                    contentDescription = member.name,
+                                                    modifier = Modifier
+                                                        .size(48.dp)
+                                                        .clip(CircleShape)
+                                                        .border(1.5.dp, Color(0xFF0097D8), CircleShape),
+                                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                                )
+                                            } else {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(48.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFFE0F2FE)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(member.name.take(2).uppercase(), fontWeight = FontWeight.Bold, color = Color(0xFF0097D8), fontSize = 15.sp)
+                                                }
+                                            }
+                                            Spacer(Modifier.width(12.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(member.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F172A))
+                                                Text(member.role, fontSize = 12.sp, color = Color(0xFF0097D8), fontWeight = FontWeight.SemiBold)
+                                                Spacer(Modifier.height(4.dp))
+                                                Text("💼 ${member.businessName} • ${member.businessCategory}", fontSize = 11.sp, color = Color(0xFF64748B))
+                                                Text("📞 ${member.phone}  |  ✉️ ${member.email}", fontSize = 11.sp, color = Color(0xFF475569))
+                                            }
+                                        }
+
+                                        Spacer(Modifier.height(10.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.End,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            TextButton(onClick = { editingMember = member }) {
+                                                Text("✏️ Edit", fontSize = 12.sp, color = Color(0xFF0284C7))
+                                            }
+                                            TextButton(
+                                                onClick = {
+                                                    val toRemove = member
+                                                    members.remove(toRemove)
+                                                    if (!token.isNullOrBlank() && toRemove.id.startsWith("c_")) {
+                                                        coroutineScope.launch {
+                                                            try {
+                                                                withContext(Dispatchers.IO) {
+                                                                    val retrofit = Retrofit.Builder()
+                                                                        .baseUrl("https://lead.sriddha.com")
+                                                                        .addConverterFactory(GsonConverterFactory.create())
+                                                                        .build()
+                                                                    val service = retrofit.create(ApiService::class.java)
+                                                                    service.deleteContact(toRemove.id)
+                                                                }
+                                                            } catch (e: Exception) {
+                                                                e.printStackTrace()
+                                                            }
+                                                        }
+                                                    }
+                                                    Toast.makeText(context, "Deleted ${member.name}", Toast.LENGTH_SHORT).show()
+                                                }
+                                            ) {
+                                                Text("🗑️ Delete", fontSize = 12.sp, color = Color(0xFFEF4444))
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -375,6 +459,165 @@ fun MembersAndNetworkingScreen(
                 }
             }
         }
+    }
+
+    // Edit Member Dialog
+    if (editingMember != null) {
+        val m = editingMember!!
+        var editName by remember(m) { mutableStateOf(m.name) }
+        var editRole by remember(m) { mutableStateOf(m.role) }
+        var editPhone by remember(m) { mutableStateOf(m.phone) }
+        var editEmail by remember(m) { mutableStateOf(m.email) }
+        var editBusiness by remember(m) { mutableStateOf(m.businessName) }
+        var editCategory by remember(m) { mutableStateOf(m.businessCategory) }
+
+        AlertDialog(
+            onDismissRequest = { editingMember = null },
+            title = { Text("Edit Contact Details", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = editName, onValueChange = { editName = it }, label = { Text("Name") }, singleLine = true)
+                    OutlinedTextField(value = editRole, onValueChange = { editRole = it }, label = { Text("Designation / Role") }, singleLine = true)
+                    OutlinedTextField(value = editPhone, onValueChange = { editPhone = it }, label = { Text("Phone") }, singleLine = true)
+                    OutlinedTextField(value = editEmail, onValueChange = { editEmail = it }, label = { Text("Email") }, singleLine = true)
+                    OutlinedTextField(value = editBusiness, onValueChange = { editBusiness = it }, label = { Text("Company / Enterprise") }, singleLine = true)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    val idx = members.indexOfFirst { it.id == m.id }
+                    if (idx >= 0) {
+                        val updated = m.copy(
+                            name = editName.trim(),
+                            role = editRole.trim(),
+                            phone = editPhone.trim(),
+                            email = editEmail.trim(),
+                            businessName = editBusiness.trim()
+                        )
+                        members[idx] = updated
+
+                        if (!token.isNullOrBlank()) {
+                            coroutineScope.launch {
+                                try {
+                                    withContext(Dispatchers.IO) {
+                                        val retrofit = Retrofit.Builder()
+                                            .baseUrl("https://lead.sriddha.com")
+                                            .addConverterFactory(GsonConverterFactory.create())
+                                            .build()
+                                        val service = retrofit.create(ApiService::class.java)
+                                        service.saveContact(
+                                            token = "Bearer $token",
+                                            contact = com.jci2027.lead360.network.SaveContactRequest(
+                                                id = updated.id,
+                                                name = updated.name,
+                                                company = updated.businessName,
+                                                designation = updated.role,
+                                                phone = updated.phone,
+                                                email = updated.email,
+                                                website = "",
+                                                address = "",
+                                                eventTag = "Directory Update",
+                                                locationName = "",
+                                                city = updated.businessCategory,
+                                                notes = "",
+                                                followUpDate = "",
+                                                photoUrl = updated.photoUrl
+                                            )
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+                    editingMember = null
+                    Toast.makeText(context, "Contact updated successfully!", Toast.LENGTH_SHORT).show()
+                }) { Text("Save Changes") }
+            },
+            dismissButton = { TextButton(onClick = { editingMember = null }) { Text("Cancel") } }
+        )
+    }
+
+    // Add Member Dialog
+    if (showAddDialog) {
+        var addName by remember { mutableStateOf("") }
+        var addRole by remember { mutableStateOf("Member") }
+        var addPhone by remember { mutableStateOf("") }
+        var addEmail by remember { mutableStateOf("") }
+        var addBusiness by remember { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false },
+            title = { Text("Add New Contact", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = addName, onValueChange = { addName = it }, label = { Text("Full Name *") }, singleLine = true)
+                    OutlinedTextField(value = addRole, onValueChange = { addRole = it }, label = { Text("Role / Designation") }, singleLine = true)
+                    OutlinedTextField(value = addPhone, onValueChange = { addPhone = it }, label = { Text("Phone Number *") }, singleLine = true)
+                    OutlinedTextField(value = addEmail, onValueChange = { addEmail = it }, label = { Text("Email Address") }, singleLine = true)
+                    OutlinedTextField(value = addBusiness, onValueChange = { addBusiness = it }, label = { Text("Organization / Business") }, singleLine = true)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (addName.isBlank() || addPhone.isBlank()) {
+                        Toast.makeText(context, "Name and Phone are required", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    val newId = "c_${System.currentTimeMillis()}"
+                    val newMember = MemberModel(
+                        id = newId,
+                        name = addName.trim(),
+                        role = addRole.trim(),
+                        phone = addPhone.trim(),
+                        email = addEmail.trim(),
+                        businessName = addBusiness.trim(),
+                        businessCategory = "Direct Addition",
+                        status = "Active"
+                    )
+                    members.add(0, newMember)
+
+                    if (!token.isNullOrBlank()) {
+                        coroutineScope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    val retrofit = Retrofit.Builder()
+                                        .baseUrl("https://lead.sriddha.com")
+                                        .addConverterFactory(GsonConverterFactory.create())
+                                        .build()
+                                    val service = retrofit.create(ApiService::class.java)
+                                    service.saveContact(
+                                        token = "Bearer $token",
+                                        contact = com.jci2027.lead360.network.SaveContactRequest(
+                                            id = newId,
+                                            name = newMember.name,
+                                            company = newMember.businessName,
+                                            designation = newMember.role,
+                                            phone = newMember.phone,
+                                            email = newMember.email,
+                                            website = "",
+                                            address = "",
+                                            eventTag = "Manual Contact",
+                                            locationName = "",
+                                            city = "",
+                                            notes = "",
+                                            followUpDate = ""
+                                        )
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+
+                    showAddDialog = false
+                    Toast.makeText(context, "Added ${newMember.name} to directory!", Toast.LENGTH_SHORT).show()
+                }) { Text("Add Contact") }
+            },
+            dismissButton = { TextButton(onClick = { showAddDialog = false }) { Text("Cancel") } }
+        )
     }
 
     // Member Registration QR Dialog

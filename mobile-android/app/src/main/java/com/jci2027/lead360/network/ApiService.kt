@@ -43,7 +43,8 @@ data class SaveContactRequest(
     val locationName: String,
     val city: String,
     val notes: String,
-    val followUpDate: String
+    val followUpDate: String,
+    val photoUrl: String? = null
 )
 
 data class SaveContactResponse(
@@ -101,6 +102,11 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body contact: SaveContactRequest
     ): Response<SaveContactResponse>
+
+    @retrofit2.http.DELETE("/api/contacts/{id}")
+    suspend fun deleteContact(
+        @retrofit2.http.Path("id") id: String
+    ): Response<GenericSuccessResponse>
 
     @GET("/api/contacts")
     suspend fun getContacts(
