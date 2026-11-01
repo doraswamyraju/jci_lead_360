@@ -102,7 +102,28 @@ This document captures all enhancements, architectural updates, fixes, and new f
 
 ---
 
-## 🛠️ 6. Technical Stack & Dependencies
+## 🌐 6. Chapter Website Builder & Member Portal Suite (Monetization & Redesign)
+
+### Problem & Strategic Addition
+- AI Assistant has been put on hold to focus on high-impact chapter operations and president branding.
+- Monetization expanded from vendor marketplace to offering Presidents an automated Chapter Website Builder & Member Portal Suite:
+  - **Access Model**: 100% Free for Chapter PST (President, Secretary, Treasurer) and LGB Office Bearers; regular members require chapter subscription.
+  - Multi-theme templates (`Presidential Prestige`, `Impact & Projects`, `Chamber Networking`).
+  - Auto Flyer Sync (syncs events created in Flyer Studio directly to the website).
+  - Official WhatsApp Cloud API integration for automated meeting & project RSVP reminders.
+  - Dedicated Member Login Portal with attendance and directory access.
+
+### Dashboard / Home Redesign
+- Redesigned `DashboardOverviewScreen.kt`:
+  - **Presidential Hero Card**: Greets the President with official designation, chapter name, verification badge, and 3 quick action buttons (`⚡ 1-Tap Flyer`, `🌐 Chapter Site`, `📅 Events`).
+  - **Executive KPI Cards**: 3 status cards tracking active projects, assigned PST & LGB officers, and upcoming meetings.
+  - **Website & Portal Suite Highlight Banner**: Prominently displays the builder with clear `"FREE FOR PST"` monetization badge and feature pills.
+  - **Executive Workspace Grid**: 2x3 module launcher routing to 1-Tap Flyers, Chapter Website, LGB Directory, 2027 Calendar, Photo Frames, and President Profile.
+- Connected tab navigation in `MainActivity.kt` and `Screen.kt`, replacing `AiFlyer` with `Screen.WebsitePortal`.
+
+---
+
+## 🛠️ 7. Technical Stack & Dependencies
 
 | Component | Technology |
 |---|---|
