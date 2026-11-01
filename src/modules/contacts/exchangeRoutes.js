@@ -45,10 +45,6 @@ router.get('/profile/:userId', (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
-    console.error('Error fetching card leader profile:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
 
 /**
  * POST /api/card/exchange
