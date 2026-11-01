@@ -147,7 +147,27 @@ As defined in Sections 5C, 5E, and 5K of the project specification report:
 
 ---
 
-## 🛠️ 8. Technical Stack & Dependencies
+## 📇 8. Dedicated Scan Card Module with Event & Location Capture Tracking
+
+### Functional Capabilities
+Implemented [`ScanCardModuleScreen.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/screens/ScanCardModuleScreen.kt) to address event-level networking memory:
+- **Event & Geo-Tagging System**: Every card scan captures and binds:
+  - **Event Origin Tag**: (e.g. `Zonecon 2027`, `NATCON`, `GBM January 2027`, `B2B Conclave`).
+  - **Venue & City**: (e.g. `Novotel HICC, Hyderabad`, `SV University Auditorium, Tirupati`).
+  - **Capture Timestamp & Meeting Notes**: Discussion brief and follow-up date.
+- **Dynamic Event Filter Bar**: Interactive filter pills at the top with live counts (e.g., `📍 Zonecon 2027 (2)`, `📍 B2B Expo (1)`). Tapping an event instantly shows **only** the contacts collected during that specific conference or meet.
+- **Global Search**: Search simultaneously across contact name, company, designation, city, venue, and event tag.
+- **2-Step Camera Viewfinder & OCR Verification**:
+  - **Step 1**: On-screen card boundary viewfinder with front capture and optional back capture toggle.
+  - **Step 2**: Mandatory editable verification form preventing silent OCR mistakes, with automatic duplicate phone detection.
+- **1-Tap Direct Outreach Actions**:
+  - `📞 Call`: Triggers native phone dialer.
+  - `💬 WhatsApp`: Opens pre-filled WhatsApp greeting (`"Hi [Name], pleasure meeting you at [EventTag]!"`).
+  - `💾 vCard`: Exports directly to Android device contacts.
+
+---
+
+## 🛠️ 9. Technical Stack & Dependencies
 
 | Component | Technology |
 |---|---|
