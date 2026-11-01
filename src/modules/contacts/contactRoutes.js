@@ -1,11 +1,11 @@
 import express from 'express';
 import { db } from '../../database/db.js';
-import { verifyToken } from '../../middlewares/authMiddleware.js';
+import { authenticate } from '../../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 // GET /api/contacts - Retrieve contacts
-router.get('/', verifyToken, (req, res) => {
+router.get('/', authenticate, (req, res) => {
   try {
     const userId = req.user?.id;
     const contacts = db.getContacts(userId);
@@ -20,7 +20,7 @@ router.get('/', verifyToken, (req, res) => {
 });
 
 // POST /api/contacts - Save or update contact
-router.post('/', verifyToken, (req, res) => {
+router.post('/', authenticate, (req, res) => {
   try {
     const userId = req.user?.id;
     const { id, name, company, designation, phone, email, website, address, eventTag, locationName, city, notes, followUpDate } = req.body;
