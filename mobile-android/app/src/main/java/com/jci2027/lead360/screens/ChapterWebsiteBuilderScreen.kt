@@ -93,7 +93,7 @@ fun ChapterWebsiteBuilderScreen(
                         color = Color(0x3310B981)
                     ) {
                         Text(
-                            text = "FREE FOR PST 2027",
+                            text = "PREMIUM SUITE",
                             color = Color(0xFF34D399),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,

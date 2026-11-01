@@ -8,8 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,15 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun DashboardOverviewScreen(
-    chapterName: String = "JCI Secunderabad Deccan",
-    presidentName: String = "JC HGF Rakesh Sharma",
+    chapterName: String = "JCI Tirupati Innovations",
+    presidentName: String = "JC Doraswamy Raju",
     onNavigateTab: (String) -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
@@ -33,32 +30,33 @@ fun DashboardOverviewScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F172A))
+            .background(Color(0xFFF8FAFC)) // Clean, executive Light Mode
             .verticalScroll(scrollState)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // --- 1. PRESIDENTIAL HERO GREETING CARD ---
+        // --- 1. PRESIDENTIAL HERO GREETING CARD (LIGHT LUXURY BLUE & WHITE) ---
         Card(
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(2.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
                     1.dp,
-                    Brush.horizontalGradient(listOf(Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFF6366F1))),
-                    RoundedCornerShape(20.dp)
-                )
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF1E293B), Color(0xFF0F172A))
-                    ),
+                    Color(0xFFBAE6FD),
                     RoundedCornerShape(20.dp)
                 )
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFFF0F9FF), Color.White)
+                        )
+                    )
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -69,20 +67,20 @@ fun DashboardOverviewScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 "🇮🇳 JCI INDIA 2027",
-                                color = Color(0xFF38BDF8),
+                                color = Color(0xFF0284C7),
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 1.sp
                             )
                             Spacer(Modifier.width(8.dp))
                             Surface(
-                                color = Color(0xFF059669).copy(alpha = 0.2f),
+                                color = Color(0xFFE0F2FE),
                                 shape = RoundedCornerShape(4.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF10B981))
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8))
                             ) {
                                 Text(
-                                    "OFFICIAL LEADER SUITE",
-                                    color = Color(0xFF10B981),
+                                    "PRESIDENT PORTAL",
+                                    color = Color(0xFF0369A1),
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -92,61 +90,64 @@ fun DashboardOverviewScreen(
                         Spacer(Modifier.height(4.dp))
                         Text(
                             "Welcome, President",
-                            color = Color(0xFF94A3B8),
-                            fontSize = 13.sp
+                            color = Color(0xFF64748B),
+                            fontSize = 12.sp
                         )
                         Text(
                             presidentName,
-                            color = Color.White,
+                            color = Color(0xFF0F172A),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
                             chapterName,
-                            color = Color(0xFF38BDF8),
+                            color = Color(0xFF0097D8),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
                     Box(
                         modifier = Modifier
-                            .size(52.dp)
+                            .size(50.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF0284C7).copy(alpha = 0.2f))
-                            .border(2.dp, Color(0xFF38BDF8), CircleShape),
+                            .background(Color(0xFFE0F2FE))
+                            .border(1.5.dp, Color(0xFF0097D8), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("👑", fontSize = 24.sp)
+                        Text("👑", fontSize = 22.sp)
                     }
                 }
 
-                Divider(color = Color(0xFF334155))
+                HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
 
-                // Action Bar inside Hero
+                // Quick Action Bar inside Hero
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    HeroActionEmojiButton(
+                    HeroActionLightButton(
+                        emoji = "🚀",
+                        label = "Projects",
+                        bgColor = Color(0xFFE0F2FE),
+                        textColor = Color(0xFF0284C7),
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavigateTab("projects") }
+                    )
+                    HeroActionLightButton(
                         emoji = "⚡",
-                        label = "1-Tap Flyer",
-                        accentColor = Color(0xFF0284C7),
+                        label = "Flyer Studio",
+                        bgColor = Color(0xFFFEF3C7),
+                        textColor = Color(0xFFB45309),
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigateTab("flyers") }
                     )
-                    HeroActionEmojiButton(
-                        emoji = "🌐",
-                        label = "Chapter Site",
-                        accentColor = Color(0xFF10B981),
+                    HeroActionLightButton(
+                        emoji = "👥",
+                        label = "Members",
+                        bgColor = Color(0xFFDCFCE7),
+                        textColor = Color(0xFF15803D),
                         modifier = Modifier.weight(1f),
-                        onClick = { onNavigateTab("website_builder") }
-                    )
-                    HeroActionEmojiButton(
-                        emoji = "📅",
-                        label = "Events",
-                        accentColor = Color(0xFF8B5CF6),
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigateTab("calendar") }
+                        onClick = { onNavigateTab("members") }
                     )
                 }
             }
@@ -157,42 +158,120 @@ fun DashboardOverviewScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ExecutiveEmojiKpiCard(
+            ExecutiveLightKpiCard(
                 modifier = Modifier.weight(1f),
                 title = "Projects",
                 value = "4 Active",
-                subtitle = "Goal: 24/yr",
+                subtitle = "6 Open Tasks",
                 emoji = "🚀",
-                accentColor = Color(0xFF38BDF8)
+                accentColor = Color(0xFF0284C7),
+                onClick = { onNavigateTab("projects") }
             )
-            ExecutiveEmojiKpiCard(
+            ExecutiveLightKpiCard(
                 modifier = Modifier.weight(1f),
-                title = "PST & LGB",
-                value = "7 Officers",
-                subtitle = "100% Assigned",
+                title = "Members",
+                value = "48 Active",
+                subtitle = "2 In Queue",
                 emoji = "👥",
-                accentColor = Color(0xFFA855F7)
+                accentColor = Color(0xFF10B981),
+                onClick = { onNavigateTab("members") }
             )
-            ExecutiveEmojiKpiCard(
+            ExecutiveLightKpiCard(
                 modifier = Modifier.weight(1f),
                 title = "Next Event",
                 value = "15 Jan",
                 subtitle = "LGB Meet #1",
-                emoji = "📌",
-                accentColor = Color(0xFFF59E0B)
+                emoji = "📅",
+                accentColor = Color(0xFFD97706),
+                onClick = { onNavigateTab("calendar") }
             )
         }
 
-        // --- 3. CHAPTER WEBSITE & MEMBER PORTAL HIGHLIGHT CARD ---
+        // --- 3. HIGH IMPACT FAST ACCESS SHORTCUTS ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Card(
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                elevation = CardDefaults.cardElevation(1.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onNavigateTab("members") }
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE0F2FE)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("📇", fontSize = 16.sp)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text("Scan Card", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF0F172A))
+                        Text("OCR Biz Directory", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                }
+            }
+
+            Card(
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                elevation = CardDefaults.cardElevation(1.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onNavigateTab("store") }
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFEF3C7)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("🛍️", fontSize = 16.sp)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text("JCI Store", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF0F172A))
+                        Text("Vendor Marketplace", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                }
+            }
+        }
+
+        // --- 4. CHAPTER WEBSITE & MEMBER PORTAL BANNER (LIGHT THEME) ---
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(1.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, Color(0xFF10B981).copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                .border(1.dp, Color(0xFF86EFAC), RoundedCornerShape(16.dp))
                 .clickable { onNavigateTab("website_builder") }
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFFF0FDF4), Color.White)
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -203,7 +282,7 @@ fun DashboardOverviewScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF10B981).copy(alpha = 0.2f)),
+                                .background(Color(0xFFDCFCE7)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text("🌐", fontSize = 18.sp)
@@ -212,13 +291,13 @@ fun DashboardOverviewScreen(
                         Column {
                             Text(
                                 "Chapter Website & Member Portal",
-                                color = Color.White,
+                                color = Color(0xFF0F172A),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
                             Text(
-                                "Deploy in 60s • Unlimited Templates",
-                                color = Color(0xFF94A3B8),
+                                "Deploy in 60s • Multiple Templates",
+                                color = Color(0xFF64748B),
                                 fontSize = 11.sp
                             )
                         }
@@ -229,8 +308,8 @@ fun DashboardOverviewScreen(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            "FREE FOR PST",
-                            color = Color.Black,
+                            "ONLINE",
+                            color = Color.White,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -238,12 +317,12 @@ fun DashboardOverviewScreen(
                     }
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(10.dp))
                 Text(
-                    "Launch your chapter's official web domain with Auto Flyer Sync, Official WhatsApp reminders, and secure Member Login Portal.",
-                    color = Color(0xFFCBD5E1),
+                    "Official chapter domain with Auto Flyer Sync, WhatsApp automated RSVP reminders, and secure Member Login Portal.",
+                    color = Color(0xFF475569),
                     fontSize = 12.sp,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
 
                 Spacer(Modifier.height(10.dp))
@@ -251,64 +330,78 @@ fun DashboardOverviewScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    PortalBadge(text = "✨ Auto Flyer Sync")
-                    PortalBadge(text = "💬 WhatsApp API")
-                    PortalBadge(text = "🔐 Member Login Portal")
+                    PortalBadgeLight(text = "✨ Auto Flyer Sync")
+                    PortalBadgeLight(text = "💬 WhatsApp Bot")
+                    PortalBadgeLight(text = "🔐 Member Portal")
                 }
             }
         }
 
-        // --- 4. EXECUTIVE WORKSPACE SHORTCUTS ---
+        // --- 5. EXECUTIVE WORKSPACE SHORTCUTS (CORE REPORT SPECIFICATIONS) ---
         Text(
-            "LEADERSHIP TOOLS",
-            color = Color(0xFF94A3B8),
+            "PRESIDENT OPERATING WORKSPACE",
+            color = Color(0xFF64748B),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp
         )
 
         val workspaceTools = listOf(
-            WorkspaceItem(
+            WorkspaceItemLight(
+                title = "Projects & Tasks",
+                subtitle = "Workspaces, milestones, committees & deliverables",
+                emoji = "🚀",
+                color = Color(0xFF0284C7),
+                tabId = "projects"
+            ),
+            WorkspaceItemLight(
+                title = "Members & Directory",
+                subtitle = "Self-service QR reg, ID cards, approvals & scanner",
+                emoji = "👥",
+                color = Color(0xFF10B981),
+                tabId = "members"
+            ),
+            WorkspaceItemLight(
+                title = "Vendor Store",
+                subtitle = "Momentos, badges, printing, banners & quotes",
+                emoji = "🛍️",
+                color = Color(0xFFF59E0B),
+                tabId = "store"
+            ),
+            WorkspaceItemLight(
                 title = "1-Tap Flyer Studio",
-                subtitle = "Templates with your photo & logo auto-mapped",
+                subtitle = "Templates with auto-mapped photo & LO crest",
                 emoji = "🎨",
-                color = Color(0xFF38BDF8),
+                color = Color(0xFFEC4899),
                 tabId = "flyers"
             ),
-            WorkspaceItem(
+            WorkspaceItemLight(
                 title = "Chapter Website Suite",
                 subtitle = "Domain, auto-posts, WhatsApp bot & portal",
                 emoji = "🌐",
-                color = Color(0xFF10B981),
+                color = Color(0xFF0D9488),
                 tabId = "website_builder"
             ),
-            WorkspaceItem(
-                title = "LGB & Officer Directory",
-                subtitle = "Manage PST and Vice Presidents contacts",
-                emoji = "🪪",
-                color = Color(0xFFA855F7),
-                tabId = "lgb"
-            ),
-            WorkspaceItem(
+            WorkspaceItemLight(
                 title = "2027 Calendar & Events",
-                subtitle = "National JCI days, projects, & agendas",
+                subtitle = "JCI national days, projects, & agendas",
                 emoji = "📅",
-                color = Color(0xFFF59E0B),
+                color = Color(0xFF6366F1),
                 tabId = "calendar"
             ),
-            WorkspaceItem(
+            WorkspaceItemLight(
+                title = "LGB & PST Directory",
+                subtitle = "Manage PST and Vice Presidents contacts",
+                emoji = "🪪",
+                color = Color(0xFF8B5CF6),
+                tabId = "lgb"
+            ),
+            WorkspaceItemLight(
                 title = "Photo Frames & DP",
                 subtitle = "Square & circular presidential frames",
                 emoji = "🖼️",
-                color = Color(0xFFEC4899),
+                color = Color(0xFFD946EF),
                 tabId = "frames"
-            ),
-            WorkspaceItem(
-                title = "President Profile & Setup",
-                subtitle = "Update Chapter name, pin, and badges",
-                emoji = "⚙️",
-                color = Color(0xFF64748B),
-                tabId = "profile"
             )
         )
 
@@ -319,7 +412,7 @@ fun DashboardOverviewScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     rowItems.forEach { item ->
-                        WorkspaceCard(
+                        WorkspaceLightCard(
                             modifier = Modifier.weight(1f),
                             item = item,
                             onClick = { onNavigateTab(item.tabId) }
@@ -336,7 +429,7 @@ fun DashboardOverviewScreen(
     }
 }
 
-data class WorkspaceItem(
+data class WorkspaceItemLight(
     val title: String,
     val subtitle: String,
     val emoji: String,
@@ -345,85 +438,89 @@ data class WorkspaceItem(
 )
 
 @Composable
-fun HeroActionEmojiButton(
+fun HeroActionLightButton(
     emoji: String,
     label: String,
-    accentColor: Color,
+    bgColor: Color,
+    textColor: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = accentColor.copy(alpha = 0.2f)),
+        colors = ButtonDefaults.buttonColors(containerColor = bgColor),
         shape = RoundedCornerShape(10.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.6f)),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
         modifier = modifier
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(emoji, fontSize = 14.sp)
             Spacer(Modifier.width(4.dp))
-            Text(label, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            Text(label, color = textColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
-fun ExecutiveEmojiKpiCard(
+fun ExecutiveLightKpiCard(
     modifier: Modifier = Modifier,
     title: String,
     value: String,
     subtitle: String,
     emoji: String,
-    accentColor: Color
+    accentColor: Color,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier
+            .clickable { onClick() },
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(1.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Box(
                 modifier = Modifier
                     .size(28.dp)
                     .clip(CircleShape)
-                    .background(accentColor.copy(alpha = 0.15f)),
+                    .background(accentColor.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(emoji, fontSize = 14.sp)
             }
-            Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-            Text(title, color = Color(0xFF94A3B8), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(2.dp))
+            Text(value, color = Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text(title, color = Color(0xFF64748B), fontSize = 11.sp, fontWeight = FontWeight.Medium)
             Text(subtitle, color = accentColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
-fun PortalBadge(text: String) {
+fun PortalBadgeLight(text: String) {
     Surface(
-        color = Color(0xFF0F172A),
+        color = Color(0xFFF1F5F9),
         shape = RoundedCornerShape(6.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1))
     ) {
         Text(
             text,
-            color = Color(0xFF94A3B8),
+            color = Color(0xFF334155),
             fontSize = 9.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
         )
     }
 }
 
 @Composable
-fun WorkspaceCard(
+fun WorkspaceLightCard(
     modifier: Modifier = Modifier,
-    item: WorkspaceItem,
+    item: WorkspaceItemLight,
     onClick: () -> Unit
 ) {
     Card(
@@ -431,32 +528,33 @@ fun WorkspaceCard(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155))
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(1.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(item.color.copy(alpha = 0.15f)),
+                    .background(item.color.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(item.emoji, fontSize = 18.sp)
             }
             Text(
                 item.title,
-                color = Color.White,
+                color = Color(0xFF0F172A),
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
                 maxLines = 1
             )
             Text(
                 item.subtitle,
-                color = Color(0xFF94A3B8),
+                color = Color(0xFF64748B),
                 fontSize = 10.sp,
                 lineHeight = 13.sp,
                 maxLines = 2

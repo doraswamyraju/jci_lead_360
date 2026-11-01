@@ -32,8 +32,11 @@ import com.jci2027.lead360.screens.FramesScreen
 import com.jci2027.lead360.screens.InteractiveCalendarScreen
 import com.jci2027.lead360.screens.InternalPhotoStore
 import com.jci2027.lead360.screens.LgbAndPstManagementScreen
+import com.jci2027.lead360.screens.MembersAndNetworkingScreen
 import com.jci2027.lead360.screens.NotificationCenterBottomSheet
 import com.jci2027.lead360.screens.ProfileScreen
+import com.jci2027.lead360.screens.ProjectsAndTasksScreen
+import com.jci2027.lead360.screens.VendorStoreScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -78,13 +81,13 @@ class MainActivity : ComponentActivity() {
                     var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
                     var showNotificationBottomSheet by remember { mutableStateOf(false) }
 
-                    // Navigation items for BottomBar
+                    // Navigation items for BottomBar (Report Primary Navigation)
                     val bottomNavItems = listOf(
                         Screen.Dashboard,
+                        Screen.Projects,
+                        Screen.Members,
                         Screen.Flyers,
-                        Screen.WebsitePortal,
-                        Screen.Calendar,
-                        Screen.Lgb
+                        Screen.Store
                     )
 
                     // Modal BottomSheet Notification Center
@@ -171,6 +174,9 @@ class MainActivity : ComponentActivity() {
                                 // Drawer Navigation Items
                                 val drawerItems = listOf(
                                     Screen.Dashboard,
+                                    Screen.Projects,
+                                    Screen.Members,
+                                    Screen.Store,
                                     Screen.Flyers,
                                     Screen.WebsitePortal,
                                     Screen.Calendar,
@@ -371,6 +377,9 @@ class MainActivity : ComponentActivity() {
                                         chapterName = userChapter,
                                         onNavigateTab = { tabId ->
                                             currentScreen = when (tabId) {
+                                                "projects" -> Screen.Projects
+                                                "members" -> Screen.Members
+                                                "store" -> Screen.Store
                                                 "flyers" -> Screen.Flyers
                                                 "website_builder" -> Screen.WebsitePortal
                                                 "calendar" -> Screen.Calendar
@@ -380,6 +389,18 @@ class MainActivity : ComponentActivity() {
                                                 else -> Screen.Dashboard
                                             }
                                         }
+                                    )
+                                    Screen.Projects -> ProjectsAndTasksScreen(
+                                        chapterName = userChapter,
+                                        onBack = { currentScreen = Screen.Dashboard }
+                                    )
+                                    Screen.Members -> MembersAndNetworkingScreen(
+                                        chapterName = userChapter,
+                                        onBack = { currentScreen = Screen.Dashboard }
+                                    )
+                                    Screen.Store -> VendorStoreScreen(
+                                        chapterName = userChapter,
+                                        onBack = { currentScreen = Screen.Dashboard }
                                     )
                                     Screen.Flyers -> PresidentFlyerStudioScreen(
                                         token = token!!,
