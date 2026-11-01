@@ -399,6 +399,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                     Screen.Members -> MembersAndNetworkingScreen(
                                         chapterName = userChapter,
+                                        token = token,
                                         onBack = { currentScreen = Screen.Dashboard },
                                         onNavigateToScanCard = { currentScreen = Screen.ScanCard }
                                     )

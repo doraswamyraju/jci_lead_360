@@ -1,4 +1,6 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import { db } from '../../database/db.js';
 
 const router = express.Router();
@@ -89,7 +91,24 @@ router.post('/exchange', (req, res) => {
       email: ''
     };
 
-    // Build standard RFC vCard 3.0
+    // Build standard RFC vCard 3.0 with photo
+    let photoVcardLine = '';
+    const photoPathRel = leader.profilePhotoUrl || leader.photoUrl;
+    if (photoPathRel) {
+      try {
+        const cleanPath = photoPathRel.startsWith('/') ? photoPathRel.substring(1) : photoPathRel;
+        const fullDiskPath = path.join(process.cwd(), 'public', cleanPath);
+        if (fs.existsSync(fullDiskPath)) {
+          const fileBuf = fs.readFileSync(fullDiskPath);
+          const ext = path.extname(fullDiskPath).toLowerCase();
+          const mimeType = ext === '.png' ? 'PNG' : 'JPEG';
+          photoVcardLine = `PHOTO;ENCODING=b;TYPE=${mimeType}:${fileBuf.toString('base64')}`;
+        }
+      } catch (e) {
+        console.error('[Exchange] Error encoding photo into vCard:', e.message);
+      }
+    }
+
     const vCardData = [
       'BEGIN:VCARD',
       'VERSION:3.0',
@@ -98,6 +117,7 @@ router.post('/exchange', (req, res) => {
       `TITLE:${leader.role || 'President'}`,
       leader.phone ? `TEL;TYPE=CELL,VOICE:${leader.phone}` : '',
       leader.email ? `EMAIL;TYPE=PREF,INTERNET:${leader.email}` : '',
+      photoVcardLine,
       'URL:https://lead.sriddha.com',
       'NOTE:Verified JCI 2027 Leader via JCI LEAD360',
       'END:VCARD'

@@ -39,7 +39,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/card', exchangeRoutes);
 
-// Direct download vCard endpoint (100% dynamic from store.json)
+// Direct download vCard endpoint (100% dynamic from store.json with embedded photo)
 app.get('/card/:userId/vcf', (req, res) => {
   const { userId } = req.params;
   const users = db.getUsers();
@@ -47,6 +47,25 @@ app.get('/card/:userId/vcf', (req, res) => {
 
   if (!user) {
     return res.status(404).send('Leader not found');
+  }
+
+  // Load and embed photo as base64 in vCard if present
+  let photoVcardLine = '';
+  const photoPathRel = user.profilePhotoUrl || user.photoUrl;
+  if (photoPathRel) {
+    try {
+      const cleanPath = photoPathRel.startsWith('/') ? photoPathRel.substring(1) : photoPathRel;
+      const fullDiskPath = path.join(__dirname, '../public', cleanPath);
+      if (fs.existsSync(fullDiskPath)) {
+        const fileBuf = fs.readFileSync(fullDiskPath);
+        const ext = path.extname(fullDiskPath).toLowerCase();
+        const mimeType = ext === '.png' ? 'PNG' : 'JPEG';
+        const base64Data = fileBuf.toString('base64');
+        photoVcardLine = `PHOTO;ENCODING=b;TYPE=${mimeType}:${base64Data}`;
+      }
+    } catch (e) {
+      console.error('[vCard] Error attaching photo to vCard:', e.message);
+    }
   }
 
   const vCardData = [
@@ -57,6 +76,7 @@ app.get('/card/:userId/vcf', (req, res) => {
     `TITLE:${user.role || 'President'}`,
     user.phone ? `TEL;TYPE=CELL,VOICE:${user.phone}` : '',
     user.email ? `EMAIL;TYPE=PREF,INTERNET:${user.email}` : '',
+    photoVcardLine,
     'URL:https://lead.sriddha.com',
     'NOTE:Verified JCI 2027 Leader via JCI LEAD360',
     'END:VCARD'

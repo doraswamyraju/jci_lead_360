@@ -19,6 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jci2027.lead360.network.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 data class MemberModel(
     val id: String,
@@ -45,6 +50,7 @@ data class ScannedBusinessCard(
 @Composable
 fun MembersAndNetworkingScreen(
     chapterName: String,
+    token: String? = null,
     onBack: () -> Unit = {},
     onNavigateToScanCard: () -> Unit = {}
 ) {
@@ -75,6 +81,69 @@ fun MembersAndNetworkingScreen(
             ScannedBusinessCard("sc1", "Mahesh Naidu", "AP Chamber of Commerce", "Director - SME Relations", "+91 94411 22334", "mahesh@apchamber.in", "Today, 11:30 AM"),
             ScannedBusinessCard("sc2", "Dr. Shalini Gupta", "Apollo Clinic Tirupati", "Chief Medical Consultant", "+91 98220 54321", "drshalini@apollo.com", "Yesterday")
         )
+    }
+
+    // Fetch live backend contacts and populate both Directory & Scanned Cards in real-time
+    LaunchedEffect(token) {
+        if (!token.isNullOrBlank()) {
+            try {
+                withContext(Dispatchers.IO) {
+                    val retrofit = Retrofit.Builder()
+                        .baseUrl("https://lead.sriddha.com")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build()
+                    val service = retrofit.create(ApiService::class.java)
+                    val response = service.getContacts("Bearer $token")
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val backendList = response.body()?.contacts.orEmpty()
+                        withContext(Dispatchers.Main) {
+                            backendList.forEach { c ->
+                                val existsInCards = scannedCards.any {
+                                    it.phone.filter { ch -> ch.isDigit() } == c.phone.filter { ch -> ch.isDigit() } ||
+                                    it.contactName.equals(c.name, ignoreCase = true)
+                                }
+                                if (!existsInCards && c.name.isNotBlank()) {
+                                    scannedCards.add(
+                                        0,
+                                        ScannedBusinessCard(
+                                            id = c.id,
+                                            contactName = c.name,
+                                            company = c.company.ifBlank { "Exchanged via QR Portal" },
+                                            designation = c.designation.ifBlank { "JCI Network Partner" },
+                                            phone = c.phone,
+                                            email = c.email,
+                                            scannedAt = "Live Exchange"
+                                        )
+                                    )
+                                }
+
+                                val existsInMembers = members.any {
+                                    it.phone.filter { ch -> ch.isDigit() } == c.phone.filter { ch -> ch.isDigit() } ||
+                                    it.name.equals(c.name, ignoreCase = true)
+                                }
+                                if (!existsInMembers && c.name.isNotBlank()) {
+                                    members.add(
+                                        0,
+                                        MemberModel(
+                                            id = c.id,
+                                            name = c.name,
+                                            role = c.designation.ifBlank { "Exchanged Contact" },
+                                            phone = c.phone,
+                                            email = c.email,
+                                            businessName = c.company.ifBlank { "Independent / Business" },
+                                            businessCategory = c.city.ifBlank { "Networking" },
+                                            status = "Active"
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     Scaffold(
