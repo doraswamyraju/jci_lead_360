@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.jci2027.lead360.auth.LoginScreen
 import com.jci2027.lead360.navigation.Screen
 import com.jci2027.lead360.president.PresidentFlyerStudioScreen
-import com.jci2027.lead360.screens.AiFlyerStudioScreen
+import com.jci2027.lead360.screens.ChapterWebsiteBuilderScreen
 import com.jci2027.lead360.screens.DashboardOverviewScreen
 import com.jci2027.lead360.screens.FramesScreen
 import com.jci2027.lead360.screens.InteractiveCalendarScreen
@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
                     val bottomNavItems = listOf(
                         Screen.Dashboard,
                         Screen.Flyers,
-                        Screen.AiFlyer,
+                        Screen.WebsitePortal,
                         Screen.Calendar,
                         Screen.Lgb
                     )
@@ -172,7 +172,7 @@ class MainActivity : ComponentActivity() {
                                 val drawerItems = listOf(
                                     Screen.Dashboard,
                                     Screen.Flyers,
-                                    Screen.AiFlyer,
+                                    Screen.WebsitePortal,
                                     Screen.Calendar,
                                     Screen.Lgb,
                                     Screen.Frames,
@@ -367,12 +367,12 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 when (currentScreen) {
                                     Screen.Dashboard -> DashboardOverviewScreen(
-                                        userName = userName,
+                                        presidentName = userName,
                                         chapterName = userChapter,
                                         onNavigateTab = { tabId ->
                                             currentScreen = when (tabId) {
                                                 "flyers" -> Screen.Flyers
-                                                "ai_flyer" -> Screen.AiFlyer
+                                                "website_builder" -> Screen.WebsitePortal
                                                 "calendar" -> Screen.Calendar
                                                 "lgb" -> Screen.Lgb
                                                 "frames" -> Screen.Frames
@@ -388,9 +388,10 @@ class MainActivity : ComponentActivity() {
                                         chapterLogoBitmap = chapterLogoBitmap,
                                         presidentPhotoBitmap = userProfileBitmap
                                     )
-                                    Screen.AiFlyer -> AiFlyerStudioScreen(
+                                    Screen.WebsitePortal -> ChapterWebsiteBuilderScreen(
+                                        chapterName = userChapter,
                                         presidentName = userName,
-                                        chapterName = userChapter
+                                        onBackToHome = { currentScreen = Screen.Dashboard }
                                     )
                                     Screen.Calendar -> InteractiveCalendarScreen(
                                         onNavigateToFlyer = { title, date ->
