@@ -6,16 +6,19 @@ plugins {
 
 android {
     namespace = "com.jci2027.lead360"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.jci2027.lead360"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = 24
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
@@ -48,6 +51,9 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.navigation:navigation-compose:2.8.4")
+
+    // Google ML Kit Text Recognition for Business Card OCR
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 
     // Image loading & Networking
     implementation("io.coil-kt:coil-compose:2.7.0")

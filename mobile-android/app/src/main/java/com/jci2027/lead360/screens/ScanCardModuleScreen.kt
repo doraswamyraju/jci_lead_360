@@ -2,8 +2,14 @@ package com.jci2027.lead360.screens
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jci2027.lead360.engine.BusinessCardOcrEngine
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -36,7 +44,7 @@ data class BusinessCardContact(
     val email: String,
     val website: String = "",
     val eventTag: String,          // e.g. "Zonecon 2027", "NATCON", "GBM Jan"
-    val locationName: String,      // e.g. "Hyderabad Marriott", "Tirupati Royal Palace"
+    val locationName: String,      // e.g. "Novotel HICC", "Tirupati Royal Palace"
     val city: String,              // e.g. "Hyderabad", "Tirupati"
     val capturedAt: String,        // Timestamp
     val notes: String = "",
@@ -363,7 +371,7 @@ fun ScanCardModuleScreen(
 
                                     Button(
                                         onClick = {
-                                            val cleanPhone = contact.phone.replace("+", "").replace(" ", "")
+                                            val cleanPhone = contact.phone.replace("+", "").replace(" ", "").replace("-", "")
                                             val waIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$cleanPhone?text=Hi%20${contact.name},%20pleasure%20meeting%20you%20at%20${contact.eventTag}!"))
                                             context.startActivity(waIntent)
                                         },
@@ -402,7 +410,7 @@ fun ScanCardModuleScreen(
             onDismiss = { showScanCaptureSheet = false },
             onSaveContact = { newContact ->
                 // Duplicate check
-                val duplicate = contactList.find { it.phone == newContact.phone }
+                val duplicate = contactList.find { it.phone.isNotBlank() && it.phone == newContact.phone }
                 if (duplicate != null) {
                     Toast.makeText(context, "Updated existing contact for ${newContact.name}!", Toast.LENGTH_SHORT).show()
                     val idx = contactList.indexOf(duplicate)
@@ -426,7 +434,7 @@ fun ScanCardModuleScreen(
 }
 
 /**
- * Camera Viewfinder Simulation + OCR Parsing Form with Geo/Event Tagging
+ * Live Camera / Photo Picker + Google ML Kit OCR Engine with Geo & Event Tagging
  */
 @Composable
 fun ScanCardCaptureDialog(
@@ -436,25 +444,86 @@ fun ScanCardCaptureDialog(
     onSaveContact: (BusinessCardContact) -> Unit
 ) {
     val context = LocalContext.current
-    var scanPhase by remember { mutableStateOf(0) } // 0: Viewfinder Camera, 1: OCR Verification & Tagging Form
+    val coroutineScope = rememberCoroutineScope()
+    var scanPhase by remember { mutableStateOf(0) } // 0: Live Capture / Gallery, 1: OCR Verification & Tagging Form
+    var isOcrProcessing by remember { mutableStateOf(false) }
 
-    // Form fields pre-filled from simulated OCR
-    var name by remember { mutableStateOf("JC Vikram Aditya") }
-    var designation by remember { mutableStateOf("Managing Director") }
-    var company by remember { mutableStateOf("Aditya Infotech & AI Labs") }
-    var phone by remember { mutableStateOf("+91 99880 77665") }
-    var email by remember { mutableStateOf("vikram@adityainfotech.com") }
-    var website by remember { mutableStateOf("www.adityainfotech.com") }
+    // Form fields populated by Google ML Kit OCR
+    var name by remember { mutableStateOf("") }
+    var designation by remember { mutableStateOf("") }
+    var company by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var website by remember { mutableStateOf("") }
 
     // Event & Location Tracking Fields
     var eventTag by remember { mutableStateOf(existingEvents.firstOrNull() ?: "Zonecon 2027") }
     var locationName by remember { mutableStateOf("Novotel Convention Center") }
     var city by remember { mutableStateOf("Hyderabad") }
-    var notes by remember { mutableStateOf("Discussed website partnership for chapter.") }
+    var notes by remember { mutableStateOf("") }
     var followUpDate by remember { mutableStateOf("Tomorrow (10:00 AM)") }
 
-    var isFrontCaptured by remember { mutableStateOf(true) }
+    var isFrontCaptured by remember { mutableStateOf(false) }
     var isBackCaptured by remember { mutableStateOf(false) }
+
+    // Gallery / Camera Photo Pickers
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            coroutineScope.launch {
+                try {
+                    isOcrProcessing = true
+                    val bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                    }
+                    val parsed = BusinessCardOcrEngine.processCardBitmap(bitmap)
+                    name = parsed.name
+                    designation = parsed.designation
+                    company = parsed.company
+                    phone = parsed.phone
+                    email = parsed.email
+                    website = parsed.website
+                    isFrontCaptured = true
+                    isOcrProcessing = false
+                    scanPhase = 1 // Move directly to review
+                    Toast.makeText(context, "Google ML Kit extracted details!", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    isOcrProcessing = false
+                    Toast.makeText(context, "OCR failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    val cameraPhotoLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap: Bitmap? ->
+        if (bitmap != null) {
+            coroutineScope.launch {
+                try {
+                    isOcrProcessing = true
+                    val parsed = BusinessCardOcrEngine.processCardBitmap(bitmap)
+                    name = parsed.name
+                    designation = parsed.designation
+                    company = parsed.company
+                    phone = parsed.phone
+                    email = parsed.email
+                    website = parsed.website
+                    isFrontCaptured = true
+                    isOcrProcessing = false
+                    scanPhase = 1 // Move directly to review
+                    Toast.makeText(context, "Google ML Kit extracted card fields!", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    isOcrProcessing = false
+                    Toast.makeText(context, "OCR failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -465,7 +534,7 @@ fun ScanCardCaptureDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    if (scanPhase == 0) "📷 Card Scanner Viewfinder" else "✅ Verify & Tag Contact",
+                    if (scanPhase == 0) "📷 Google ML Kit Card Scanner" else "✅ Verify & Tag Contact",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color(0xFF0F172A)
@@ -492,7 +561,7 @@ fun ScanCardCaptureDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 if (scanPhase == 0) {
-                    // CAMERA VIEWFINDER SIMULATION
+                    // LIVE CAPTURE OR GALLERY SELECTOR WITH OCR VIEWFINDER
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -502,34 +571,42 @@ fun ScanCardCaptureDialog(
                             .border(2.dp, Color(0xFF0097D8), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text("📇", fontSize = 40.sp)
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                "Align Visiting Card inside the frame",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                "AI auto-detects edges & lighting",
-                                color = Color(0xFF94A3B8),
-                                fontSize = 10.sp
-                            )
-                        }
+                        if (isOcrProcessing) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(color = Color(0xFF38BDF8))
+                                Spacer(Modifier.height(10.dp))
+                                Text("Running Google ML Kit OCR...", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text("📇", fontSize = 38.sp)
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    "Google ML Kit Neural OCR",
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "Captures Front/Back or selects from Gallery",
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 10.sp
+                                )
+                            }
 
-                        // Corner guidelines
-                        Surface(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(8.dp),
-                            color = Color.Black.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text("📍 Auto-tagged location: $city ($locationName)", color = Color(0xFF38BDF8), fontSize = 9.sp, modifier = Modifier.padding(4.dp))
+                            // Corner guidelines
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(8.dp),
+                                color = Color.Black.copy(alpha = 0.6f),
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text("📍 Auto Location: $city ($locationName)", color = Color(0xFF38BDF8), fontSize = 9.sp, modifier = Modifier.padding(4.dp))
+                            }
                         }
                     }
 
@@ -538,30 +615,44 @@ fun ScanCardCaptureDialog(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Button(
-                            onClick = {
-                                isFrontCaptured = true
-                                Toast.makeText(context, "Front Captured! Capturing Back (Optional)...", Toast.LENGTH_SHORT).show()
-                            },
+                            onClick = { cameraPhotoLauncher.launch(null) },
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = if (isFrontCaptured) Color(0xFF10B981) else Color(0xFF0097D8))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8))
                         ) {
-                            Text(if (isFrontCaptured) "✓ Front Captured" else "📷 Capture Front", fontSize = 11.sp)
+                            Text("📸 Take Photo", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
 
                         OutlinedButton(
-                            onClick = {
-                                isBackCaptured = !isBackCaptured
-                                Toast.makeText(context, if (isBackCaptured) "Back Captured!" else "Back Cleared", Toast.LENGTH_SHORT).show()
-                            },
+                            onClick = { galleryLauncher.launch("image/*") },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(if (isBackCaptured) "✓ Back Added" else "+ Back (Optional)", fontSize = 11.sp)
+                            Text("🖼️ From Gallery", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
+                    }
+
+                    // Preset Demo Quick Scan
+                    OutlinedButton(
+                        onClick = {
+                            val parsed = BusinessCardOcrEngine.parseExtractedText(
+                                "JC Sen. Rajesh Singhania\nManaging Director\nApex Solar Energies Ltd\n+91 98490 11223\nrajesh@apexsolar.in\nwww.apexsolar.in"
+                            )
+                            name = parsed.name
+                            designation = parsed.designation
+                            company = parsed.company
+                            phone = parsed.phone
+                            email = parsed.email
+                            website = parsed.website
+                            isFrontCaptured = true
+                            scanPhase = 1
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("⚡ Fast Demo Sample OCR", fontSize = 11.sp)
                     }
 
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "On-device OCR extracts phone, email, and company details without uploading sensitive data to external clouds.",
+                        "On-device neural network model extracts phone, email, and company details without uploading sensitive data to external clouds.",
                         fontSize = 11.sp,
                         color = Color(0xFF64748B),
                         lineHeight = 15.sp
@@ -582,7 +673,7 @@ fun ScanCardCaptureDialog(
                             OutlinedTextField(
                                 value = eventTag,
                                 onValueChange = { eventTag = it },
-                                label = { Text("Event Name / Occasion (e.g. Zonecon, NATCON, GBM)") },
+                                label = { Text("Event Name (e.g. Zonecon, NATCON, GBM)") },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true
                             )
@@ -622,10 +713,13 @@ fun ScanCardCaptureDialog(
         confirmButton = {
             if (scanPhase == 0) {
                 Button(
-                    onClick = { scanPhase = 1 },
+                    onClick = {
+                        if (name.isBlank()) name = "JC Delegate"
+                        scanPhase = 1
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8))
                 ) {
-                    Text("Proceed to Review (OCR)")
+                    Text("Manual Entry / Review")
                 }
             } else {
                 Button(
@@ -633,13 +727,13 @@ fun ScanCardCaptureDialog(
                         val timestamp = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date())
                         val newContact = BusinessCardContact(
                             id = "c_${System.currentTimeMillis()}",
-                            name = name,
-                            designation = designation,
-                            company = company,
+                            name = name.ifBlank { "JC Executive" },
+                            designation = designation.ifBlank { "Member" },
+                            company = company.ifBlank { "Enterprise" },
                             phone = phone,
                             email = email,
                             website = website,
-                            eventTag = eventTag,
+                            eventTag = eventTag.ifBlank { "Networking Meet" },
                             locationName = locationName,
                             city = city,
                             capturedAt = timestamp,
@@ -729,4 +823,3 @@ fun ContactDetailModal(
         }
     )
 }
-
