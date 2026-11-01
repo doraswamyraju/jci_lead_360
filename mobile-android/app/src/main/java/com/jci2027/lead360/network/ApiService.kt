@@ -1,11 +1,14 @@
 package com.jci2027.lead360.network
 
 import com.jci2027.lead360.model.TemplatesResponse
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 data class LoginRequest(
     val email: String,
@@ -54,6 +57,12 @@ data class GetContactsResponse(
     val contacts: List<SaveContactRequest>?
 )
 
+data class UploadImageResponse(
+    val success: Boolean,
+    val fileUrl: String?,
+    val filename: String?
+)
+
 interface ApiService {
     @POST("/api/auth/login")
     suspend fun login(
@@ -75,4 +84,10 @@ interface ApiService {
     suspend fun getContacts(
         @Header("Authorization") token: String
     ): Response<GetContactsResponse>
+
+    @Multipart
+    @POST("/api/upload")
+    suspend fun uploadImage(
+        @Part image: MultipartBody.Part
+    ): Response<UploadImageResponse>
 }

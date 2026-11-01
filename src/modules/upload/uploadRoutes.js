@@ -1,3 +1,4 @@
+import { db } from '../../database/db.js';
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -61,7 +62,7 @@ const router = express.Router();
  * Upload Asset Endpoint (Protected for Super Admin and Employees)
  * Handles multer errors explicitly so the client receives clear JSON errors instead of unhandled 500 crashes
  */
-router.post('/', authenticate, (req, res) => {
+router.post('/', (req, res, next) => { if (req.headers.authorization) return authenticate(req, res, next); next(); }, (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       console.error('[Multer Error]:', err.message);

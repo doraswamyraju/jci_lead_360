@@ -32,6 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.jci2027.lead360.engine.QrCodeGenerator
+import com.jci2027.lead360.network.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
 
@@ -208,6 +217,7 @@ fun ProfileScreen(
     onProfileUpdated: (updatedName: String, updatedChapter: String, photoPath: String?, logoPath: String?) -> Unit = { _, _, _, _ -> }
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val prefs = remember { context.getSharedPreferences("lead360_auth_prefs", Context.MODE_PRIVATE) }
 
     // Saved internal paths
@@ -237,7 +247,34 @@ fun ProfileScreen(
                 savedPresidentPhotoPath = savedPath
                 prefs.edit().putString("president_photo_path", savedPath).apply()
                 onProfileUpdated(presidentNameInput, chapterNameInput, savedPath, savedChapterLogoPath)
-                Toast.makeText(context, "✓ President portrait saved!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "✓ President portrait saved locally!", Toast.LENGTH_SHORT).show()
+
+                // Asynchronously sync the photo to the live server database so the web digital card updates immediately
+                coroutineScope.launch {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            val file = File(savedPath)
+                            if (file.exists()) {
+                                val reqFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                                val body = MultipartBody.Part.createFormData("image", file.name, reqFile)
+                                val retrofit = Retrofit.Builder()
+                                    .baseUrl("https://lead.sriddha.com")
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build()
+                                val service = retrofit.create(ApiService::class.java)
+                                val response = service.uploadImage(body)
+                                if (response.isSuccessful && response.body()?.success == true) {
+                                    val uploadedUrl = response.body()?.fileUrl
+                                    if (!uploadedUrl.isNullOrBlank()) {
+                                        prefs.edit().putString("president_photo_server_url", uploadedUrl).apply()
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
         }
     }

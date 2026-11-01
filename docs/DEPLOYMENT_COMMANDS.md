@@ -13,7 +13,7 @@
 Whenever you push new code and just want to update the live site on your VPS, run this single command in your SSH terminal:
 
 ```bash
-cd /var/www/lead360 && git pull origin main && npm install --production && pm2 reload jci-lead-360
+cd /var/www/lead360 && git config pull.rebase false && git pull origin main --no-edit && npm install --production && pm2 reload jci-lead-360
 ```
 
 ---
