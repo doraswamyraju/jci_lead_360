@@ -36,6 +36,7 @@ import com.jci2027.lead360.screens.MembersAndNetworkingScreen
 import com.jci2027.lead360.screens.NotificationCenterBottomSheet
 import com.jci2027.lead360.screens.ProfileScreen
 import com.jci2027.lead360.screens.ProjectsAndTasksScreen
+import com.jci2027.lead360.screens.ScanCardModuleScreen
 import com.jci2027.lead360.screens.VendorStoreScreen
 import kotlinx.coroutines.launch
 
@@ -176,6 +177,7 @@ class MainActivity : ComponentActivity() {
                                     Screen.Dashboard,
                                     Screen.Projects,
                                     Screen.Members,
+                                    Screen.ScanCard,
                                     Screen.Store,
                                     Screen.Flyers,
                                     Screen.WebsitePortal,
@@ -379,6 +381,7 @@ class MainActivity : ComponentActivity() {
                                             currentScreen = when (tabId) {
                                                 "projects" -> Screen.Projects
                                                 "members" -> Screen.Members
+                                                "scan_card" -> Screen.ScanCard
                                                 "store" -> Screen.Store
                                                 "flyers" -> Screen.Flyers
                                                 "website_builder" -> Screen.WebsitePortal
@@ -395,6 +398,10 @@ class MainActivity : ComponentActivity() {
                                         onBack = { currentScreen = Screen.Dashboard }
                                     )
                                     Screen.Members -> MembersAndNetworkingScreen(
+                                        chapterName = userChapter,
+                                        onBack = { currentScreen = Screen.Dashboard }
+                                    )
+                                    Screen.ScanCard -> ScanCardModuleScreen(
                                         chapterName = userChapter,
                                         onBack = { currentScreen = Screen.Dashboard }
                                     )

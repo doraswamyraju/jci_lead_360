@@ -199,7 +199,7 @@ fun DashboardOverviewScreen(
                 elevation = CardDefaults.cardElevation(1.dp),
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onNavigateTab("members") }
+                    .clickable { onNavigateTab("scan_card") }
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp),

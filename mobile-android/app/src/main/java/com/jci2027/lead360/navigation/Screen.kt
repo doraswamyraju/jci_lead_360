@@ -4,6 +4,7 @@ sealed class Screen(val id: String, val title: String, val icon: String) {
     object Dashboard : Screen("dashboard", "Home", "🏛️")
     object Projects : Screen("projects", "Projects", "🚀")
     object Members : Screen("members", "Members", "👥")
+    object ScanCard : Screen("scan_card", "Scan Card", "📇")
     object Flyers : Screen("flyers", "Flyers", "⚡")
     object Store : Screen("store", "Store", "🛍️")
     object WebsitePortal : Screen("website_portal", "LO Website", "🌐")
