@@ -63,6 +63,28 @@ data class UploadImageResponse(
     val filename: String?
 )
 
+data class UpdateOfficerRequest(
+    val userId: String? = null,
+    val name: String? = null,
+    val phone: String? = null,
+    val email: String? = null,
+    val photoUrl: String? = null,
+    val role: String? = null
+)
+
+data class UpdateChapterRequest(
+    val chapterName: String? = null,
+    val zone: String? = null,
+    val phone: String? = null,
+    val email: String? = null,
+    val logoUrl: String? = null
+)
+
+data class GenericSuccessResponse(
+    val success: Boolean,
+    val message: String?
+)
+
 interface ApiService {
     @POST("/api/auth/login")
     suspend fun login(
@@ -90,4 +112,16 @@ interface ApiService {
     suspend fun uploadImage(
         @Part image: MultipartBody.Part
     ): Response<UploadImageResponse>
+
+    @POST("/api/users/officer-details")
+    suspend fun updateOfficerDetails(
+        @Header("Authorization") token: String,
+        @Body request: UpdateOfficerRequest
+    ): Response<GenericSuccessResponse>
+
+    @POST("/api/users/chapter-details")
+    suspend fun updateChapterDetails(
+        @Header("Authorization") token: String,
+        @Body request: UpdateChapterRequest
+    ): Response<GenericSuccessResponse>
 }

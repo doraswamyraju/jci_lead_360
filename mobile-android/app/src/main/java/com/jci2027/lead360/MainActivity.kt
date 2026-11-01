@@ -438,6 +438,7 @@ class MainActivity : ComponentActivity() {
                                         name = userName,
                                         chapterName = userChapter,
                                         role = userRole,
+                                        token = token,
                                         onLogout = {
                                             prefs.edit().clear().apply()
                                             token = null

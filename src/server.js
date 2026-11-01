@@ -10,6 +10,7 @@ import templateRoutes from './modules/templates/templateRoutes.js';
 import uploadRoutes from './modules/upload/uploadRoutes.js';
 import contactRoutes from './modules/contacts/contactRoutes.js';
 import exchangeRoutes from './modules/contacts/exchangeRoutes.js';
+import { db } from './database/db.js';
 import { seedInitialData } from './database/seed.js';
 
 dotenv.config();
@@ -38,22 +39,21 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/card', exchangeRoutes);
 
-// Direct download vCard endpoint
+// Direct download vCard endpoint (100% dynamic from store.json)
 app.get('/card/:userId/vcf', (req, res) => {
   const { userId } = req.params;
-  const user = db.findUserById(userId) || db.getUsers().find(u => u.role === 'PRESIDENT') || {
-    name: 'JC Doraswamy Raju Meesala',
-    chapterName: 'JCI Tirupati',
-    role: 'PRESIDENT',
-    phone: '+91 98765 43210',
-    email: 'president@jcitirupati.com'
-  };
+  const users = db.getUsers();
+  const user = (userId && db.findUserById(userId)) || users.find(u => u.role === 'PRESIDENT') || users[0];
+
+  if (!user) {
+    return res.status(404).send('Leader not found');
+  }
 
   const vCardData = [
     'BEGIN:VCARD',
     'VERSION:3.0',
     `FN:${user.name}`,
-    `ORG:Junior Chamber International (JCI);${user.chapterName || 'JCI Tirupati'}`,
+    `ORG:Junior Chamber International (JCI);${user.chapterName || 'JCI'}`,
     `TITLE:${user.role || 'President'}`,
     user.phone ? `TEL;TYPE=CELL,VOICE:${user.phone}` : '',
     user.email ? `EMAIL;TYPE=PREF,INTERNET:${user.email}` : '',
@@ -63,7 +63,7 @@ app.get('/card/:userId/vcf', (req, res) => {
   ].filter(Boolean).join('\r\n');
 
   res.setHeader('Content-Type', 'text/vcard; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="${user.name.replace(/\s+/g, '_')}_JCI.vcf"`);
+  res.setHeader('Content-Disposition', `attachment; filename="${(user.name || 'JCI_Leader').replace(/\s+/g, '_')}_JCI.vcf"`);
   res.send(vCardData);
 });
 

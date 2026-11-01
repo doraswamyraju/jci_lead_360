@@ -6,48 +6,45 @@ const router = express.Router();
 /**
  * GET /api/card/profile/:userId
  * Returns public digital card profile for web view & QR scanner
+ * 100% dynamically fetched from store.json
  */
 router.get('/profile/:userId', (req, res) => {
   try {
     const { userId } = req.params;
     const users = db.getUsers();
-    // Match by id or fallback to president
-    const user = db.findUserById(userId) || users.find(u => u.role === 'PRESIDENT') || users[0];
+    // Match by id or match first president or active leader
+    const user = (userId && db.findUserById(userId)) || users.find(u => u.role === 'PRESIDENT') || users[0];
 
-    const leaderPhoto = (user && (user.profilePhotoUrl || user.photoUrl)) || '/assets/president_profile.jpg';
-    
     if (!user) {
-      return res.json({
-        success: true,
-        leader: {
-          id: userId,
-          name: 'JC Doraswamy Raju Meesala',
-          role: 'PRESIDENT',
-          chapter: 'JCI Tirupati',
-          zone: 'Zone XXVI',
-          phone: '+91 98765 43210',
-          email: 'president@jcitirupati.com',
-          website: 'https://lead.sriddha.com',
-          photoUrl: leaderPhoto
-        }
+      return res.status(404).json({
+        success: false,
+        message: 'Leader profile not found in database'
       });
     }
+
+    const leaderPhoto = user.profilePhotoUrl || user.photoUrl || '';
+    const chapterName = user.chapterName || 'JCI Tirupati';
+    const zone = user.zone || 'Zone XXVI';
 
     res.json({
       success: true,
       leader: {
         id: user.id,
-        name: user.name || 'JC Doraswamy Raju Meesala',
+        name: user.name,
         role: user.role || 'PRESIDENT',
-        chapter: user.chapterName || 'JCI Tirupati',
-        zone: user.zone || 'Zone XXVI',
-        phone: user.phone || '+91 98765 43210',
-        email: user.email || 'president@jcitirupati.com',
+        chapter: chapterName,
+        zone: zone,
+        phone: user.phone || '',
+        email: user.email || '',
         website: 'https://lead.sriddha.com',
         photoUrl: leaderPhoto
       }
     });
   } catch (error) {
+    console.error('Error fetching card leader profile:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
     console.error('Error fetching card leader profile:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -86,13 +83,14 @@ router.post('/exchange', (req, res) => {
 
     db.saveContact(newContact);
 
-    // Fetch leader details to supply back for vCard / phone save
-    const leader = db.findUserById(leaderId) || {
-      name: 'JC Doraswamy Raju Meesala',
+    // Fetch leader details dynamically from database
+    const users = db.getUsers();
+    const leader = (leaderId && db.findUserById(leaderId)) || users.find(u => u.role === 'PRESIDENT') || users[0] || {
+      name: 'Leader',
       role: 'PRESIDENT',
-      chapterName: 'JCI Tirupati',
-      phone: '+91 98765 43210',
-      email: 'president@jcitirupati.com'
+      chapterName: 'JCI Chapter',
+      phone: '',
+      email: ''
     };
 
     // Build standard RFC vCard 3.0

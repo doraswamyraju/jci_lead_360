@@ -213,6 +213,7 @@ fun ProfileScreen(
     name: String,
     chapterName: String,
     role: String,
+    token: String? = null,
     onLogout: () -> Unit,
     onProfileUpdated: (updatedName: String, updatedChapter: String, photoPath: String?, logoPath: String?) -> Unit = { _, _, _, _ -> }
 ) {
@@ -513,6 +514,44 @@ fun ProfileScreen(
                         onProfileUpdated(presidentNameInput.trim(), chapterNameInput.trim(), savedPresidentPhotoPath, savedChapterLogoPath)
                         isSaved = true
                         Toast.makeText(context, "✓ President & LO Details Saved Successfully!", Toast.LENGTH_SHORT).show()
+
+                        // Push updated details to live backend so web card & directory update immediately
+                        if (!token.isNullOrBlank()) {
+                            coroutineScope.launch {
+                                try {
+                                    withContext(Dispatchers.IO) {
+                                        val retrofit = Retrofit.Builder()
+                                            .baseUrl("https://lead.sriddha.com")
+                                            .addConverterFactory(GsonConverterFactory.create())
+                                            .build()
+                                        val service = retrofit.create(ApiService::class.java)
+
+                                        val serverPhotoUrl = prefs.getString("president_photo_server_url", null)
+                                        service.updateOfficerDetails(
+                                            token = "Bearer $token",
+                                            request = com.jci2027.lead360.network.UpdateOfficerRequest(
+                                                name = presidentNameInput.trim(),
+                                                phone = presidentPhone.trim(),
+                                                email = presidentEmail.trim(),
+                                                photoUrl = serverPhotoUrl,
+                                                role = role
+                                            )
+                                        )
+                                        service.updateChapterDetails(
+                                            token = "Bearer $token",
+                                            request = com.jci2027.lead360.network.UpdateChapterRequest(
+                                                chapterName = chapterNameInput.trim(),
+                                                zone = chapterZone.trim(),
+                                                phone = chapterPhone.trim(),
+                                                email = chapterEmail.trim()
+                                            )
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
                     shape = RoundedCornerShape(10.dp),

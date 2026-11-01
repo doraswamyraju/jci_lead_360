@@ -77,6 +77,19 @@ router.post('/', (req, res, next) => { if (req.headers.authorization) return aut
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
+    try {
+      const users = db.getUsers();
+      let user = (req.user && req.user.id) ? db.findUserById(req.user.id) : null;
+      if (!user) user = users.find(u => u.role === 'PRESIDENT') || users[0];
+      if (user) {
+        user.photoUrl = fileUrl;
+        user.profilePhotoUrl = fileUrl;
+        user.updatedAt = new Date().toISOString();
+        db.saveUser(user);
+      }
+    } catch (saveErr) {
+      console.error('[Upload] Error linking photo to user:', saveErr);
+    }
     return res.json({
       success: true,
       fileUrl,

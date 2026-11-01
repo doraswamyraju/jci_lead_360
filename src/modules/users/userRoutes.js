@@ -236,18 +236,28 @@ router.post('/chapter-details', authenticate, (req, res) => {
 });
 
 /**
- * Update Officer Details (Photo, Name, Phone)
+ * Update Officer Details (Photo, Name, Phone, Email)
  */
 router.post('/officer-details', authenticate, (req, res) => {
   try {
-    const { userId, name, phone, photoUrl, role } = req.body;
-    const user = db.findUserById(userId);
+    const { userId, name, phone, email, photoUrl, role } = req.body;
+    let user = userId ? db.findUserById(userId) : null;
+    if (!user && req.user) {
+      user = db.findUserById(req.user.id);
+    }
+    if (!user) {
+      user = db.getUsers().find(u => u.role === 'PRESIDENT') || db.getUsers()[0];
+    }
     if (!user) {
       return res.status(404).json({ success: false, message: 'Officer not found' });
     }
     if (name) user.name = name.trim();
     if (phone) user.phone = phone.trim();
-    if (photoUrl) user.photoUrl = photoUrl;
+    if (email) user.email = email.trim();
+    if (photoUrl) {
+      user.photoUrl = photoUrl;
+      user.profilePhotoUrl = photoUrl;
+    }
     if (role) user.role = role;
     user.updatedAt = new Date().toISOString();
     
