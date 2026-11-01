@@ -157,12 +157,19 @@ Implemented [`ScanCardModuleScreen.kt`](file:///d:/Lead360/mobile-android/app/sr
   - **Capture Timestamp & Meeting Notes**: Discussion brief and follow-up date.
 - **Dynamic Event Filter Bar**: Interactive filter pills at the top with live counts (e.g., `📍 Zonecon 2027 (2)`, `📍 B2B Expo (1)`). Tapping an event instantly shows **only** the contacts collected during that specific conference or meet.
 - **Global Search**: Search simultaneously across contact name, company, designation, city, venue, and event tag.
-- **2-Step Camera Viewfinder & Real Google ML Kit OCR Engine**:
+- **2-Step Camera Viewfinder & CardSnap ML Kit OCR Engine**:
   - Integrated official Google ML Kit Text Recognition (`com.google.mlkit:text-recognition:16.0.1`).
-  - Implemented [`BusinessCardOcrEngine.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/BusinessCardOcrEngine.kt) using on-device neural network text recognition:
-    - **Smart RegEx & Heuristic Parsing**: Automatically detects emails, phone numbers, website URLs, executive designations (`President`, `Managing Director`, `Secretary`, `CEO`, `Founder`), and business enterprise names.
-    - **Live Device Camera / Gallery Intake**: Real-time camera viewfinder or gallery picker intake with `ActivityResultContracts.TakePicturePreview()` and `GetContent()`.
-  - **Mandatory Review & Duplicate Detection**: Shows proposed parsed fields for instant review, detects duplicate phone numbers, and allows 1-tap save.
+  - Integrated **CardSnap** algorithms ([`CardSnapImageCropper.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/CardSnapImageCropper.kt)):
+    - **Sobel Filter Edge Detection**: Downscales, converts to grayscale, computes 3x3 Sobel gradient magnitude, and applies card aspect perspective auto-crop.
+  - Implemented **CardSnap Deduplication & Similarity** ([`CardSnapDeduplicator.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/CardSnapDeduplicator.kt)):
+    - Levenshtein distance normalized similarity scoring (`> 0.82` threshold).
+    - Exact digit phone normalization matching and case-insensitive email matching.
+  - Implemented **CardSnap Contact Extraction & Confidence Scorer** ([`BusinessCardOcrEngine.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/BusinessCardOcrEngine.kt)):
+    - Address block multi-line detection (street suffixes, zip codes, and cities).
+    - Confidence level classification (`HIGH`, `MEDIUM`, `LOW`) rendered on the review badge.
+  - **LEAD360 Backend Sync & Android Contacts**:
+    - Backend endpoints `POST /api/contacts` and `GET /api/contacts` mounted on Node.js/Express server.
+    - Android native `ContactsContract.Intents.Insert` integration saving full name, company, title, email, phone, postal address, and event notes to the device Contacts app.
 - **1-Tap Direct Outreach Actions**:
   - `📞 Call`: Triggers native phone dialer.
   - `💬 WhatsApp`: Opens pre-filled WhatsApp greeting (`"Hi [Name], pleasure meeting you at [EventTag]!"`).
