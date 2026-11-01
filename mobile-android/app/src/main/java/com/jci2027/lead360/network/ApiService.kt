@@ -27,6 +27,33 @@ data class UserDto(
     val chapterName: String?
 )
 
+data class SaveContactRequest(
+    val id: String,
+    val name: String,
+    val company: String,
+    val designation: String,
+    val phone: String,
+    val email: String,
+    val website: String,
+    val address: String,
+    val eventTag: String,
+    val locationName: String,
+    val city: String,
+    val notes: String,
+    val followUpDate: String
+)
+
+data class SaveContactResponse(
+    val success: Boolean,
+    val message: String?,
+    val contact: SaveContactRequest?
+)
+
+data class GetContactsResponse(
+    val success: Boolean,
+    val contacts: List<SaveContactRequest>?
+)
+
 interface ApiService {
     @POST("/api/auth/login")
     suspend fun login(
@@ -37,4 +64,15 @@ interface ApiService {
     suspend fun getTemplates(
         @Header("Authorization") token: String
     ): Response<TemplatesResponse>
+
+    @POST("/api/contacts")
+    suspend fun saveContact(
+        @Header("Authorization") token: String,
+        @Body contact: SaveContactRequest
+    ): Response<SaveContactResponse>
+
+    @GET("/api/contacts")
+    suspend fun getContacts(
+        @Header("Authorization") token: String
+    ): Response<GetContactsResponse>
 }

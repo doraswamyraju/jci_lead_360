@@ -8,6 +8,7 @@ import authRoutes from './modules/auth/authRoutes.js';
 import userRoutes from './modules/users/userRoutes.js';
 import templateRoutes from './modules/templates/templateRoutes.js';
 import uploadRoutes from './modules/upload/uploadRoutes.js';
+import contactRoutes from './modules/contacts/contactRoutes.js';
 import { seedInitialData } from './database/seed.js';
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/contacts', contactRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -49,23 +51,19 @@ app.use((err, req, res, next) => {
   console.error('[Unhandled Server Error]:', err);
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal server error occurred'
+    message: err.message || 'Internal Server Error'
   });
 });
 
-// Fallback to Single Page App index
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+// Initialize database seed & start listening
+seedInitialData();
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`===============================================`);
+  console.log(`🚀 JCI LEAD360 Server running on port ${PORT}`);
+  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`===============================================`);
 });
 
-// Seed initial authentic accounts and start server
-seedInitialData().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`===============================================`);
-    console.log(`  🚀 JCI LEAD360 Production Server Online`);
-    console.log(`  🌐 Port: ${PORT} (0.0.0.0)`);
-    console.log(`  🔒 Environment: ${process.env.NODE_ENV || 'production'}`);
-    console.log(`  🔗 Domain: https://lead.sriddha.com`);
-    console.log(`===============================================`);
-  });
-});
+export default app;

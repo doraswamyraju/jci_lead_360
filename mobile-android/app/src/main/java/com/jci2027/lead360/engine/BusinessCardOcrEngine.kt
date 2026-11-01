@@ -18,7 +18,8 @@ data class ParsedCardData(
     val email: String = "",
     val website: String = "",
     val address: String = "",
-    val rawText: String = ""
+    val rawText: String = "",
+    val confidence: String = "HIGH" // HIGH, MEDIUM, LOW
 )
 
 object BusinessCardOcrEngine {
@@ -26,131 +27,116 @@ object BusinessCardOcrEngine {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
-    private val emailPattern = Pattern.compile(
-        "[a-zA-Z0-9+._%\\-]{1,256}@[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}(\\.[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25})+"
+    // RegEx patterns adapted from CardSnap ContactParser
+    private val EMAIL_REGEX = Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
+    private val PHONE_REGEX = Regex("""(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{1,4}\)?[-.\s]?)?\d{2,6}[-.\s]?\d{2,6}(?:[-.\s]?\d{2,6})*""")
+    private val WEBSITE_REGEX = Regex("(?:https?://)?(?:www\\.)?[a-zA-Z0-9][a-zA-Z0-9-]+\\.[a-zA-Z]{2,}(?:/[^\\s]*)?")
+    private val COMPANY_SUFFIXES = Regex(
+        "\\b(?:Pty\\s+Ltd|Inc|LLC|Ltd|Corp|Corporation|Company|Co\\.|GmbH|AG|SA|SAS|SL|BV|NV|PLC|LLP|Group|Technologies|Solutions|Consulting|Associates|Partners|Enterprises|Industries)\\b",
+        RegexOption.IGNORE_CASE
     )
-
-    private val phonePattern = Pattern.compile(
-        "(\\+?\\d{1,3}[-.\\s]?)?(\\(?\\d{2,5}\\)?[-.\\s]?)?\\d{3,5}[-.\\s]?\\d{4,5}"
+    private val TITLE_KEYWORDS = Regex(
+        "\\b(?:CEO|CTO|CFO|COO|CMO|President|Director|Manager|Engineer|Founder|Co-Founder|VP\\s+of|SVP\\s+of|Director\\s+of|Head\\s+of|VP|SVP|EVP|Chief|Head|Lead|Senior|Junior|Associate|Consultant|Specialist|Coordinator|Administrator|Analyst|Developer|Architect|Officer|Partner|Owner|Principal|Advisor|Doctor|Dr\\.|Secretary|Treasurer|Senator)\\b",
+        RegexOption.IGNORE_CASE
     )
-
-    private val websitePattern = Pattern.compile(
-        "(https?://)?(www\\.)?[a-zA-Z0-9\\-]{2,256}\\.(com|in|org|net|co|io|biz|info)",
-        Pattern.CASE_INSENSITIVE
-    )
-
-    private val designationKeywords = listOf(
-        "president", "vice president", "secretary", "treasurer", "director", "manager",
-        "founder", "co-founder", "ceo", "cto", "cfo", "md", "managing director",
-        "partner", "consultant", "advocate", "doctor", "dr.", "engineer", "officer",
-        "chair", "chairman", "lead", "head", "executive", "senator", "past president"
-    )
-
-    private val companyKeywords = listOf(
-        "ltd", "limited", "pvt", "private", "corp", "corporation", "inc", "technologies",
-        "solutions", "enterprises", "associates", "group", "industries", "agency", "academy",
-        "clinics", "hospital", "builders", "realty", "infra", "services", "chambers"
+    private val ADDRESS_STREET_REGEX = Regex(
+        "\\d+[A-Za-z]?\\s+.*(?:Street|St\\.?|Road|Rd\\.?|Avenue|Ave\\.?|Drive|Dr\\.?|Lane|Ln\\.?|Boulevard|Blvd\\.?|Way|Court|Ct\\.?|Plaza|Square|Highway|Hwy\\.?|Parkway|Pkwy\\.?|Circle|Cir\\.?|Terrace|Ter\\.?|Place|Loop)",
+        RegexOption.IGNORE_CASE
     )
 
     /**
-     * Process bitmap using Google ML Kit on-device neural text recognizer
+     * Process bitmap using CardSnap auto-crop & Google ML Kit on-device neural text recognizer
      */
-    suspend fun processCardBitmap(bitmap: Bitmap): ParsedCardData = suspendCancellableCoroutine { cont ->
-        val image = InputImage.fromBitmap(bitmap, 0)
-        recognizer.process(image)
-            .addOnSuccessListener { visionText ->
-                if (cont.isActive) {
-                    val parsed = parseExtractedText(visionText.text)
-                    cont.resume(parsed)
+    suspend fun processCardBitmap(originalBitmap: Bitmap): ParsedCardData = suspendCancellableCoroutine { cont ->
+        try {
+            // Apply CardSnap perspective edge-detection auto-crop
+            val croppedBitmap = CardSnapImageCropper.cropToCardGuide(originalBitmap)
+            val image = InputImage.fromBitmap(croppedBitmap, 0)
+            recognizer.process(image)
+                .addOnSuccessListener { visionText ->
+                    if (cont.isActive) {
+                        val parsed = parseExtractedText(visionText.text)
+                        cont.resume(parsed)
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                if (cont.isActive) {
-                    cont.resumeWithException(exception)
+                .addOnFailureListener { exception ->
+                    if (cont.isActive) {
+                        cont.resumeWithException(exception)
+                    }
                 }
+        } catch (e: Exception) {
+            if (cont.isActive) {
+                cont.resumeWithException(e)
             }
+        }
     }
 
     /**
-     * Heuristic parser to extract business card fields from OCR text lines
+     * Heuristic CardSnap contact parser with address line accumulation and confidence scoring
      */
-    fun parseExtractedText(raw: String): ParsedCardData {
-        val lines = raw.lines()
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
+    fun parseExtractedText(ocrText: String): ParsedCardData {
+        val lines = ocrText.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+        val emails = EMAIL_REGEX.findAll(ocrText).map { it.value }.toList()
+        val phones = PHONE_REGEX.findAll(ocrText).map { it.value.trim() }.filter { it.filter { c -> c.isDigit() }.length in 8..15 }.toList()
+        val websites = WEBSITE_REGEX.findAll(ocrText).map { it.value }.filter { !it.contains("@") }.toList()
 
-        var foundEmail = ""
-        var foundPhone = ""
-        var foundWebsite = ""
-        var foundName = ""
-        var foundDesignation = ""
-        var foundCompany = ""
-
-        val remainingLines = mutableListOf<String>()
+        var name = ""
+        var company = ""
+        var title = ""
+        val addressLines = mutableListOf<String>()
 
         for (line in lines) {
-            val emailMatcher = emailPattern.matcher(line)
-            if (foundEmail.isBlank() && emailMatcher.find()) {
-                foundEmail = emailMatcher.group()
-                continue
+            // Check for valid Name (not email, no digits, 2..45 chars)
+            if (name.isBlank() && line.length in 3..45 && !line.contains("@") && line.none { it.isDigit() } && !TITLE_KEYWORDS.containsMatchIn(line) && !COMPANY_SUFFIXES.containsMatchIn(line)) {
+                name = line
             }
-
-            val webMatcher = websitePattern.matcher(line)
-            if (foundWebsite.isBlank() && webMatcher.find()) {
-                foundWebsite = webMatcher.group()
-                continue
+            // Check company
+            if (company.isBlank() && COMPANY_SUFFIXES.containsMatchIn(line)) {
+                company = line
             }
-
-            val phoneMatcher = phonePattern.matcher(line)
-            if (foundPhone.isBlank() && phoneMatcher.find()) {
-                val candidate = phoneMatcher.group().trim()
-                if (candidate.filter { it.isDigit() }.length in 8..14) {
-                    foundPhone = candidate
-                    continue
-                }
+            // Check title / designation
+            if (title.isBlank() && TITLE_KEYWORDS.containsMatchIn(line)) {
+                title = line
             }
-
-            // Check if line indicates designation
-            val lower = line.lowercase()
-            if (foundDesignation.isBlank() && designationKeywords.any { lower.contains(it) }) {
-                foundDesignation = line
-                continue
-            }
-
-            // Check if line indicates company
-            if (foundCompany.isBlank() && companyKeywords.any { lower.contains(it) }) {
-                foundCompany = line
-                continue
-            }
-
-            remainingLines.add(line)
-        }
-
-        // The top-most remaining short line is usually the person's name
-        if (remainingLines.isNotEmpty()) {
-            val candidateName = remainingLines.firstOrNull { line ->
-                val words = line.split("\\s+".toRegex())
-                words.size in 1..4 && line.none { it.isDigit() } && line.length in 3..35
-            }
-            if (candidateName != null) {
-                foundName = candidateName
-                remainingLines.remove(candidateName)
+            // Check address
+            if (ADDRESS_STREET_REGEX.containsMatchIn(line)) {
+                addressLines.add(line)
             }
         }
 
-        // If company wasn't found by keyword, second line or header line often is company
-        if (foundCompany.isBlank() && remainingLines.isNotEmpty()) {
-            foundCompany = remainingLines.first()
+        // Fallbacks
+        if (name.isBlank() && lines.isNotEmpty()) {
+            name = lines.firstOrNull { it.none { c -> c.isDigit() } } ?: lines.first()
+        }
+        if (company.isBlank() && lines.size > 1) {
+            company = lines.getOrNull(1) ?: "Enterprise"
+        }
+        if (title.isBlank()) {
+            title = "Executive / Delegate"
+        }
+
+        val address = addressLines.joinToString(", ")
+
+        // Score confidence
+        val hasRealName = name.isNotBlank() && name.length >= 2
+        val hasPhone = phones.isNotEmpty()
+        val hasEmail = emails.isNotEmpty()
+        val confidence = when {
+            hasRealName && (hasPhone || hasEmail) -> "HIGH"
+            hasRealName || hasPhone || hasEmail -> "MEDIUM"
+            else -> "LOW"
         }
 
         return ParsedCardData(
-            name = foundName.ifBlank { "JC Executive" },
-            designation = foundDesignation.ifBlank { "Chapter Member / Delegate" },
-            company = foundCompany.ifBlank { "Business Enterprise" },
-            phone = foundPhone.ifBlank { "+91 " },
-            email = foundEmail,
-            website = foundWebsite,
-            rawText = raw
+            name = name,
+            designation = title,
+            company = company,
+            phone = phones.firstOrNull() ?: "",
+            email = emails.firstOrNull() ?: "",
+            website = websites.firstOrNull() ?: "",
+            address = address,
+            rawText = ocrText,
+            confidence = confidence
         )
     }
 }

@@ -123,6 +123,23 @@ export const db = {
     writeStore(store);
     return true;
   },
+  getContacts: (userId) => {
+    const store = readStore();
+    if (!store.business_contacts) store.business_contacts = [];
+    return userId ? store.business_contacts.filter(c => c.userId === userId || !c.userId) : store.business_contacts;
+  },
+  saveContact: (contact) => {
+    const store = readStore();
+    if (!store.business_contacts) store.business_contacts = [];
+    const idx = store.business_contacts.findIndex(c => c.id === contact.id);
+    if (idx >= 0) {
+      store.business_contacts[idx] = { ...store.business_contacts[idx], ...contact, updatedAt: new Date().toISOString() };
+    } else {
+      store.business_contacts.unshift({ ...contact, createdAt: new Date().toISOString() });
+    }
+    writeStore(store);
+    return contact;
+  },
   getStats: () => {
     const store = readStore();
     return {
