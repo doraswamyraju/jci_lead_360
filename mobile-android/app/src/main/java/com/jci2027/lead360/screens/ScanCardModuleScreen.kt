@@ -97,7 +97,68 @@ fun ScanCardModuleScreen(
 
     var currentStep by remember { mutableStateOf(ScannerStep.ENTRY) }
     var cardModel by remember { mutableStateOf(ScannedCardModel()) }
-    val savedContactsHistory = remember { mutableStateListOf<ScannedCardModel>() }
+    
+    // Existing saved contacts for directory
+    val contactList = remember {
+        mutableStateListOf(
+            ScannedCardModel(
+                id = "c1",
+                name = "JC Sen. Rajesh Singhania",
+                designation = "National Vice President",
+                company = "Apex Solar & Energies Ltd",
+                phone = "+91 98490 11223",
+                email = "rajesh@apexsolar.in",
+                website = "www.apexsolar.in",
+                address = "Jubilee Hills, Hyderabad",
+                eventTag = "Zonecon 2027",
+                city = "Hyderabad",
+                confidence = "HIGH"
+            ),
+            ScannedCardModel(
+                id = "c2",
+                name = "JC HGF Priya Nambiar",
+                designation = "Chapter President",
+                company = "Nambiar Logistics & Cargo",
+                phone = "+91 97420 55667",
+                email = "priya@nambiarlogistics.com",
+                website = "www.nambiarlogistics.com",
+                address = "Whitefield, Bangalore",
+                eventTag = "Zonecon 2027",
+                city = "Hyderabad",
+                confidence = "HIGH"
+            ),
+            ScannedCardModel(
+                id = "c3",
+                name = "Mahesh Babu Naidu",
+                designation = "Director - SME Relations",
+                company = "AP Chamber of Commerce",
+                phone = "+91 94411 22334",
+                email = "mahesh@apchamber.in",
+                website = "www.apchamber.in",
+                address = "Tirupati Chamber Hub",
+                eventTag = "B2B Expo & Conclave",
+                city = "Tirupati",
+                confidence = "HIGH"
+            ),
+            ScannedCardModel(
+                id = "c4",
+                name = "Dr. Shalini Gupta",
+                designation = "Chief Medical Consultant",
+                company = "Apollo Specialty Clinics",
+                phone = "+91 98220 54321",
+                email = "drshalini@apollo.com",
+                website = "www.apolloclinics.com",
+                address = "Renigunta Road, Tirupati",
+                eventTag = "GBM January 2027",
+                city = "Tirupati",
+                confidence = "HIGH"
+            )
+        )
+    }
+
+    var selectedEventFilter by remember { mutableStateOf("All Events") }
+    var searchQuery by remember { mutableStateOf("") }
+    var viewContactDetail by remember { mutableStateOf<ScannedCardModel?>(null) }
 
     // Check & request Camera Permission
     var hasCameraPermission by remember {
@@ -157,10 +218,16 @@ fun ScanCardModuleScreen(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (currentStep) {
                 ScannerStep.ENTRY -> {
-                    // SCREEN 1: ENTRY SCREEN (Exact Blueprint)
-                    ScannerEntryScreen(
+                    // SCREEN 1: DIRECTORY SCREEN with Event Filters, Search, and 1-tap "Scan Card" button
+                    ScannerDirectoryScreen(
                         chapterName = chapterName,
+                        contacts = contactList,
+                        selectedEventFilter = selectedEventFilter,
+                        onEventFilterSelected = { selectedEventFilter = it },
+                        searchQuery = searchQuery,
+                        onSearchQueryChanged = { searchQuery = it },
                         onScanClick = {
+                            cardModel = ScannedCardModel()
                             if (hasCameraPermission) {
                                 currentStep = ScannerStep.SCAN_FRONT
                             } else {
@@ -168,8 +235,10 @@ fun ScanCardModuleScreen(
                             }
                         },
                         onGalleryClick = {
+                            cardModel = ScannedCardModel()
                             galleryPickerLauncher.launch("image/*")
                         },
+                        onContactClick = { viewContactDetail = it },
                         onBack = onBack
                     )
                 }
@@ -251,14 +320,36 @@ fun ScanCardModuleScreen(
                     // SCREEN 4: EXTRACT & REVIEW SCREEN
                     ExtractAndReviewScreen(
                         cardModel = cardModel,
-                        existingContacts = savedContactsHistory.map { Triple(it.name, it.phone, it.email) },
+                        existingContacts = contactList.map { Triple(it.name, it.phone, it.email) },
                         onRescan = {
                             cardModel = ScannedCardModel()
                             currentStep = ScannerStep.SCAN_FRONT
                         },
                         onSave = { updatedCard ->
                             cardModel = updatedCard
-                            savedContactsHistory.add(0, updatedCard)
+
+                            // CardSnap Deduplication
+                            val (isDuplicate, reason) = CardSnapDeduplicator.checkDuplicate(
+                                updatedCard.name,
+                                updatedCard.phone,
+                                updatedCard.email,
+                                updatedCard.company,
+                                contactList.map { Triple(it.name, it.phone, it.email) }
+                            )
+
+                            if (isDuplicate) {
+                                val idx = contactList.indexOfFirst {
+                                    it.phone.filter { c -> c.isDigit() } == updatedCard.phone.filter { c -> c.isDigit() } ||
+                                            it.name.equals(updatedCard.name, ignoreCase = true)
+                                }
+                                if (idx >= 0) {
+                                    contactList[idx] = updatedCard
+                                } else {
+                                    contactList.add(0, updatedCard)
+                                }
+                            } else {
+                                contactList.add(0, updatedCard)
+                            }
 
                             // Save to Phone Contacts if enabled
                             if (updatedCard.savedToPhoneContacts) {
@@ -286,154 +377,367 @@ fun ScanCardModuleScreen(
             }
         }
     }
+
+    // Modal Contact Detail
+    viewContactDetail?.let { contact ->
+        ContactDetailPopup(
+            contact = contact,
+            onDismiss = { viewContactDetail = null }
+        )
+    }
 }
 
 // =========================================================================
-// SCREEN 1: ENTRY SCREEN (Matching Reference Design 1)
+// SCREEN 1: DIRECTORY SCREEN (Search, Event Filters, Contact List, 1-Tap Scan)
 // =========================================================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScannerEntryScreen(
+fun ScannerDirectoryScreen(
     chapterName: String,
+    contacts: List<ScannedCardModel>,
+    selectedEventFilter: String,
+    onEventFilterSelected: (String) -> Unit,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     onScanClick: () -> Unit,
     onGalleryClick: () -> Unit,
+    onContactClick: (ScannedCardModel) -> Unit,
     onBack: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .verticalScroll(rememberScrollState())
-    ) {
-        // Dark Blue Top App Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF091322), Color(0xFF0F2342))
-                    )
-                )
-                .padding(horizontal = 16.dp, vertical = 20.dp)
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+    val context = LocalContext.current
+
+    // Dynamic list of unique events for filtering
+    val availableEvents = remember(contacts) {
+        listOf("All Events") + contacts.map { it.eventTag }.distinct()
+    }
+
+    // Filtered contacts based on event filter & search text
+    val filteredContacts = remember(contacts, selectedEventFilter, searchQuery) {
+        contacts.filter { contact ->
+            val matchesEvent = (selectedEventFilter == "All Events" || contact.eventTag == selectedEventFilter)
+            val matchesQuery = searchQuery.isBlank() ||
+                    contact.name.contains(searchQuery, ignoreCase = true) ||
+                    contact.company.contains(searchQuery, ignoreCase = true) ||
+                    contact.eventTag.contains(searchQuery, ignoreCase = true) ||
+                    contact.city.contains(searchQuery, ignoreCase = true)
+            matchesEvent && matchesQuery
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text("Business Card Scanner", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color(0xFF0F172A))
+                        Text("CardSnap Engine • LO Networking Rolodex", fontSize = 11.sp, color = Color(0xFF64748B))
                     }
-                    Spacer(Modifier.width(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("JCI", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                        Spacer(Modifier.width(6.dp))
-                        Surface(
-                            color = Color(0xFF0284C7),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text("LEAD360", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Text("←", fontSize = 22.sp, color = Color(0xFF0F172A))
+                    }
+                },
+                actions = {
+                    Button(
+                        onClick = onScanClick,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text("📷 Scan Card", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+            )
+        },
+        containerColor = Color(0xFFF8FAFC)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Search Input Box & Event Filter Bar
+            Surface(color = Color.White, shadowElevation = 1.dp) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchQueryChanged,
+                        placeholder = { Text("Search by name, company, event, or city...", fontSize = 13.sp) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF0097D8),
+                            unfocusedBorderColor = Color(0xFFE2E8F0)
+                        )
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    // Event Filter Pills (e.g. Zonecon 2027, NATCON, GBM)
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp)
+                    ) {
+                        items(availableEvents) { event ->
+                            val isSelected = selectedEventFilter == event
+                            val count = if (event == "All Events") contacts.size else contacts.count { it.eventTag == event }
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (isSelected) Color(0xFF0097D8) else Color(0xFFF1F5F9),
+                                border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                                modifier = Modifier.clickable { onEventFilterSelected(event) }
+                            ) {
+                                Text(
+                                    text = "$event ($count)",
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) Color.White else Color(0xFF475569),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
-                        Spacer(Modifier.width(8.dp))
-                        Text("President Portal", color = Color(0xFF94A3B8), fontSize = 12.sp)
                     }
                 }
+            }
 
-                Spacer(Modifier.height(24.dp))
+            // Quick Gallery Import Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "SAVED VISITING CARDS (${filteredContacts.size})",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF64748B)
+                )
 
-                // Hero Graphic Placeholder
+                TextButton(
+                    onClick = onGalleryClick,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text("🖼️ Import from Gallery", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0284C7))
+                }
+            }
+
+            // Contacts List
+            if (filteredContacts.isEmpty()) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(130.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF1E293B).copy(alpha = 0.5f))
-                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+                        .fillMaxSize()
+                        .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("📇 ⇆ 📱", fontSize = 42.sp)
+                        Text("📇", fontSize = 42.sp)
                         Spacer(Modifier.height(8.dp))
-                        Text("Dual-Sided Smart Scanner", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("No contacts found for '$selectedEventFilter'", fontWeight = FontWeight.Bold, color = Color(0xFF64748B), fontSize = 14.sp)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Tap 'Scan Card' to capture visiting cards with CameraX.", fontSize = 12.sp, color = Color(0xFF94A3B8))
                     }
                 }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    items(filteredContacts) { contact ->
+                        Card(
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(1.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onContactClick(contact) }
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                // Header: Event Tag Pill & Confidence
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Surface(
+                                        color = Color(0xFFE0F2FE),
+                                        shape = RoundedCornerShape(6.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text("📍 ${contact.eventTag}", color = Color(0xFF0284C7), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                            if (contact.city.isNotBlank()) {
+                                                Text(" • ${contact.city}", color = Color(0xFF0369A1), fontSize = 10.sp)
+                                            }
+                                        }
+                                    }
 
-                Spacer(Modifier.height(20.dp))
-                Text("Business Card Scanner", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    "Scan both sides of a business card, extract details and save to LEAD360.",
-                    color = Color(0xFFBAE6FD),
-                    fontSize = 13.sp,
-                    lineHeight = 18.sp
-                )
-            }
-        }
+                                    Surface(
+                                        color = if (contact.confidence == "HIGH") Color(0xFFDCFCE7) else Color(0xFFFEF3C7),
+                                        shape = RoundedCornerShape(4.dp)
+                                    ) {
+                                        Text(
+                                            contact.confidence,
+                                            color = if (contact.confidence == "HIGH") Color(0xFF15803D) else Color(0xFFB45309),
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
 
-        // 4 Value Prop Features
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            FeatureValueRow(
-                iconEmoji = "⚡",
-                iconBg = Color(0xFFFEF3C7),
-                title = "2-Side Scanning",
-                desc = "Capture front and back of the card for complete information."
-            )
-            FeatureValueRow(
-                iconEmoji = "🤖",
-                iconBg = Color(0xFFE0F2FE),
-                title = "Auto Extract Details",
-                desc = "Name, designation, company, phone, email, website, address etc."
-            )
-            FeatureValueRow(
-                iconEmoji = "🗄️",
-                iconBg = Color(0xFFDCFCE7),
-                title = "Save to LEAD360",
-                desc = "Add to your LO contact directory and tag conference/meet origin."
-            )
-            FeatureValueRow(
-                iconEmoji = "📱",
-                iconBg = Color(0xFFF3E8FF),
-                title = "Save to Phone Contacts",
-                desc = "Optionally add directly to your device contacts."
-            )
+                                Spacer(Modifier.height(10.dp))
 
-            Spacer(Modifier.height(16.dp))
+                                // Contact Info
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(46.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF0097D8).copy(alpha = 0.12f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            contact.name.take(2).uppercase(),
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF0097D8),
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    Spacer(Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(contact.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF0F172A))
+                                        Text("${contact.designation} • ${contact.company}", fontSize = 12.sp, color = Color(0xFF0284C7), fontWeight = FontWeight.Medium)
+                                        Spacer(Modifier.height(2.dp))
+                                        Text("📞 ${contact.phone}  |  ✉️ ${contact.email}", fontSize = 11.sp, color = Color(0xFF64748B))
+                                    }
+                                }
 
-            // Primary Action Buttons
-            Button(
-                onClick = onScanClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8))
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("📷", fontSize = 18.sp)
-                    Spacer(Modifier.width(10.dp))
-                    Text("Scan Business Card", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
-            }
+                                Spacer(Modifier.height(12.dp))
+                                HorizontalDivider(color = Color(0xFFF1F5F9))
+                                Spacer(Modifier.height(10.dp))
 
-            OutlinedButton(
-                onClick = onGalleryClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF0097D8))
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("🖼️", fontSize = 18.sp)
-                    Spacer(Modifier.width(10.dp))
-                    Text("Choose from Gallery", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0097D8))
+                                // Fast Action Bar (Call, WhatsApp, Save to Device Contacts)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contact.phone}"))
+                                            context.startActivity(dialIntent)
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        contentPadding = PaddingValues(vertical = 4.dp),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text("📞 Call", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            val cleanPhone = contact.phone.replace("+", "").replace(" ", "").replace("-", "")
+                                            val waIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$cleanPhone?text=Hi%20${contact.name},%20pleasure%20meeting%20you%20at%20${contact.eventTag}!"))
+                                            context.startActivity(waIntent)
+                                        },
+                                        modifier = Modifier.weight(1.2f),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                                        contentPadding = PaddingValues(vertical = 4.dp),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text("💬 WhatsApp", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            saveCardToPhoneContacts(context, contact)
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        contentPadding = PaddingValues(vertical = 4.dp),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text("💾 Save", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * Detailed Contact Popup View
+ */
+@Composable
+fun ContactDetailPopup(
+    contact: ScannedCardModel,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Text(contact.name, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color(0xFF0F172A))
+                Text("${contact.designation} • ${contact.company}", fontSize = 12.sp, color = Color(0xFF0097D8))
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Surface(
+                    color = Color(0xFFE0F2FE),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text("EVENT ORIGIN & LOCATION", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0369A1))
+                        Spacer(Modifier.height(4.dp))
+                        Text("📍 Event: ${contact.eventTag}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A))
+                        Text("🏢 City: ${contact.city}", fontSize = 11.sp, color = Color(0xFF475569))
+                    }
+                }
+
+                Text("📞 Phone: ${contact.phone}", fontSize = 13.sp, color = Color(0xFF334155))
+                Text("✉️ Email: ${contact.email}", fontSize = 13.sp, color = Color(0xFF334155))
+                if (contact.address.isNotBlank()) {
+                    Text("📍 Address: ${contact.address}", fontSize = 13.sp, color = Color(0xFF334155))
+                }
+                if (contact.website.isNotBlank()) {
+                    Text("🌐 Web: ${contact.website}", fontSize = 13.sp, color = Color(0xFF334155))
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    saveCardToPhoneContacts(context, contact)
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8))
+            ) {
+                Text("Save to Device Contacts")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }
 
 @Composable

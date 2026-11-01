@@ -9,6 +9,7 @@ import userRoutes from './modules/users/userRoutes.js';
 import templateRoutes from './modules/templates/templateRoutes.js';
 import uploadRoutes from './modules/upload/uploadRoutes.js';
 import contactRoutes from './modules/contacts/contactRoutes.js';
+import exchangeRoutes from './modules/contacts/exchangeRoutes.js';
 import { seedInitialData } from './database/seed.js';
 
 dotenv.config();
@@ -35,6 +36,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/contacts', contactRoutes);
+app.use('/api/card', exchangeRoutes);
+
+// Public reciprocal contact card landing page: /card/:userId
+app.get('/card/:userId?', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/card.html'));
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -47,6 +47,16 @@ object QrCodeGenerator {
     }
 
     /**
+     * Build Reciprocal Contact Exchange URL for QR Code.
+     * When scanned by any camera, it opens a responsive web portal allowing the visitor
+     * to input their details (which auto-saves to the Leader's LEAD360 Rolodex directory)
+     * and downloads the Leader's full contact card (.vcf) into the visitor's phone.
+     */
+    fun buildExchangeUrl(leaderId: String = "usr_president", baseUrl: String = "https://lead.sriddha.com"): String {
+        return "$baseUrl/card/$leaderId"
+    }
+
+    /**
      * Standard vCard 3.0 string formatted for instant reciprocal contact exchange
      */
     fun buildVCardString(
