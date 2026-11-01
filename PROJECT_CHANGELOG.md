@@ -157,9 +157,12 @@ Implemented [`ScanCardModuleScreen.kt`](file:///d:/Lead360/mobile-android/app/sr
   - **Capture Timestamp & Meeting Notes**: Discussion brief and follow-up date.
 - **Dynamic Event Filter Bar**: Interactive filter pills at the top with live counts (e.g., `📍 Zonecon 2027 (2)`, `📍 B2B Expo (1)`). Tapping an event instantly shows **only** the contacts collected during that specific conference or meet.
 - **Global Search**: Search simultaneously across contact name, company, designation, city, venue, and event tag.
-- **2-Step Camera Viewfinder & OCR Verification**:
-  - **Step 1**: On-screen card boundary viewfinder with front capture and optional back capture toggle.
-  - **Step 2**: Mandatory editable verification form preventing silent OCR mistakes, with automatic duplicate phone detection.
+- **2-Step Camera Viewfinder & Real Google ML Kit OCR Engine**:
+  - Integrated official Google ML Kit Text Recognition (`com.google.mlkit:text-recognition:16.0.1`).
+  - Implemented [`BusinessCardOcrEngine.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/BusinessCardOcrEngine.kt) using on-device neural network text recognition:
+    - **Smart RegEx & Heuristic Parsing**: Automatically detects emails, phone numbers, website URLs, executive designations (`President`, `Managing Director`, `Secretary`, `CEO`, `Founder`), and business enterprise names.
+    - **Live Device Camera / Gallery Intake**: Real-time camera viewfinder or gallery picker intake with `ActivityResultContracts.TakePicturePreview()` and `GetContent()`.
+  - **Mandatory Review & Duplicate Detection**: Shows proposed parsed fields for instant review, detects duplicate phone numbers, and allows 1-tap save.
 - **1-Tap Direct Outreach Actions**:
   - `📞 Call`: Triggers native phone dialer.
   - `💬 WhatsApp`: Opens pre-filled WhatsApp greeting (`"Hi [Name], pleasure meeting you at [EventTag]!"`).
