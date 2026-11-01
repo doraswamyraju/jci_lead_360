@@ -123,7 +123,31 @@ This document captures all enhancements, architectural updates, fixes, and new f
 
 ---
 
-## 🛠️ 7. Technical Stack & Dependencies
+## 📱 7. Executive Light Theme & Full Report Specifications (Projects, Members, OCR Card, Store)
+
+### 1. Executive Light Mode UI Overhaul
+- Converted [`DashboardOverviewScreen.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/screens/DashboardOverviewScreen.kt) to a crisp, high-visibility **Light Theme** (`#F8FAFC` slate background, clean white cards, royal blue gradient hero banner, and subtle borders).
+- Completely removed all "Free for PST" text and badges per user instructions across the Home dashboard and the Chapter Website Suite.
+
+### 2. Implementation of Missing Functional Modules
+As defined in Sections 5C, 5E, and 5K of the project specification report:
+- **Projects & Tasks Workspace** ([`ProjectsAndTasksScreen.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/screens/ProjectsAndTasksScreen.kt)):
+  - Tabbed interface switching between **Projects** and **Open Tasks**.
+  - Project Cards displaying progress bar, chair/lead, budget, category, venue, and task count.
+  - Interactive Task Checklist with real-time checkbox toggling, priority tags (`URGENT`, `HIGH`, `MEDIUM`), due dates, and project tags.
+  - Interactive Dialogs for "+ New Project" and "+ New Task".
+- **Members, Registration QR & Business Card Scanner** ([`MembersAndNetworkingScreen.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/screens/MembersAndNetworkingScreen.kt)):
+  - **Directory**: Full list of members with business category, enterprise name, role, phone, and quick contact shortcuts.
+  - **Pending Approvals Queue**: Live applicant queue with instant "Approve Member" (moves to active directory) and "Reject" actions.
+  - **Member Registration QR Generator**: Revocable registration QR dialog for self-service onboarding at General Body Meetings.
+  - **AI Business Card Scanner (OCR)**: Scans visiting cards from B2B and zone meets, parses contacts (name, company, title, phone, email), saves to LEAD360 rolodex, and supports vCard phone export.
+- **JCI Vendor Store & Marketplace** ([`VendorStoreScreen.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/screens/VendorStoreScreen.kt)):
+  - Category filters: *Momentos & Trophies, Banners & Printing, JCI Badges & Pins, Event Tech & AV*.
+  - Verified suppliers catalog with pricing estimates, turnaround time, ratings, and instant custom quotation request modal with WhatsApp fulfillment.
+
+---
+
+## 🛠️ 8. Technical Stack & Dependencies
 
 | Component | Technology |
 |---|---|
