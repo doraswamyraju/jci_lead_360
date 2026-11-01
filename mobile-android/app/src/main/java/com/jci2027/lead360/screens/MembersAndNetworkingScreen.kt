@@ -45,12 +45,12 @@ data class ScannedBusinessCard(
 @Composable
 fun MembersAndNetworkingScreen(
     chapterName: String,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNavigateToScanCard: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) } // 0: Directory, 1: Pending Approvals, 2: Business Card Scanner
     var showQrDialog by remember { mutableStateOf(false) }
-    var showScanSimulateDialog by remember { mutableStateOf(false) }
 
     val members = remember {
         mutableStateListOf(
@@ -259,7 +259,7 @@ fun MembersAndNetworkingScreen(
                                 )
                                 Spacer(Modifier.height(14.dp))
                                 Button(
-                                    onClick = { showScanSimulateDialog = true },
+                                    onClick = onNavigateToScanCard,
                                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                                     shape = RoundedCornerShape(10.dp)
                                 ) {
@@ -338,38 +338,6 @@ fun MembersAndNetworkingScreen(
                 }) { Text("Share QR Link") }
             },
             dismissButton = { TextButton(onClick = { showQrDialog = false }) { Text("Close") } }
-        )
-    }
-
-    // Card Scanner Simulation Dialog
-    if (showScanSimulateDialog) {
-        var cName by remember { mutableStateOf("Rajesh Singhania") }
-        var cCompany by remember { mutableStateOf("Apex Solar Energies") }
-        var cRole by remember { mutableStateOf("Managing Director") }
-        var cPhone by remember { mutableStateOf("+91 98490 99887") }
-        var cEmail by remember { mutableStateOf("rajesh@apexsolar.in") }
-
-        AlertDialog(
-            onDismissRequest = { showScanSimulateDialog = false },
-            title = { Text("Card Scanned Successfully (OCR)", fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Parsed details from camera capture:", fontSize = 12.sp, color = Color(0xFF64748B))
-                    OutlinedTextField(value = cName, onValueChange = { cName = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = cCompany, onValueChange = { cCompany = it }, label = { Text("Company") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = cRole, onValueChange = { cRole = it }, label = { Text("Designation") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = cPhone, onValueChange = { cPhone = it }, label = { Text("Phone") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = cEmail, onValueChange = { cEmail = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-                }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    scannedCards.add(0, ScannedBusinessCard("sc_${System.currentTimeMillis()}", cName, cCompany, cRole, cPhone, cEmail, "Just now"))
-                    Toast.makeText(context, "Card saved to LEAD360 Business Directory!", Toast.LENGTH_SHORT).show()
-                    showScanSimulateDialog = false
-                }) { Text("Save Card") }
-            },
-            dismissButton = { TextButton(onClick = { showScanSimulateDialog = false }) { Text("Cancel") } }
         )
     }
 }

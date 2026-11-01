@@ -170,7 +170,25 @@ Implemented [`ScanCardModuleScreen.kt`](file:///d:/Lead360/mobile-android/app/sr
 
 ---
 
-## 🛠️ 9. Technical Stack & Dependencies
+## 🪪 9. Official JCI Digital Business Card & Membership ID with Reciprocal QR
+
+### Capabilities Implemented
+- Designed [`JciDigitalBusinessCard`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/screens/AppScreens.kt) positioned prominently at the top of the **Profile Screen**, adhering to the latest **JCI Corporate Identity Guidelines**:
+  - **Front Side (Executive Visiting Card)**:
+    - Official JCI Brand Lockup (`Junior Chamber International`, Chapter name, and uploaded Chapter Logo).
+    - Leader Portrait photo with circular cyan border (tap to update photo).
+    - Designation & Year: e.g. `CHAPTER PRESIDENT • 2027`.
+    - Official Membership ID pill: `MEMBER ID: JCI-2027-[XXX]`.
+    - Quick contact lines: phone, verified email, and Zone/Country origin.
+  - **Back Side (Interactive Tap-to-Flip)**:
+    - Tapping the card flips to the **Back Side**.
+    - Generates a **real, sharp QR code** powered by ZXing (`com.google.zxing:core:3.5.3`).
+    - Encodes a full **vCard 3.0 profile** (`FN`, `ORG`, `TITLE`, `TEL`, `EMAIL`, `URL`, `NOTE`).
+    - Allows fellow leaders and delegates at conferences (Zonecon, NATCON) to scan and save the user's contact information into their phone's address book.
+
+---
+
+## 🛠️ 10. Technical Stack & Dependencies
 
 | Component | Technology |
 |---|---|
