@@ -157,19 +157,12 @@ Implemented [`ScanCardModuleScreen.kt`](file:///d:/Lead360/mobile-android/app/sr
   - **Capture Timestamp & Meeting Notes**: Discussion brief and follow-up date.
 - **Dynamic Event Filter Bar**: Interactive filter pills at the top with live counts (e.g., `📍 Zonecon 2027 (2)`, `📍 B2B Expo (1)`). Tapping an event instantly shows **only** the contacts collected during that specific conference or meet.
 - **Global Search**: Search simultaneously across contact name, company, designation, city, venue, and event tag.
-- **2-Step Camera Viewfinder & CardSnap ML Kit OCR Engine**:
-  - Integrated official Google ML Kit Text Recognition (`com.google.mlkit:text-recognition:16.0.1`).
-  - Integrated **CardSnap** algorithms ([`CardSnapImageCropper.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/CardSnapImageCropper.kt)):
-    - **Sobel Filter Edge Detection**: Downscales, converts to grayscale, computes 3x3 Sobel gradient magnitude, and applies card aspect perspective auto-crop.
-  - Implemented **CardSnap Deduplication & Similarity** ([`CardSnapDeduplicator.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/CardSnapDeduplicator.kt)):
-    - Levenshtein distance normalized similarity scoring (`> 0.82` threshold).
-    - Exact digit phone normalization matching and case-insensitive email matching.
-  - Implemented **CardSnap Contact Extraction & Confidence Scorer** ([`BusinessCardOcrEngine.kt`](file:///d:/Lead360/mobile-android/app/src/main/java/com/jci2027/lead360/engine/BusinessCardOcrEngine.kt)):
-    - Address block multi-line detection (street suffixes, zip codes, and cities).
-    - Confidence level classification (`HIGH`, `MEDIUM`, `LOW`) rendered on the review badge.
-  - **LEAD360 Backend Sync & Android Contacts**:
-    - Backend endpoints `POST /api/contacts` and `GET /api/contacts` mounted on Node.js/Express server.
-    - Android native `ContactsContract.Intents.Insert` integration saving full name, company, title, email, phone, postal address, and event notes to the device Contacts app.
+- **Complete 5-Screen Business Card Scanner Experience (Reference Flow)**:
+  - **Screen 1: Entry Screen**: Clean hero card with dual-side graphic, 4 feature rows (2-Side Scanning, Auto Extract, Save to LEAD360, Save to Phone Contacts), and direct triggers for `Scan Business Card` and `Choose from Gallery`.
+  - **Screen 2: Scan Front Side**: Full live CameraX viewfinder (`androidx.camera:camera-view:1.3.4`), 3-step indicator (`(1) Front Side` active), card bounding guide with corner brackets, flash toggle, and shutter button with continuous ML Kit text recognition.
+  - **Screen 3: Scan Back Side**: Second capture step for card backs (`(2) Back Side` active). Automatically combines and merges front and back text, with an option to skip if the card is single-sided.
+  - **Screen 4: Extract & Review**: Displays real preview thumbnails of **[Front Side ✓]** and **[Back Side ✓]**, an editable form (Full Name, Designation, Company, Phone with `+ Add`, Email with `+ Add`, Website, Address, Social Profiles chips), Deduplication warning alert if matching contact exists, and toggles for saving to LEAD360 and Phone Contacts.
+  - **Screen 5: Saved Successfully**: Big animated green checkmark, initials avatar card, 5 instant quick action circles (`📞 Call`, `✉️ Email`, `🌐 Web`, `📍 Map`, `🔗 Share`), dual confirmation badges (`Saved to LEAD360 ✓`, `Saved to Phone Contacts ✓`), and buttons for `View Contact Directory` and `Scan Another Card`.
 - **1-Tap Direct Outreach Actions**:
   - `📞 Call`: Triggers native phone dialer.
   - `💬 WhatsApp`: Opens pre-filled WhatsApp greeting (`"Hi [Name], pleasure meeting you at [EventTag]!"`).
