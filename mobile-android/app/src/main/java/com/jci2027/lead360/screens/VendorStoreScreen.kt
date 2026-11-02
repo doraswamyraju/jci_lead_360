@@ -2,12 +2,15 @@ package com.jci2027.lead360.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,134 +21,177 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class StoreItem(
-    val id: String,
-    val title: String,
-    val vendorName: String,
-    val category: String,
-    val priceEstimate: String,
-    val leadTime: String,
-    val rating: String,
-    val iconEmoji: String
-)
+import com.jci2027.lead360.vendor.model.CatalogItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VendorStoreScreen(
     chapterName: String,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    liveCatalog: List<CatalogItem> = emptyList(),
+    onRequestQuote: (CatalogItem) -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedCategory by remember { mutableStateOf("All") }
-    var showQuoteDialog by remember { mutableStateOf<StoreItem?>(null) }
 
-    val categories = listOf("All", "Momentos & Trophies", "Banners & Printing", "JCI Badges & Pins", "Event Tech & AV")
+    val categories = listOf("All", "Mementoes", "Banners", "Brochures", "Merchandise")
 
-    val storeItems = remember {
+    val displayItems = liveCatalog.ifEmpty {
         listOf(
-            StoreItem("s1", "Official JCI 2027 President Gold Collar Pin", "National Insignia Makers", "JCI Badges & Pins", "₹450 / pc", "3 Days", "⭐ 4.9 (42 LOs)", "🎖️"),
-            StoreItem("s2", "Crystal Presidential Memento with Gold Etching", "Prestige Awards & Trophies", "Momentos & Trophies", "₹1,200 / pc", "4 Days", "⭐ 4.8 (85 LOs)", "🏆"),
-            StoreItem("s3", "Heavy Duty Roll-up Standee (6x3 ft)", "ColorCraft Digital Press", "Banners & Printing", "₹1,450 / unit", "24 Hours", "⭐ 4.7 (120 LOs)", "🎪"),
-            StoreItem("s4", "Satin LO President & Chief Guest Sash with Crest", "Regal Embroidery Works", "JCI Badges & Pins", "₹650 / pc", "2 Days", "⭐ 4.9 (64 LOs)", "🎗️"),
-            StoreItem("s5", "Acrylic Certificate Frames with Laser Crest", "CraftPoint Displays", "Momentos & Trophies", "₹380 / pc", "3 Days", "⭐ 4.6 (50 LOs)", "📜"),
-            StoreItem("s6", "JCI Stage LED Screen & Audio Setup Rental", "SoundWave Events", "Event Tech & AV", "₹18,000 / day", "Same Day", "⭐ 4.9 (31 LOs)", "🎤")
+            CatalogItem("cat_01", "JCI Crystal Memento", "Mementoes", 1250.0, "piece", "Premium crystal memento with JCI logo engraving. Ideal for installations, awards and recognitions.", leadTime = "3-4 Days", vendorName = "Rs Creations"),
+            CatalogItem("cat_02", "Banners & Standees", "Banners", 1450.0, "unit", "Star flex heavy duty roll-up standees (6x3 ft) with metal hardware & zip carry case.", leadTime = "24 Hours", vendorName = "Rs Creations"),
+            CatalogItem("cat_03", "Brochures & Flyers", "Brochures", 8.5, "piece", "170 GSM art paper tri-fold brochures with glossy lamination for chapter events.", leadTime = "2 Days", vendorName = "Rs Creations"),
+            CatalogItem("cat_04", "Apparel & Merchandise", "Merchandise", 450.0, "piece", "Official JCI dry-fit collared polo t-shirt with embroidered crest on chest.", leadTime = "5 Days", vendorName = "Rs Creations")
         )
     }
 
-    val filteredItems = if (selectedCategory == "All") storeItems else storeItems.filter { it.category == selectedCategory }
+    val filteredItems = if (selectedCategory == "All") {
+        displayItems
+    } else {
+        displayItems.filter { it.category.equals(selectedCategory, ignoreCase = true) }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Column {
-                        Text("JCI Vendor Store & Marketplace", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color(0xFF0F172A))
-                        Text("Verified Official Suppliers for $chapterName", fontSize = 11.sp, color = Color(0xFF64748B))
+                        Text(
+                            "JCI Vendor Store & Marketplace",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp,
+                            color = Color.White
+                        )
+                        Text(
+                            "Official Live Suppliers for $chapterName",
+                            fontSize = 11.sp,
+                            color = Color(0xFFBBDEFB)
+                        )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Text("←", fontSize = 22.sp, color = Color(0xFF0F172A))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0D47A1))
             )
         },
-        containerColor = Color(0xFFF8FAFC)
+        containerColor = Color(0xFFF1F5F9)
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Category Filter Pills
-            ScrollableTabRow(
-                selectedTabIndex = categories.indexOf(selectedCategory),
-                containerColor = Color.White,
-                edgePadding = 16.dp
+            // Category Selector Chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 categories.forEach { cat ->
-                    Tab(
-                        selected = selectedCategory == cat,
-                        onClick = { selectedCategory = cat },
-                        text = {
-                            Text(
-                                cat,
-                                fontSize = 12.sp,
-                                fontWeight = if (selectedCategory == cat) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedCategory == cat) Color(0xFF0097D8) else Color(0xFF64748B)
-                            )
-                        }
-                    )
+                    val isSelected = selectedCategory == cat
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isSelected) Color(0xFF0D47A1) else Color.White,
+                        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                        modifier = Modifier.clickable { selectedCategory = cat }
+                    ) {
+                        Text(
+                            text = cat,
+                            fontSize = 12.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) Color.White else Color(0xFF475569),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                        )
+                    }
                 }
             }
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(filteredItems) { item ->
                     Card(
-                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(1.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        elevation = CardDefaults.cardElevation(2.dp)
                     ) {
                         Row(
-                            modifier = Modifier.padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(52.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(Color(0xFFF1F5F9)),
+                                    .size(72.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0xFFF8FAFC)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(item.iconEmoji, fontSize = 24.sp)
+                                Text(
+                                    when (item.category.lowercase()) {
+                                        "mementoes" -> "🏆"
+                                        "banners" -> "🎪"
+                                        "brochures" -> "📑"
+                                        "merchandise" -> "👕"
+                                        else -> "📦"
+                                    },
+                                    fontSize = 32.sp
+                                )
                             }
-                            Spacer(Modifier.width(12.dp))
+
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(item.title, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF0F172A))
-                                Text("By ${item.vendorName}", fontSize = 11.sp, color = Color(0xFF64748B))
-                                Spacer(Modifier.height(4.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(item.priceEstimate, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF059669))
-                                    Spacer(Modifier.width(10.dp))
-                                    Text("⚡ ${item.leadTime}", fontSize = 11.sp, color = Color(0xFF0284C7))
-                                    Spacer(Modifier.width(10.dp))
-                                    Text(item.rating, fontSize = 11.sp, color = Color(0xFFD97706))
-                                }
+                                Text(
+                                    item.name,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    "Supplied by ${item.vendorName}",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF0D47A1),
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    "Turnaround: ${item.leadTime}",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    "₹${String.format("%,.0f", item.price)} / ${item.unit}",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF0F172A)
+                                )
                             }
-                            Spacer(Modifier.width(8.dp))
+
                             Button(
-                                onClick = { showQuoteDialog = item },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                                shape = RoundedCornerShape(8.dp)
+                                onClick = {
+                                    onRequestQuote(item)
+                                    Toast.makeText(context, "Quote request created for ${item.name}", Toast.LENGTH_SHORT).show()
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D47A1)),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                             ) {
-                                Text("Get Quote", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text("Quote", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         }
                     }
@@ -153,29 +199,4 @@ fun VendorStoreScreen(
             }
         }
     }
-
-    // Quote Dialog
-    showQuoteDialog?.let { item ->
-        var qty by remember { mutableStateOf("25") }
-        var notes by remember { mutableStateOf("Need with JCI Tirupati Innovations official 2027 logo") }
-        AlertDialog(
-            onDismissRequest = { showQuoteDialog = null },
-            title = { Text("Request Quotation: ${item.title}", fontWeight = FontWeight.Bold, fontSize = 16.sp) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Vendor: ${item.vendorName}", fontSize = 12.sp, color = Color(0xFF0284C7), fontWeight = FontWeight.SemiBold)
-                    OutlinedTextField(value = qty, onValueChange = { qty = it }, label = { Text("Required Quantity") }, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(value = notes, onValueChange = { notes = it }, label = { Text("Customization Brief / Event Date") }, modifier = Modifier.fillMaxWidth())
-                }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    Toast.makeText(context, "Quote request sent to ${item.vendorName}! They will connect via WhatsApp.", Toast.LENGTH_LONG).show()
-                    showQuoteDialog = null
-                }) { Text("Send Quote Request") }
-            },
-            dismissButton = { TextButton(onClick = { showQuoteDialog = null }) { Text("Cancel") } }
-        )
-    }
 }
-

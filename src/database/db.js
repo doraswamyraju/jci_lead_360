@@ -147,6 +147,65 @@ export const db = {
     writeStore(store);
     return true;
   },
+  // Vendor Catalog & Orders Live Engine
+  getVendorCatalog: (vendorId) => {
+    const store = readStore();
+    if (!store.vendor_catalog) store.vendor_catalog = [];
+    return vendorId ? store.vendor_catalog.filter(c => c.vendorId === vendorId) : store.vendor_catalog;
+  },
+  saveCatalogItem: (item) => {
+    const store = readStore();
+    if (!store.vendor_catalog) store.vendor_catalog = [];
+    const idx = store.vendor_catalog.findIndex(c => c.id === item.id);
+    if (idx >= 0) {
+      store.vendor_catalog[idx] = { ...store.vendor_catalog[idx], ...item, updatedAt: new Date().toISOString() };
+    } else {
+      store.vendor_catalog.unshift({ ...item, createdAt: new Date().toISOString() });
+    }
+    writeStore(store);
+    return item;
+  },
+  deleteCatalogItem: (id) => {
+    const store = readStore();
+    if (!store.vendor_catalog) store.vendor_catalog = [];
+    store.vendor_catalog = store.vendor_catalog.filter(c => c.id !== id);
+    writeStore(store);
+    return true;
+  },
+  getVendorOrders: (vendorId) => {
+    const store = readStore();
+    if (!store.vendor_orders) store.vendor_orders = [];
+    return vendorId ? store.vendor_orders.filter(o => o.vendorId === vendorId) : store.vendor_orders;
+  },
+  saveVendorOrder: (order) => {
+    const store = readStore();
+    if (!store.vendor_orders) store.vendor_orders = [];
+    const idx = store.vendor_orders.findIndex(o => o.id === order.id);
+    if (idx >= 0) {
+      store.vendor_orders[idx] = { ...store.vendor_orders[idx], ...order, updatedAt: new Date().toISOString() };
+    } else {
+      store.vendor_orders.unshift({ ...order, createdAt: new Date().toISOString() });
+    }
+    writeStore(store);
+    return order;
+  },
+  getVendorRfqs: (vendorId) => {
+    const store = readStore();
+    if (!store.vendor_rfqs) store.vendor_rfqs = [];
+    return vendorId ? store.vendor_rfqs.filter(r => r.vendorId === vendorId || !r.vendorId) : store.vendor_rfqs;
+  },
+  saveVendorRfq: (rfq) => {
+    const store = readStore();
+    if (!store.vendor_rfqs) store.vendor_rfqs = [];
+    const idx = store.vendor_rfqs.findIndex(r => r.id === rfq.id);
+    if (idx >= 0) {
+      store.vendor_rfqs[idx] = { ...store.vendor_rfqs[idx], ...rfq, updatedAt: new Date().toISOString() };
+    } else {
+      store.vendor_rfqs.unshift({ ...rfq, createdAt: new Date().toISOString() });
+    }
+    writeStore(store);
+    return rfq;
+  },
   getStats: () => {
     const store = readStore();
     return {

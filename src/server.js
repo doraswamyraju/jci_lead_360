@@ -10,6 +10,7 @@ import templateRoutes from './modules/templates/templateRoutes.js';
 import uploadRoutes from './modules/upload/uploadRoutes.js';
 import contactRoutes from './modules/contacts/contactRoutes.js';
 import exchangeRoutes from './modules/contacts/exchangeRoutes.js';
+import vendorRoutes from './modules/vendor/vendorRoutes.js';
 import sharp from 'sharp';
 import { db } from './database/db.js';
 import { seedInitialData } from './database/seed.js';
@@ -39,6 +40,7 @@ app.use('/api/templates', templateRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/card', exchangeRoutes);
+app.use('/api/vendor', vendorRoutes);
 
 // Direct download vCard endpoint (100% dynamic from store.json with embedded photo)
 app.get('/card/:userId/vcf', async (req, res) => {
