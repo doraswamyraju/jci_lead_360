@@ -186,6 +186,7 @@ class MainActivity : ComponentActivity() {
                                     Screen.Calendar,
                                     Screen.Lgb,
                                     Screen.Frames,
+                                    Screen.Vendor,
                                     Screen.Profile
                                 )
 
@@ -442,6 +443,9 @@ class MainActivity : ComponentActivity() {
                                         presidentName = userName
                                     )
                                     Screen.Frames -> FramesScreen()
+                                    Screen.Vendor -> com.jci2027.lead360.vendor.VendorAppContainer(
+                                        onExitVendorMode = { currentScreen = Screen.Dashboard }
+                                    )
                                     Screen.Profile -> ProfileScreen(
                                         name = userName,
                                         chapterName = userChapter,

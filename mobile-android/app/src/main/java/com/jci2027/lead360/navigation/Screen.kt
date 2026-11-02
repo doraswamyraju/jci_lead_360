@@ -13,4 +13,5 @@ sealed class Screen(val id: String, val title: String, val icon: String) {
     object Lgb : Screen("lgb", "LGB & PST", "🪪")
     object Frames : Screen("frames", "Frames", "📸")
     object Profile : Screen("profile", "Profile", "👤")
+    object Vendor : Screen("vendor", "Vendor Portal", "🏪")
 }
