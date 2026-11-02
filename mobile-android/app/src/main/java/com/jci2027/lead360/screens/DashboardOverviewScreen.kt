@@ -402,6 +402,13 @@ fun DashboardOverviewScreen(
                 emoji = "🖼️",
                 color = Color(0xFFD946EF),
                 tabId = "frames"
+            ),
+            WorkspaceItemLight(
+                title = "JCI Resources",
+                subtitle = "Official Logo, Letterhead, Visiting Card & Certs",
+                emoji = "🗂️",
+                color = Color(0xFF0284C7),
+                tabId = "resources"
             )
         )
 

@@ -31,6 +31,7 @@ import com.jci2027.lead360.screens.DashboardOverviewScreen
 import com.jci2027.lead360.screens.FramesScreen
 import com.jci2027.lead360.screens.InteractiveCalendarScreen
 import com.jci2027.lead360.screens.InternalPhotoStore
+import com.jci2027.lead360.screens.JciResourcesScreen
 import com.jci2027.lead360.screens.LgbAndPstManagementScreen
 import com.jci2027.lead360.screens.MembersAndNetworkingScreen
 import com.jci2027.lead360.screens.NotificationCenterBottomSheet
@@ -177,6 +178,7 @@ class MainActivity : ComponentActivity() {
                                     Screen.Dashboard,
                                     Screen.Projects,
                                     Screen.Members,
+                                    Screen.Resources,
                                     Screen.ScanCard,
                                     Screen.Store,
                                     Screen.Flyers,
@@ -385,6 +387,7 @@ class MainActivity : ComponentActivity() {
                                                 "store" -> Screen.Store
                                                 "flyers" -> Screen.Flyers
                                                 "website_builder" -> Screen.WebsitePortal
+                                                "resources" -> Screen.Resources
                                                 "calendar" -> Screen.Calendar
                                                 "lgb" -> Screen.Lgb
                                                 "frames" -> Screen.Frames
@@ -423,6 +426,10 @@ class MainActivity : ComponentActivity() {
                                         chapterName = userChapter,
                                         presidentName = userName,
                                         onBackToHome = { currentScreen = Screen.Dashboard }
+                                    )
+                                    Screen.Resources -> JciResourcesScreen(
+                                        chapterName = userChapter,
+                                        onBack = { currentScreen = Screen.Dashboard }
                                     )
                                     Screen.Calendar -> InteractiveCalendarScreen(
                                         onNavigateToFlyer = { title, date ->

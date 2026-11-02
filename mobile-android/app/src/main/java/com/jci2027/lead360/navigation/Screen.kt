@@ -8,6 +8,7 @@ sealed class Screen(val id: String, val title: String, val icon: String) {
     object Flyers : Screen("flyers", "Flyers", "⚡")
     object Store : Screen("store", "Store", "🛍️")
     object WebsitePortal : Screen("website_portal", "LO Website", "🌐")
+    object Resources : Screen("resources", "JCI Resources", "🗂️")
     object Calendar : Screen("calendar", "Calendar", "📅")
     object Lgb : Screen("lgb", "LGB & PST", "🪪")
     object Frames : Screen("frames", "Frames", "📸")
