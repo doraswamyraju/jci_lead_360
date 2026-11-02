@@ -23,6 +23,19 @@
       "createdAt": "2026-10-27T14:10:47.083Z",
       "photoUrl": "/assets/president_profile.jpg",
       "profilePhotoUrl": "/assets/president_profile.jpg"
+    },
+    {
+      "id": "usr_vnd_01",
+      "name": "Rs Creations (Official Vendor)",
+      "businessName": "Rs Creations",
+      "email": "vendor@lead360.com",
+      "password": "$2a$10$bzMM7ydj3IMIfBPKlgcr2.wm1uhJ8X9WUlQv4N21JNyWk030Fdlca",
+      "role": "VENDOR",
+      "phone": "+919876543210",
+      "serviceAreas": "Andhra Pradesh & Telangana",
+      "gstin": "37AAAAA0000A1Z5",
+      "isActive": true,
+      "createdAt": "2026-11-02T10:47:06.409Z"
     }
   ],
   "chapters": [

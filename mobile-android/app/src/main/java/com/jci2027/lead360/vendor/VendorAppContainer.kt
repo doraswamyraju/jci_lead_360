@@ -130,6 +130,7 @@ fun VendorAppContainer(
                         VendorTab.MORE -> {
                             VendorBusinessProfileScreen(
                                 onBack = { selectedTab = VendorTab.HOME },
+                                onEditProfileClick = onExitVendorMode,
                                 onItemClick = { itemId ->
                                     when (itemId) {
                                         "product_catalog" -> selectedTab = VendorTab.CATALOG

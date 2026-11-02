@@ -52,6 +52,23 @@ export async function seedInitialData() {
     };
     db.saveUser(president);
 
+    // 3b. Official Vendor
+    const vendorPassword = await bcrypt.hash("vendor123", salt);
+    const vendorUser = {
+      id: "usr_vnd_01",
+      name: "Rs Creations (Official Vendor)",
+      businessName: "Rs Creations",
+      email: "vendor@lead360.com",
+      password: vendorPassword,
+      role: ROLES.VENDOR,
+      phone: "+919876543210",
+      serviceAreas: "Andhra Pradesh & Telangana",
+      gstin: "37AAAAA0000A1Z5",
+      isActive: true,
+      createdAt: new Date().toISOString()
+    };
+    db.saveUser(vendorUser);
+
     // 4. Seed Essential 2027 Templates
     const templates = db.getTemplates();
     if (templates.length === 0) {

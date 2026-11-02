@@ -77,6 +77,14 @@ class MainActivity : ComponentActivity() {
                             chapterLogoPath = prefs.getString("chapter_logo_path", null)
                         }
                     )
+                } else if (userRole.equals("VENDOR", ignoreCase = true)) {
+                    // Dedicated standalone Vendor App experience for official vendors
+                    com.jci2027.lead360.vendor.VendorAppContainer(
+                        onExitVendorMode = {
+                            prefs.edit().clear().apply()
+                            token = null
+                        }
+                    )
                 } else {
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val coroutineScope = rememberCoroutineScope()
