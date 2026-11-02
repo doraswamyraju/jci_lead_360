@@ -46,3 +46,4 @@ object JciColors {
     val TextMuted = Color(0xFF64748B)
     val TextLight = Color(0xFFF8FAFC)
 }
+

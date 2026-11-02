@@ -8,7 +8,7 @@ const router = express.Router();
 
 /**
  * Universal Single Login for all roles:
- * SUPER_ADMIN, EMPLOYEE, PRESIDENT, SECRETARY, TREASURER
+ * SUPER_ADMIN, EMPLOYEE, PRESIDENT, SECRETARY, TREASURER, VENDOR
  */
 router.post('/login', async (req, res) => {
   try {
@@ -41,7 +41,9 @@ router.post('/login', async (req, res) => {
         role: user.role,
         phone: user.phone || null,
         chapterId: user.chapterId || null,
-        chapterName: user.chapterName || null
+        chapterName: user.chapterName || null,
+        photoUrl: user.profilePhotoUrl || user.photoUrl || null,
+        zone: user.zone || 'Zone XXVI'
       }
     });
   } catch (error) {
@@ -65,8 +67,11 @@ router.get('/me', authenticate, (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone || null,
       chapterId: user.chapterId || null,
-      chapterName: user.chapterName || null
+      chapterName: user.chapterName || null,
+      photoUrl: user.profilePhotoUrl || user.photoUrl || null,
+      zone: user.zone || 'Zone XXVI'
     }
   });
 });

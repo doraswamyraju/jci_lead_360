@@ -441,16 +441,28 @@
         });
         const result = await res.json();
 
-        if (result.success) {
-          // Immediately trigger the phone contact save action without waiting or requiring an extra tap
-          window.location.href = `/card/${encodeURIComponent(leaderId)}/vcf`;
+        if (result.success && result.vcard) {
+          // Create a Blob from the direct vCard payload returned by the exchange API (which contains the embedded base64 PHOTO)
+          const vcardBlob = new Blob([result.vcard], { type: 'text/vcard;charset=utf-8' });
+          const blobUrl = window.URL.createObjectURL(vcardBlob);
+          const dlAnchor = document.createElement('a');
+          dlAnchor.href = blobUrl;
+          dlAnchor.download = `${(result.leader?.name || 'JCI_Leader').replace(/\s+/g, '_')}_JCI.vcf`;
+          document.body.appendChild(dlAnchor);
+          dlAnchor.click();
+          document.body.removeChild(dlAnchor);
 
           document.getElementById('form-container').style.display = 'none';
           document.getElementById('success-container').style.display = 'block';
 
-          // Also set fallback link in case browser blocked auto-download
+          // Set fallback link with the blob url
           const dlBtn = document.getElementById('download-vcard-btn');
-          dlBtn.href = `/card/${encodeURIComponent(leaderId)}/vcf`;
+          dlBtn.href = blobUrl;
+          dlBtn.download = `${(result.leader?.name || 'JCI_Leader').replace(/\s+/g, '_')}_JCI.vcf`;
+        } else if (result.success) {
+          window.location.href = `/card/${encodeURIComponent(leaderId)}/vcf`;
+          document.getElementById('form-container').style.display = 'none';
+          document.getElementById('success-container').style.display = 'block';
         } else {
           alert(result.message || 'Error exchanging contact');
           submitBtn.disabled = false;

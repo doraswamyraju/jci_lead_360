@@ -311,6 +311,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // 1. OFFICIAL JCI DIGITAL BUSINESS CARD & MEMBERSHIP ID WITH RECIPROCAL QR
+        val serverPhotoUrl = prefs.getString("president_photo_server_url", null)
         JciDigitalBusinessCard(
             presidentName = presidentNameInput,
             role = role,
@@ -320,6 +321,7 @@ fun ProfileScreen(
             email = presidentEmail,
             photoBitmap = presidentBitmap,
             chapterLogoBitmap = chapterLogoBitmap,
+            photoServerUrl = serverPhotoUrl,
             onPhotoClick = { presidentPhotoLauncher.launch("image/*") }
         )
 
@@ -600,6 +602,8 @@ fun JciDigitalBusinessCard(
     email: String,
     photoBitmap: Bitmap?,
     chapterLogoBitmap: Bitmap?,
+    photoServerUrl: String? = null,
+    baseUrl: String = "https://lead.sriddha.com",
     onPhotoClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -724,6 +728,14 @@ fun JciDigitalBusinessCard(
                                 Image(
                                     bitmap = photoBitmap.asImageBitmap(),
                                     contentDescription = "Portrait",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else if (!photoServerUrl.isNullOrBlank()) {
+                                val fullUrl = if (photoServerUrl.startsWith("http")) photoServerUrl else "$baseUrl$photoServerUrl"
+                                AsyncImage(
+                                    model = fullUrl,
+                                    contentDescription = "President Profile",
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )

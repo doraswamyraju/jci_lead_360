@@ -229,11 +229,20 @@ fun LoginScreen(
                                             remove("saved_password")
                                             putBoolean("remember_credentials", false)
                                         }
-                                        // Save active session token
+                                        // Save active session token and profile parameters
                                         putString("auth_token", token)
                                         putString("auth_role", role)
                                         putString("auth_name", name)
                                         putString("auth_chapter", chapter)
+                                        if (!user?.phone.isNullOrBlank()) {
+                                            putString("auth_phone", user?.phone)
+                                        }
+                                        if (!user?.photoUrl.isNullOrBlank()) {
+                                            putString("president_photo_server_url", user?.photoUrl)
+                                        }
+                                        if (!user?.zone.isNullOrBlank()) {
+                                            putString("chapter_zone", user?.zone)
+                                        }
                                     }.apply()
 
                                     isLoading = false

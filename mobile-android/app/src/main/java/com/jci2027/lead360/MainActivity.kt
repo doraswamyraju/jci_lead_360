@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import coil.compose.AsyncImage
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,7 @@ class MainActivity : ComponentActivity() {
                 var userChapter by remember { mutableStateOf(prefs.getString("auth_chapter", "JCI Tirupati Innovations") ?: "JCI Tirupati Innovations") }
 
                 var userPhotoPath by remember { mutableStateOf(prefs.getString("president_photo_path", null)) }
+                var serverPhotoUrl by remember { mutableStateOf(prefs.getString("president_photo_server_url", null)) }
                 var chapterLogoPath by remember { mutableStateOf(prefs.getString("chapter_logo_path", null)) }
 
                 val userProfileBitmap = remember(userPhotoPath) {
@@ -75,6 +77,7 @@ class MainActivity : ComponentActivity() {
                             userName = name
                             userChapter = chapter
                             userPhotoPath = prefs.getString("president_photo_path", null)
+                            serverPhotoUrl = prefs.getString("president_photo_server_url", null)
                             chapterLogoPath = prefs.getString("chapter_logo_path", null)
                         }
                     )
@@ -164,6 +167,14 @@ class MainActivity : ComponentActivity() {
                                             if (userProfileBitmap != null) {
                                                 Image(
                                                     bitmap = userProfileBitmap.asImageBitmap(),
+                                                    contentDescription = userName,
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                            } else if (!serverPhotoUrl.isNullOrBlank()) {
+                                                val photoFullUrl = if (serverPhotoUrl!!.startsWith("http")) serverPhotoUrl!! else "https://lead.sriddha.com$serverPhotoUrl"
+                                                AsyncImage(
+                                                    model = photoFullUrl,
                                                     contentDescription = userName,
                                                     modifier = Modifier.fillMaxSize(),
                                                     contentScale = ContentScale.Crop

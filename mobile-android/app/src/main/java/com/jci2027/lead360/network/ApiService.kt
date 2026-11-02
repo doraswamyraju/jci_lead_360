@@ -27,7 +27,10 @@ data class UserDto(
     val name: String?,
     val email: String?,
     val role: String?,
-    val chapterName: String?
+    val chapterName: String?,
+    val phone: String? = null,
+    val photoUrl: String? = null,
+    val zone: String? = null
 )
 
 data class SaveContactRequest(

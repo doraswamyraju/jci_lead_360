@@ -76,7 +76,7 @@ export async function seedInitialData() {
         id: 'tpl_gbm_01',
         title: '1st LOM General Body Meeting 2027',
         category: 'GBM & Meetings',
-        baseImageUrl: '/assets/logo.png',
+        baseImageUrl: '/assets/tpl_gbm_bg.png',
         dimensions: { width: 1080, height: 1080 },
         layers: [
           { type: 'chapter_logo', label: 'Chapter Logo', x: 80, y: 80, width: 220, height: 90 },
@@ -94,7 +94,7 @@ export async function seedInitialData() {
         id: 'tpl_efficiency_01',
         title: '100% Efficiency: LOM Action Plan Adoption',
         category: '100% Efficiency',
-        baseImageUrl: '/assets/logo.png',
+        baseImageUrl: '/assets/tpl_efficiency_bg.png',
         dimensions: { width: 1080, height: 1350 },
         layers: [
           { type: 'chapter_logo', label: 'Chapter Logo', x: 90, y: 90, width: 240, height: 100 },
