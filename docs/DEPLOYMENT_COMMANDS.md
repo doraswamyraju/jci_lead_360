@@ -133,8 +133,10 @@ certbot --nginx -d lead.sriddha.com --non-interactive --agree-tos -m admin@sridd
 
 ---
 
-## 🔑 Initial Super Admin Credentials
+## 🔑 Initial Production User Credentials
 
-- **URL**: `https://lead.sriddha.com`
-- **Email**: `admin@lead360.com`
-- **Password**: `Admin@2027`
+| Portal / Role | Email | Password | Destination Panel |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | dmin@lead360.com | Admin@2027 | Super Admin Dashboard |
+| **Chapter President** | president@jcitirupati.com | President@2027 | President & Leader Hub |
+| **Official Vendor** | endor@lead360.com | endor123 | Dedicated Vendor App Portal |
