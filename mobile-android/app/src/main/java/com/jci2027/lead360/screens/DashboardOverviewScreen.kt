@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jci2027.lead360.theme.JciColors
 
 @Composable
 fun DashboardOverviewScreen(
@@ -39,17 +40,17 @@ fun DashboardOverviewScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAFC)) // Ultra-clean, modern executive background
+            .background(JciColors.BackgroundLight)
             .verticalScroll(scrollState)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // ==========================================
-        // 1. EXECUTIVE PRESTIGE HERO CARD (Fintech/Neobank aesthetic)
+        // 1. EXECUTIVE PRESTIGE HERO CARD (Official JCI Shield & Navy/Sky/Teal Gradient)
         // ==========================================
         Card(
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)), // Deep midnight slate
+            colors = CardDefaults.cardColors(containerColor = JciColors.DeepNavy),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -59,20 +60,30 @@ fun DashboardOverviewScreen(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                Color(0xFF0B192C),
-                                Color(0xFF1E3E62),
-                                Color(0xFF0097D8).copy(alpha = 0.85f)
+                                JciColors.DeepNavy,
+                                Color(0xFF10284C),
+                                JciColors.RoyalBlue,
+                                JciColors.SkyBlue
                             )
                         )
                     )
             ) {
-                // Subtle decorative background circles
+                // Official JCI Shield Dual-Accent Accent Arc (Sky Blue & Teal ribbons)
                 Box(
                     modifier = Modifier
-                        .size(160.dp)
+                        .size(170.dp)
                         .align(Alignment.TopEnd)
-                        .offset(x = 40.dp, y = (-40).dp)
-                        .background(Color.White.copy(alpha = 0.04f), CircleShape)
+                        .offset(x = 50.dp, y = (-40).dp)
+                        .background(
+                            Brush.sweepGradient(
+                                listOf(
+                                    JciColors.SkyBlue.copy(alpha = 0.25f),
+                                    JciColors.ShieldTeal.copy(alpha = 0.35f),
+                                    Color.Transparent
+                                )
+                            ),
+                            CircleShape
+                        )
                 )
 
                 Column(
@@ -85,38 +96,39 @@ fun DashboardOverviewScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = Color.White.copy(alpha = 0.15f)
+                                color = Color.White.copy(alpha = 0.18f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f))
                             ) {
                                 Text(
                                     "🇮🇳 JCI INDIA 2027",
-                                    color = Color(0xFFBAE6FD),
+                                    color = Color.White,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 1.2.sp,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
-                            Spacer(Modifier.width(8.dp))
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFF10B981).copy(alpha = 0.2f)
+                                color = JciColors.ShieldTeal.copy(alpha = 0.25f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, JciColors.ShieldTeal.copy(alpha = 0.5f))
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
                                     Box(
                                         modifier = Modifier
                                             .size(6.dp)
-                                            .background(Color(0xFF34D399), CircleShape)
+                                            .background(JciColors.ShieldTeal, CircleShape)
                                     )
                                     Text(
                                         "PRESIDENT PORTAL",
-                                        color = Color(0xFF6EE7B7),
+                                        color = Color(0xFFA7F3D0),
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold
                                     )
@@ -124,15 +136,15 @@ fun DashboardOverviewScreen(
                             }
                         }
 
-                        // Executive Monogram Avatar
+                        // JCI Emblem Monogram
                         Surface(
                             shape = CircleShape,
                             color = Color.White.copy(alpha = 0.15f),
-                            border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF38BDF8).copy(alpha = 0.6f)),
+                            border = androidx.compose.foundation.BorderStroke(1.5.dp, JciColors.ShieldTeal),
                             modifier = Modifier.size(42.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text("👑", fontSize = 18.sp)
+                                Text("🛡️", fontSize = 20.sp)
                             }
                         }
                     }
@@ -141,7 +153,7 @@ fun DashboardOverviewScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
                             "Welcome Back,",
-                            color = Color(0xFF94A3B8),
+                            color = Color(0xFFBAE6FD),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -158,23 +170,23 @@ fun DashboardOverviewScreen(
                         ) {
                             Text(
                                 "🏛️ $chapterName",
-                                color = Color(0xFF7DD3FC),
+                                color = Color(0xFFE0F2FE),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
-                            Text("•", color = Color(0xFF64748B), fontSize = 12.sp)
+                            Text("•", color = Color(0xFF93C5FD), fontSize = 12.sp)
                             Text(
                                 "Zone XXVI",
-                                color = Color(0xFFCBD5E1),
+                                color = Color(0xFFBAE6FD),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                     }
 
-                    HorizontalDivider(color = Color.White.copy(alpha = 0.12f), thickness = 1.dp)
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.16f), thickness = 1.dp)
 
-                    // Hero Quick Action Buttons (Glassmorphic)
+                    // Hero Quick Action Buttons with official Brand accents
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -182,18 +194,21 @@ fun DashboardOverviewScreen(
                         HeroExecutiveButton(
                             emoji = "⚡",
                             label = "Flyer Studio",
+                            accent = JciColors.SkyBlue,
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateTab("flyers") }
                         )
                         HeroExecutiveButton(
                             emoji = "🗂️",
                             label = "JCI Resources",
+                            accent = JciColors.ShieldTeal,
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateTab("resources") }
                         )
                         HeroExecutiveButton(
                             emoji = "📇",
                             label = "Scan Card",
+                            accent = Color(0xFF38BDF8),
                             modifier = Modifier.weight(1f),
                             onClick = { onNavigateTab("scan_card") }
                         )
@@ -203,7 +218,7 @@ fun DashboardOverviewScreen(
         }
 
         // ==========================================
-        // 2. QUICK HORIZONTAL ACTION CHIPS (Stripe / Apple Style)
+        // 2. QUICK HORIZONTAL ACTION CHIPS (JCI Shield Brand Colors)
         // ==========================================
         Row(
             modifier = Modifier
@@ -214,13 +229,13 @@ fun DashboardOverviewScreen(
             ActionQuickPill(
                 emoji = "🎨",
                 title = "Logo Maker",
-                accent = Color(0xFF0097D8),
+                accent = JciColors.SkyBlue,
                 onClick = { onNavigateTab("resources") }
             )
             ActionQuickPill(
                 emoji = "👥",
-                title = "Directory (${48})",
-                accent = Color(0xFF10B981),
+                title = "Directory (48)",
+                accent = JciColors.ShieldTeal,
                 onClick = { onNavigateTab("members") }
             )
             ActionQuickPill(
@@ -230,9 +245,15 @@ fun DashboardOverviewScreen(
                 onClick = { onNavigateTab("calendar") }
             )
             ActionQuickPill(
+                emoji = "🛍️",
+                title = "Vendor Store",
+                accent = JciColors.RoyalBlue,
+                onClick = { onNavigateTab("store") }
+            )
+            ActionQuickPill(
                 emoji = "🌐",
                 title = "LO Website",
-                accent = Color(0xFF8B5CF6),
+                accent = Color(0xFF6366F1),
                 onClick = { onNavigateTab("website_builder") }
             )
         }
@@ -249,7 +270,7 @@ fun DashboardOverviewScreen(
                 title = "Projects",
                 value = "4 Active",
                 badge = "+2 This Mo",
-                badgeColor = Color(0xFF0284C7),
+                badgeColor = JciColors.SkyBlue,
                 emoji = "🚀",
                 onClick = { onNavigateTab("projects") }
             )
@@ -258,7 +279,7 @@ fun DashboardOverviewScreen(
                 title = "Members",
                 value = "48 Active",
                 badge = "2 Pending",
-                badgeColor = Color(0xFF10B981),
+                badgeColor = JciColors.ShieldTeal,
                 emoji = "👥",
                 onClick = { onNavigateTab("members") }
             )
@@ -280,7 +301,7 @@ fun DashboardOverviewScreen(
             shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(2.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBAE6FD)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, JciColors.SkyBlue.copy(alpha = 0.35f)),
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onNavigateTab("resources") }
@@ -289,7 +310,7 @@ fun DashboardOverviewScreen(
                 modifier = Modifier
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFFF0F9FF), Color(0xFFFFFFFF))
+                            listOf(Color(0xFFF0F9FF), Color(0xFFF5FBFA), Color(0xFFFFFFFF))
                         )
                     )
                     .padding(18.dp)
@@ -299,12 +320,15 @@ fun DashboardOverviewScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF0097D8)),
+                                .size(46.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(JciColors.OfficialShieldGradient),
                             contentAlignment = Alignment.Center
                         ) {
                             Text("🗂️", fontSize = 22.sp)
@@ -312,299 +336,231 @@ fun DashboardOverviewScreen(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(
-                                    "JCI Resources & Identity Hub",
-                                    fontWeight = FontWeight.Black,
+                                    "JCI Official Resources",
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
-                                    color = Color(0xFF0F172A)
+                                    color = JciColors.DeepNavy
                                 )
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = JciColors.SkyBlue.copy(alpha = 0.15f)
+                                ) {
+                                    Text(
+                                        "BRAND 2027",
+                                        color = JciColors.RoyalBlue,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
                             Text(
-                                "Official Logo, Letterhead, Visiting Card & Certs",
-                                fontSize = 11.sp,
-                                color = Color(0xFF64748B)
+                                "Logo Maker • Letterheads • Cards • Badges",
+                                fontSize = 12.sp,
+                                color = JciColors.TextMuted,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
 
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFFE0F2FE)
-                    ) {
-                        Text(
-                            "OPEN →",
-                            color = Color(0xFF0284C7),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 11.sp,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    BrandFeatureTag(text = "🎨 7 Logo Styles", isLive = true)
-                    BrandFeatureTag(text = "📄 Letterhead", isLive = false)
-                    BrandFeatureTag(text = "🪪 Visiting Card", isLive = false)
-                    BrandFeatureTag(text = "🏆 Certificates", isLive = false)
+                    Text("›", fontSize = 26.sp, color = JciColors.SkyBlue, fontWeight = FontWeight.Bold)
                 }
             }
         }
 
         // ==========================================
-        // 5. CHAPTER WEBSITE & MEMBER PORTAL BANNER
+        // 5. 100% EFFICIENCY ACTION TRACKER
         // ==========================================
         Card(
             shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(2.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBBF7D0)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onNavigateTab("website_builder") }
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(Color(0xFFF0FDF4), Color.White)
-                        )
-                    )
-                    .padding(18.dp)
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF10B981)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("🌐", fontSize = 20.sp)
-                        }
-                        Column {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("🎯", fontSize = 16.sp)
                             Text(
-                                "Official LO Web & Mobile Portal",
-                                color = Color(0xFF0F172A),
+                                "100% Efficiency Progress",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                "Deploy in 60s • Auto Flyer Sync • RSVP Bot",
-                                color = Color(0xFF64748B),
-                                fontSize = 11.sp
+                                fontSize = 15.sp,
+                                color = JciColors.DeepNavy
                             )
                         }
+                        Text(
+                            "Q1 National & Zone Milestones",
+                            fontSize = 12.sp,
+                            color = JciColors.TextMuted
+                        )
                     }
 
                     Surface(
-                        color = Color(0xFF10B981),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(20.dp),
+                        color = JciColors.ShieldTealLight,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, JciColors.ShieldTeal.copy(alpha = 0.4f))
                     ) {
                         Text(
-                            "LIVE",
-                            color = Color.White,
-                            fontSize = 10.sp,
+                            "78% Completed",
+                            color = Color(0xFF0F766E),
                             fontWeight = FontWeight.ExtraBold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            fontSize = 11.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
                     }
                 }
-            }
-        }
 
-        // ==========================================
-        // 6. PRESIDENT OPERATING WORKSPACE (Clean Apple-Style Grid)
-        // ==========================================
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "PRESIDENTIAL WORKSPACE",
-                color = Color(0xFF64748B),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.sp
-            )
-            Text(
-                "9 Core Tools",
-                color = Color(0xFF0097D8),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+                LinearProgressIndicator(
+                    progress = { 0.78f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = JciColors.ShieldTeal,
+                    trackColor = Color(0xFFE2E8F0)
+                )
 
-        val workspaceTools = listOf(
-            WorkspaceItemLight(
-                title = "Projects & Tasks",
-                subtitle = "Milestones, committees & deliverables",
-                emoji = "🚀",
-                color = Color(0xFF0284C7),
-                tabId = "projects"
-            ),
-            WorkspaceItemLight(
-                title = "Members & Network",
-                subtitle = "QR registration, approvals & live directory",
-                emoji = "👥",
-                color = Color(0xFF10B981),
-                tabId = "members"
-            ),
-            WorkspaceItemLight(
-                title = "1-Tap Flyer Studio",
-                subtitle = "Auto-mapped photo & LO crest templates",
-                emoji = "🎨",
-                color = Color(0xFFEC4899),
-                tabId = "flyers"
-            ),
-            WorkspaceItemLight(
-                title = "JCI Resources",
-                subtitle = "Logo, Letterhead, Cards & Certs",
-                emoji = "🗂️",
-                color = Color(0xFF0097D8),
-                tabId = "resources"
-            ),
-            WorkspaceItemLight(
-                title = "Scan Card (OCR)",
-                subtitle = "Visiting card scanner & Rolodex",
-                emoji = "📇",
-                color = Color(0xFF8B5CF6),
-                tabId = "scan_card"
-            ),
-            WorkspaceItemLight(
-                title = "Vendor Store",
-                subtitle = "Momentos, badges, printing & quotes",
-                emoji = "🛍️",
-                color = Color(0xFFF59E0B),
-                tabId = "store"
-            ),
-            WorkspaceItemLight(
-                title = "Chapter Website",
-                subtitle = "Domain, auto-posts & member portal",
-                emoji = "🌐",
-                color = Color(0xFF0D9488),
-                tabId = "website_builder"
-            ),
-            WorkspaceItemLight(
-                title = "2027 Calendar",
-                subtitle = "JCI national days, projects & meets",
-                emoji = "📅",
-                color = Color(0xFF6366F1),
-                tabId = "calendar"
-            ),
-            WorkspaceItemLight(
-                title = "LGB & PST Team",
-                subtitle = "Manage PST and Vice Presidents",
-                emoji = "🪪",
-                color = Color(0xFF06B6D4),
-                tabId = "lgb"
-            ),
-            WorkspaceItemLight(
-                title = "Photo Frames & DP",
-                subtitle = "Square & circular presidential frames",
-                emoji = "🖼️",
-                color = Color(0xFFD946EF),
-                tabId = "frames"
-            )
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            workspaceTools.chunked(2).forEach { rowItems ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    rowItems.forEach { item ->
-                        WorkspaceLightCard(
-                            modifier = Modifier.weight(1f),
-                            item = item,
-                            onClick = { onNavigateTab(item.tabId) }
-                        )
-                    }
-                    if (rowItems.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+                    Text("✓ 7 Mandatory Goals Met", fontSize = 12.sp, color = JciColors.ShieldTeal, fontWeight = FontWeight.SemiBold)
+                    Text("2 Due Next Week", fontSize = 12.sp, color = JciColors.TextMuted, fontWeight = FontWeight.Medium)
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        // ==========================================
+        // 6. EXECUTIVE ACTION TILES
+        // ==========================================
+        Text(
+            "Leadership Modules",
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            color = JciColors.DeepNavy
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ExecutiveActionTile(
+                modifier = Modifier.weight(1f),
+                emoji = "🚀",
+                title = "Projects Hub",
+                subtitle = "Manage chapter tasks",
+                accentColor = JciColors.RoyalBlue,
+                onClick = { onNavigateTab("projects") }
+            )
+            ExecutiveActionTile(
+                modifier = Modifier.weight(1f),
+                emoji = "🪪",
+                title = "LGB & PST",
+                subtitle = "Officer portfolio",
+                accentColor = JciColors.ShieldTeal,
+                onClick = { onNavigateTab("lgb") }
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ExecutiveActionTile(
+                modifier = Modifier.weight(1f),
+                emoji = "🛍️",
+                title = "Vendor Store",
+                subtitle = "Order official mementos",
+                accentColor = JciColors.SkyBlue,
+                onClick = { onNavigateTab("store") }
+            )
+            ExecutiveActionTile(
+                modifier = Modifier.weight(1f),
+                emoji = "📸",
+                title = "Photo Frames",
+                subtitle = "Greeting overlays",
+                accentColor = Color(0xFF8B5CF6),
+                onClick = { onNavigateTab("frames") }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
-// -------------------------------------------------------------
-// REUSABLE MODERN COMPONENTS
-// -------------------------------------------------------------
-
 @Composable
-fun HeroExecutiveButton(
+private fun HeroExecutiveButton(
     emoji: String,
     label: String,
+    accent: Color = Color.White,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = Color.White.copy(alpha = 0.12f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
         modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() },
+        color = Color.White.copy(alpha = 0.12f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, accent.copy(alpha = 0.35f))
     ) {
-        Row(
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            Text(emoji, fontSize = 14.sp)
-            Spacer(Modifier.width(6.dp))
-            Text(label, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+            Text(emoji, fontSize = 18.sp)
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
     }
 }
 
 @Composable
-fun ActionQuickPill(
+private fun ActionQuickPill(
     emoji: String,
     title: String,
     accent: Color,
     onClick: () -> Unit
 ) {
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = Color.White,
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
-        shadowElevation = 1.dp
+        shadowElevation = 1.dp,
+        modifier = Modifier.clickable { onClick() }
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(accent.copy(alpha = 0.12f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(emoji, fontSize = 12.sp)
-            }
-            Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+            Text(emoji, fontSize = 16.sp)
+            Text(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = JciColors.DeepNavy
+            )
         }
     }
 }
 
 @Composable
-fun ModernExecutiveKpiCard(
+private fun ModernExecutiveKpiCard(
     modifier: Modifier = Modifier,
     title: String,
     value: String,
@@ -617,11 +573,12 @@ fun ModernExecutiveKpiCard(
         modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF1F5F9))
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
@@ -629,105 +586,85 @@ fun ModernExecutiveKpiCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(badgeColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
+                Text(emoji, fontSize = 18.sp)
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = badgeColor.copy(alpha = 0.12f)
                 ) {
-                    Text(emoji, fontSize = 16.sp)
+                    Text(
+                        text = badge,
+                        color = badgeColor,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                    )
                 }
             }
 
-            Spacer(Modifier.height(4.dp))
-            Text(value, color = Color(0xFF0F172A), fontWeight = FontWeight.Black, fontSize = 16.sp)
-            Text(title, color = Color(0xFF64748B), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.height(2.dp))
 
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = badgeColor.copy(alpha = 0.1f),
-                modifier = Modifier.padding(top = 2.dp)
-            ) {
-                Text(
-                    badge,
-                    color = badgeColor,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                )
-            }
+            Text(
+                text = value,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 15.sp,
+                color = JciColors.DeepNavy
+            )
+
+            Text(
+                text = title,
+                fontSize = 11.sp,
+                color = JciColors.TextMuted,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
 
 @Composable
-fun BrandFeatureTag(text: String, isLive: Boolean) {
-    Surface(
-        color = if (isLive) Color(0xFFE0F2FE) else Color(0xFFF1F5F9),
-        shape = RoundedCornerShape(6.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (isLive) Color(0xFFBAE6FD) else Color(0xFFE2E8F0))
-    ) {
-        Text(
-            text,
-            color = if (isLive) Color(0xFF0284C7) else Color(0xFF64748B),
-            fontSize = 9.sp,
-            fontWeight = if (isLive) FontWeight.Bold else FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
-        )
-    }
-}
-
-data class WorkspaceItemLight(
-    val title: String,
-    val subtitle: String,
-    val emoji: String,
-    val color: Color,
-    val tabId: String
-)
-
-@Composable
-fun WorkspaceLightCard(
+private fun ExecutiveActionTile(
     modifier: Modifier = Modifier,
-    item: WorkspaceItemLight,
+    emoji: String,
+    title: String,
+    subtitle: String,
+    accentColor: Color,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF1F5F9))
+        elevation = CardDefaults.cardElevation(1.5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(item.color.copy(alpha = 0.12f)),
+                    .size(42.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(accentColor.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(item.emoji, fontSize = 18.sp)
+                Text(emoji, fontSize = 20.sp)
             }
-            Text(
-                item.title,
-                color = Color(0xFF0F172A),
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                maxLines = 1
-            )
-            Text(
-                item.subtitle,
-                color = Color(0xFF64748B),
-                fontSize = 10.sp,
-                lineHeight = 13.sp,
-                maxLines = 2
-            )
+
+            Column {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = JciColors.DeepNavy
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = JciColors.TextMuted
+                )
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ import com.jci2027.lead360.screens.ProfileScreen
 import com.jci2027.lead360.screens.ProjectsAndTasksScreen
 import com.jci2027.lead360.screens.ScanCardModuleScreen
 import com.jci2027.lead360.screens.VendorStoreScreen
+import com.jci2027.lead360.theme.JciColors
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -112,7 +113,7 @@ class MainActivity : ComponentActivity() {
                         drawerState = drawerState,
                         drawerContent = {
                             ModalDrawerSheet(
-                                drawerContainerColor = Color(0xFF091322),
+                                drawerContainerColor = JciColors.DeepNavy,
                                 drawerContentColor = Color.White,
                                 modifier = Modifier.width(300.dp)
                             ) {
@@ -342,7 +343,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     colors = TopAppBarDefaults.topAppBarColors(
-                                        containerColor = Color(0xFF091322)
+                                        containerColor = JciColors.DeepNavyDark
                                     )
                                 )
                             },
@@ -367,11 +368,11 @@ class MainActivity : ComponentActivity() {
                                                     text = screen.title,
                                                     fontSize = 10.sp,
                                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                                    color = if (isSelected) Color(0xFF0097D8) else Color(0xFF64748B)
+                                                    color = if (isSelected) JciColors.RoyalBlue else Color(0xFF64748B)
                                                 )
                                             },
                                             colors = NavigationBarItemDefaults.colors(
-                                                selectedIconColor = Color(0xFF0097D8),
+                                                selectedIconColor = JciColors.RoyalBlue,
                                                 indicatorColor = Color(0xFFE0F2FE)
                                             )
                                         )
