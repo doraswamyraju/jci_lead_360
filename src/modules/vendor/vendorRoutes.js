@@ -49,6 +49,7 @@ router.post('/catalog', authenticate, (req, res) => {
       return res.status(400).json({ success: false, message: 'Name and price are required' });
     }
 
+    const { layers, dimensions, customizable } = req.body;
     const item = {
       id: id || `cat_${Date.now()}`,
       vendorId: req.user.id,
@@ -59,7 +60,10 @@ router.post('/catalog', authenticate, (req, res) => {
       unit: unit || 'piece',
       description: description || '',
       imageUrl: imageUrl || '',
-      leadTime: leadTime || '3-4 Days'
+      leadTime: leadTime || '3-4 Days',
+      customizable: customizable !== undefined ? customizable : true,
+      layers: layers || [],
+      dimensions: dimensions || { width: 800, height: 800 }
     };
 
     db.saveCatalogItem(item);
@@ -134,7 +138,26 @@ router.post('/orders', authenticate, (req, res) => {
       ]
     };
 
+    const isNew = !orderData.id;
     db.saveVendorOrder(order);
+
+    // Trigger instant notification for Vendor with sound payload
+    if (isNew || orderData.notifyVendor) {
+      db.saveNotification({
+        title: `🛒 New Order Placed: #${order.id}`,
+        message: `${order.chapterName} placed an order for "${order.title}" (₹${order.amount.toLocaleString('en-IN')})`,
+        type: 'order',
+        targetRole: 'VENDOR',
+        targetUserId: order.vendorId || null,
+        data: {
+          orderId: order.id,
+          chapterName: order.chapterName,
+          amount: order.amount,
+          title: order.title,
+          sound: 'chime'
+        }
+      });
+    }
 
     res.json({
       success: true,
@@ -188,6 +211,21 @@ router.post('/rfqs', authenticate, (req, res) => {
 
     db.saveVendorRfq(rfq);
 
+    if (rfq.status === 'Open') {
+      db.saveNotification({
+        title: `📬 New RFQ from ${rfq.chapterName}`,
+        message: `Requirement: "${rfq.title}" for event on ${rfq.eventDate}`,
+        type: 'rfq',
+        targetRole: 'VENDOR',
+        targetUserId: rfq.vendorId || null,
+        data: {
+          rfqId: rfq.id,
+          chapterName: rfq.chapterName,
+          sound: 'bell'
+        }
+      });
+    }
+
     res.json({
       success: true,
       message: 'RFQ created successfully',
@@ -196,6 +234,49 @@ router.post('/rfqs', authenticate, (req, res) => {
   } catch (error) {
     console.error('Error saving rfq:', error);
     res.status(500).json({ success: false, message: 'Failed to save rfq' });
+  }
+});
+
+
+/**
+ * GET /api/vendor/notifications
+ * Poll / fetch notifications for active user
+ */
+router.get('/notifications', authenticate, (req, res) => {
+  try {
+    const notifications = db.getNotifications(req.user.id, req.user.role);
+    res.json({
+      success: true,
+      notifications,
+      unreadCount: notifications.filter(n => !n.read).length
+    });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
+  }
+});
+
+/**
+ * POST /api/vendor/notifications/:id/read
+ */
+router.post('/notifications/:id/read', authenticate, (req, res) => {
+  try {
+    db.markNotificationRead(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to mark read' });
+  }
+});
+
+/**
+ * POST /api/vendor/notifications/read-all
+ */
+router.post('/notifications/read-all', authenticate, (req, res) => {
+  try {
+    db.markAllNotificationsRead(req.user.id, req.user.role);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to mark all read' });
   }
 });
 

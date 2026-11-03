@@ -1,3 +1,4 @@
+import { renderProductStudio } from './productStudio.js';
 /**
  * Standalone Vendor Dashboard Module (Web Portal)
  * 100% Dynamic, Live Database-backed, Multi-tab Experience
@@ -39,6 +40,9 @@ export function renderVendorDashboard(container, user, activeSubmodule = 'overvi
           </button>
           <button class="btn-vendor-tab ${activeSubmodule === 'catalog' ? 'active' : ''}" data-tab="catalog" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
             📦 Catalog
+          </button>
+          <button class="btn-vendor-tab ${activeSubmodule === 'studio' ? 'active' : ''}" data-tab="studio" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            🛠️ Customization Studio
           </button>
           <button class="btn-vendor-tab ${activeSubmodule === 'orders' ? 'active' : ''}" data-tab="orders" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
             🚚 Orders & Production
@@ -94,7 +98,10 @@ export function renderVendorDashboard(container, user, activeSubmodule = 'overvi
       renderOverviewTab(content, user, token, (targetTab) => renderVendorDashboard(container, user, targetTab));
       break;
     case 'catalog':
-      renderCatalogTab(content, user, token);
+      renderCatalogTab(content, user, token, (target) => renderVendorDashboard(container, user, target));
+      break;
+    case 'studio':
+      renderProductStudio(content, () => renderVendorDashboard(container, user, 'catalog'));
       break;
     case 'orders':
       renderOrdersTab(content, user, token);
@@ -343,6 +350,9 @@ async function renderCatalogTab(container, user, token) {
             <h2 style="font-size: 18px; font-weight: 800; color: var(--dark); margin: 0;">Official Product Catalog</h2>
             <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Synchronized live with Android President App and Chapter Cart</p>
           </div>
+          <button id="btn-catalog-open-studio" style="background: #f8fafc; color: #0284c7; border: 1px solid #bae6fd; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span>🛠️</span> Open Customization Studio
+          </button>
           <button id="btn-catalog-add-new" style="background: #0097D8; color: #ffffff; border: none; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
             <span>➕</span> Add Product to Catalog
           </button>
@@ -490,6 +500,11 @@ async function renderCatalogTab(container, user, token) {
         const q = container.querySelector('#catalog-search').value;
         loadCatalog(cat, q);
       });
+    });
+
+    // Open Customization Studio button
+    container.querySelector('#btn-catalog-open-studio')?.addEventListener('click', () => {
+      renderVendorDashboard(container.closest('.vendor-web-portal').parentElement, user, 'studio');
     });
 
     // Add New Product Button

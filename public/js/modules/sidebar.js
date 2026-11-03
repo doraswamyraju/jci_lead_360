@@ -14,8 +14,9 @@ export function renderSidebar(user, activeModule, onSelectModule) {
     navItems = [
       { id: 'overview', icon: '📊', label: 'Vendor Overview', badge: 'Live' },
       { id: 'catalog', icon: '📦', label: 'Product Catalog', badge: null },
+      { id: 'studio', icon: '🛠️', label: 'Customization Studio', badge: 'New' },
       { id: 'orders', icon: '🚚', label: 'Orders & Production', badge: 'Active' },
-      { id: 'rfqs', icon: '📑', label: 'RFQs & Quotes', badge: 'New' },
+      { id: 'rfqs', icon: '📑', label: 'RFQs & Quotes', badge: null },
       { id: 'earnings', icon: '💰', label: 'Earnings & Payouts', badge: null },
       { id: 'profile', icon: '⚙️', label: 'Business Profile', badge: null }
     ];

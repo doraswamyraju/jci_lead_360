@@ -1,3 +1,4 @@
+import { NotificationCenter } from './notificationCenter.js';
 import { renderVendorDashboard } from './vendorDashboard.js';
 import { renderSidebar } from './sidebar.js';
 import { renderTopbar } from './topbar.js';
@@ -12,6 +13,13 @@ export function routeDashboard(user) {
 
   let currentModule = user.role === 'VENDOR' ? 'overview' : (user.role === 'SUPER_ADMIN' || user.role === 'EMPLOYEE') ? 'templates' : 'flyers';
 
+  // Standalone Notification Center instance with audio synthesis
+  const notifCenter = new NotificationCenter(user, (navDest) => {
+    currentModule = navDest;
+    buildShell();
+  });
+  notifCenter.start();
+
   function buildShell() {
     const sidebarObj = renderSidebar(user, currentModule, (newMod) => {
       currentModule = newMod;
@@ -19,15 +27,16 @@ export function routeDashboard(user) {
     });
 
     const topbarObj = renderTopbar(user, () => {
+      notifCenter.stop();
       clearSession();
       window.location.reload();
     }, () => {
       const sb = document.getElementById('app-sidebar');
       if (sb) sb.classList.toggle('mobile-open');
-    });
+    }, notifCenter);
 
     const floatingObj = renderFloatingActions(user, (action) => {
-      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team', 'notices', 'greetings', 'overview', 'catalog', 'orders', 'rfqs', 'earnings', 'profile'].includes(action)) {
+      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team', 'notices', 'greetings', 'overview', 'catalog', 'orders', 'rfqs', 'earnings', 'profile', 'studio'].includes(action)) {
         currentModule = action;
         buildShell();
       } else if (action === 'new-template') {
