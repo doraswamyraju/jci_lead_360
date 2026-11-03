@@ -1,14 +1,10 @@
 package com.jci2027.lead360.network
 
 import com.jci2027.lead360.model.TemplatesResponse
+import com.jci2027.lead360.vendor.model.*
 import okhttp3.MultipartBody
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
+import retrofit2.http.*
 
 data class LoginRequest(
     val email: String,
@@ -30,7 +26,17 @@ data class UserDto(
     val chapterName: String?,
     val phone: String? = null,
     val photoUrl: String? = null,
-    val zone: String? = null
+    val zone: String? = null,
+    val businessName: String? = null,
+    val gstin: String? = null,
+    val serviceAreas: String? = null,
+    val logoUrl: String? = null,
+    val bankDetails: BankDetails? = null
+)
+
+data class UsersListResponse(
+    val success: Boolean,
+    val users: List<UserDto>
 )
 
 data class SaveContactRequest(
@@ -89,6 +95,20 @@ data class GenericSuccessResponse(
     val message: String?
 )
 
+data class NotificationItem(
+    val id: String,
+    val title: String,
+    val message: String,
+    val type: String? = "order",
+    val read: Boolean = false,
+    val timestamp: String? = null
+)
+
+data class NotificationsResponse(
+    val success: Boolean,
+    val notifications: List<NotificationItem>
+)
+
 interface ApiService {
     @POST("/api/auth/login")
     suspend fun login(
@@ -106,9 +126,9 @@ interface ApiService {
         @Body contact: SaveContactRequest
     ): Response<SaveContactResponse>
 
-    @retrofit2.http.DELETE("/api/contacts/{id}")
+    @DELETE("/api/contacts/{id}")
     suspend fun deleteContact(
-        @retrofit2.http.Path("id") id: String
+        @Path("id") id: String
     ): Response<GenericSuccessResponse>
 
     @GET("/api/contacts")
@@ -133,4 +153,68 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateChapterRequest
     ): Response<GenericSuccessResponse>
+
+    // Vendor & Catalog APIs
+    @GET("/api/vendor/catalog")
+    suspend fun getCatalog(
+        @Query("category") category: String? = null,
+        @Query("search") search: String? = null
+    ): Response<CatalogResponse>
+
+    @POST("/api/vendor/catalog")
+    suspend fun saveCatalogItem(
+        @Header("Authorization") token: String,
+        @Body item: CatalogItem
+    ): Response<GenericSuccessResponse>
+
+    @DELETE("/api/vendor/catalog/{id}")
+    suspend fun deleteCatalogItem(
+        @Header("Authorization") token: String,
+        @Path("id") id: String
+    ): Response<GenericSuccessResponse>
+
+    @GET("/api/vendor/orders")
+    suspend fun getVendorOrders(
+        @Header("Authorization") token: String
+    ): Response<OrdersResponse>
+
+    @POST("/api/vendor/orders")
+    suspend fun placeOrder(
+        @Header("Authorization") token: String,
+        @Body order: PlaceOrderRequest
+    ): Response<GenericSuccessResponse>
+
+    @PUT("/api/vendor/orders/{id}/status")
+    suspend fun updateOrderStatus(
+        @Header("Authorization") token: String,
+        @Path("id") orderId: String,
+        @Body statusBody: Map<String, String>
+    ): Response<GenericSuccessResponse>
+
+    @GET("/api/vendor/rfqs")
+    suspend fun getVendorRfqs(
+        @Header("Authorization") token: String
+    ): Response<RfqsResponse>
+
+    @PUT("/api/vendor/profile")
+    suspend fun updateVendorProfile(
+        @Header("Authorization") token: String,
+        @Body profile: VendorProfile
+    ): Response<GenericSuccessResponse>
+
+    @GET("/api/vendor/notifications")
+    suspend fun getNotifications(
+        @Header("Authorization") token: String
+    ): Response<NotificationsResponse>
+
+    @POST("/api/vendor/notifications/read-all")
+    suspend fun markAllNotificationsRead(
+        @Header("Authorization") token: String
+    ): Response<GenericSuccessResponse>
+
+    // Super Admin APIs
+    @GET("/api/users")
+    suspend fun getAllUsers(
+        @Header("Authorization") token: String
+    ): Response<UsersListResponse>
 }

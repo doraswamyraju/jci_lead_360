@@ -7,7 +7,16 @@ data class VendorProfile(
     val phone: String = "+91 98765 43210",
     val email: String = "vendor@lead360.com",
     val serviceAreas: String = "Andhra Pradesh & Telangana",
-    val gstin: String = "37AAAAA0000A1Z5"
+    val gstin: String = "37AAAAA0000A1Z5",
+    val logoUrl: String? = null,
+    val bankDetails: BankDetails? = null
+)
+
+data class BankDetails(
+    val holder: String = "",
+    val accountNumber: String = "",
+    val bankName: String = "",
+    val ifsc: String = ""
 )
 
 data class VendorKpiSummary(
@@ -20,17 +29,50 @@ data class VendorKpiSummary(
     val pendingAmount: String = "₹11,000"
 )
 
+data class ProductDimension(
+    val width: Int = 800,
+    val height: Int = 800
+)
+
+data class ProductLayer(
+    val id: String = "",
+    val type: String = "custom_text",
+    val label: String = "",
+    val x: Int = 200,
+    val y: Int = 200,
+    val width: Int = 300,
+    val height: Int = 40,
+    val color: String = "#ffffff",
+    val fontSize: Int = 20,
+    val fontFamily: String = "'Outfit', 'Inter', sans-serif",
+    val bold: Boolean = true,
+    val italic: Boolean = false,
+    val uppercase: Boolean = false,
+    val backgroundColor: String = "transparent",
+    val align: String = "center",
+    val defaultText: String = ""
+)
+
 data class CatalogItem(
     val id: String,
     val name: String,
     val category: String,
     val price: Double,
     val unit: String = "piece",
-    val description: String,
+    val description: String = "",
     val imageUrl: String = "",
     val productCountInCat: Int = 0,
     val leadTime: String = "3-4 Days",
-    val vendorName: String = "Rs Creations"
+    val vendorName: String = "Rs Creations",
+    val vendorId: String? = "usr_vnd_01",
+    val customizable: Boolean = true,
+    val dimensions: ProductDimension? = null,
+    val layers: List<ProductLayer> = emptyList()
+)
+
+data class CatalogResponse(
+    val success: Boolean,
+    val items: List<CatalogItem>
 )
 
 data class RfqItem(
@@ -43,7 +85,13 @@ data class RfqItem(
     val emoji: String = "🏆",
     val description: String = "",
     val itemsSummary: String = "",
-    val quotedAmount: Double? = null
+    val quotedAmount: Double? = null,
+    val createdAt: String? = null
+)
+
+data class RfqsResponse(
+    val success: Boolean,
+    val rfqs: List<RfqItem>
 )
 
 data class OrderAsset(
@@ -53,19 +101,32 @@ data class OrderAsset(
 )
 
 data class VendorOrder(
-    val orderId: String,
-    val title: String,
-    val chapterName: String,
-    val orderDate: String,
-    val amount: Double,
-    val status: String, // Confirmed, In Production, Ready, Delivered
-    val itemsSummary: String,
+    val orderId: String = "",
+    val id: String = "",
+    val title: String = "",
+    val chapterName: String = "",
+    val orderDate: String = "",
+    val amount: Double = 0.0,
+    val status: String = "In Production", // Confirmed, In Production, Ready, Delivered
+    val itemsSummary: String = "",
     val confirmedDate: String = "10 Jan 2027",
     val inProductionDate: String = "11 Jan 2027",
     val readyDate: String = "-",
     val deliveredDate: String = "-",
-    val assets: List<OrderAsset> = listOf(
-        OrderAsset("Stage_Backdrop_Artwork.pdf", "/assets/logo.png", "12.4 MB"),
-        OrderAsset("Official_PO_Doc.pdf", "/assets/logo.png", "1.2 MB")
-    )
+    val vendorId: String? = "usr_vnd_01",
+    val assets: List<OrderAsset> = emptyList()
+)
+
+data class OrdersResponse(
+    val success: Boolean,
+    val orders: List<VendorOrder>
+)
+
+data class PlaceOrderRequest(
+    val title: String,
+    val chapterName: String,
+    val amount: Double,
+    val itemsSummary: String,
+    val vendorId: String = "usr_vnd_01",
+    val notifyVendor: Boolean = true
 )

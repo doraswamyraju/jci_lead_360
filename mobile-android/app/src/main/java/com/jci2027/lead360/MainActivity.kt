@@ -81,6 +81,15 @@ class MainActivity : ComponentActivity() {
                             chapterLogoPath = prefs.getString("chapter_logo_path", null)
                         }
                     )
+                } else if (userRole.equals("SUPER_ADMIN", ignoreCase = true) || userRole.equals("ADMIN", ignoreCase = true)) {
+                    // Dedicated Super Admin Experience with Parity to Web Admin Module
+                    com.jci2027.lead360.admin.AdminAppContainer(
+                        token = token!!,
+                        onSignOut = {
+                            prefs.edit().clear().apply()
+                            token = null
+                        }
+                    )
                 } else if (userRole.equals("VENDOR", ignoreCase = true)) {
                     // Dedicated standalone Vendor App experience for official vendors
                     com.jci2027.lead360.vendor.VendorAppContainer(
@@ -434,6 +443,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                     Screen.Store -> VendorStoreScreen(
                                         chapterName = userChapter,
+                                        token = token,
                                         onBack = { currentScreen = Screen.Dashboard }
                                     )
                                     Screen.Flyers -> PresidentFlyerStudioScreen(
