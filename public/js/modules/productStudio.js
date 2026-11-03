@@ -13,53 +13,73 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
   const isEditing = !!existingProduct;
 
   let currentImage = existingProduct?.imageUrl || '/assets/item_memento.png';
-  let layers = existingProduct?.layers ? JSON.parse(JSON.stringify(existingProduct.layers)) : [
-    {
-      id: 'layer_1',
-      type: 'chapter_logo',
-      label: 'Chapter Logo',
-      x: 350,
-      y: 200,
-      width: 100,
-      height: 80
-    },
-    {
-      id: 'layer_2',
-      type: 'event_name',
-      label: 'Event / Award Title',
-      x: 200,
-      y: 520,
-      width: 400,
-      height: 40,
-      color: '#fbbf24',
-      fontSize: 22,
-      fontFamily: "'Inter', sans-serif",
-      bold: true,
-      italic: false,
-      uppercase: true,
-      backgroundColor: 'transparent',
-      align: 'center',
-      defaultText: 'OUTSTANDING CHAPTER AWARD'
-    },
-    {
-      id: 'layer_3',
-      type: 'recipient_name',
-      label: 'Recipient Dignitary Name',
-      x: 200,
-      y: 575,
-      width: 400,
-      height: 35,
-      color: '#ffffff',
-      fontSize: 18,
-      fontFamily: "'Inter', sans-serif",
-      bold: false,
-      italic: false,
-      uppercase: false,
-      backgroundColor: 'transparent',
-      align: 'center',
-      defaultText: 'Presented to JC Doraswamy Raju'
-    }
-  ];
+
+  // Ensure all layers have unique string IDs and fallback typography properties
+  const rawLayers = existingProduct?.layers && existingProduct.layers.length > 0
+    ? existingProduct.layers
+    : [
+      {
+        type: 'chapter_logo',
+        label: 'Chapter Logo',
+        x: 350,
+        y: 200,
+        width: 100,
+        height: 80
+      },
+      {
+        type: 'event_name',
+        label: 'Award / Event Title',
+        x: 200,
+        y: 520,
+        width: 400,
+        height: 40,
+        color: '#fbbf24',
+        fontSize: 22,
+        fontFamily: "'Inter', sans-serif",
+        bold: true,
+        italic: false,
+        uppercase: true,
+        backgroundColor: 'transparent',
+        align: 'center',
+        defaultText: 'OUTSTANDING CHAPTER AWARD'
+      },
+      {
+        type: 'recipient_name',
+        label: 'Recipient Dignitary Name',
+        x: 200,
+        y: 575,
+        width: 400,
+        height: 35,
+        color: '#ffffff',
+        fontSize: 18,
+        fontFamily: "'Inter', sans-serif",
+        bold: false,
+        italic: false,
+        uppercase: false,
+        backgroundColor: 'transparent',
+        align: 'center',
+        defaultText: 'Presented to JC Doraswamy Raju'
+      }
+    ];
+
+  let layers = rawLayers.map((l, idx) => ({
+    id: l.id || `layer_${idx + 1}_${Math.random().toString(36).substr(2, 6)}`,
+    label: l.label || `Zone ${idx + 1}`,
+    type: l.type || 'custom_text',
+    x: typeof l.x === 'number' ? l.x : 200,
+    y: typeof l.y === 'number' ? l.y : 200,
+    width: typeof l.width === 'number' ? l.width : (l.type === 'chapter_logo' ? 100 : 360),
+    height: typeof l.height === 'number' ? l.height : (l.type === 'chapter_logo' ? 80 : 35),
+    color: l.color || '#ffffff',
+    fontSize: typeof l.fontSize === 'number' ? l.fontSize : 20,
+    fontFamily: l.fontFamily || "'Inter', sans-serif",
+    bold: l.bold !== false,
+    italic: l.italic === true,
+    uppercase: l.uppercase === true,
+    backgroundColor: l.backgroundColor || 'transparent',
+    align: l.align || 'center',
+    defaultText: l.defaultText || ''
+  }));
 
   let selectedLayerId = layers[0]?.id || null;
   let canvasWidth = existingProduct?.dimensions?.width || 800;
@@ -75,7 +95,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
           </div>
           <div>
             <h3 style="font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; margin: 0;">Product Customization Studio</h3>
-            <p style="font-size: 12px; color: #94a3b8; margin: 2px 0 0 0;">Upload product mockup & define auto-customizing fields for Chapter Presidents</p>
+            <p style="font-size: 12px; color: #94a3b8; margin: 2px 0 0 0;">Upload product mockup & define interactive auto-customizing fields for Chapter Presidents</p>
           </div>
         </div>
 
@@ -94,7 +114,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
           <div>
             <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Product Title *</label>
-            <input type="text" id="st-name" class="form-control" value="${existingProduct ? existingProduct.name : 'JCI Crystal Memento'}" required />
+            <input type="text" id="st-name" class="form-control" value="${existingProduct ? existingProduct.name : 'Custom JCI Award Item'}" required />
           </div>
           <div>
             <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Category *</label>
@@ -119,10 +139,10 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <span style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase;">Add Customization Zone:</span>
-            <button class="btn-add-zone" data-type="chapter_logo" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">🏢 Chapter Logo</button>
-            <button class="btn-add-zone" data-type="event_name" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">🏆 Award / Event Name</button>
-            <button class="btn-add-zone" data-type="recipient_name" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">👤 Recipient Name</button>
-            <button class="btn-add-zone" data-type="custom_text" style="background:#f3e8ff; color:#6b21a8; border:1px solid #e9d5ff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">✍️ Custom Text</button>
+            <button type="button" class="btn-add-zone" data-type="chapter_logo" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">🏢 Chapter Logo</button>
+            <button type="button" class="btn-add-zone" data-type="event_name" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">🏆 Award / Event Name</button>
+            <button type="button" class="btn-add-zone" data-type="recipient_name" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">👤 Recipient Name</button>
+            <button type="button" class="btn-add-zone" data-type="custom_text" style="background:#f3e8ff; color:#6b21a8; border:1px solid #e9d5ff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">✍️ Custom Text</button>
           </div>
 
           <label style="background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
@@ -132,15 +152,18 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         </div>
 
         <!-- 3-Column Studio: Layers Stack (Left) | Canvas (Center) | Inspector (Right) -->
-        <div style="display: grid; grid-template-columns: 220px 1fr 320px; gap: 20px; align-items: start;">
+        <div style="display: grid; grid-template-columns: 240px 1fr 320px; gap: 20px; align-items: start;">
           <!-- Left: Layers Stack -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
-            <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 10px;">Layers Stack</div>
+            <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Layers Stack</span>
+              <span id="layer-count-badge" style="background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 10px; font-size: 11px;">${layers.length}</span>
+            </div>
             <div id="studio-layers-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
           </div>
 
           <!-- Center: Interactive Canvas Wrapper -->
-          <div style="background: #0f172a; border-radius: 14px; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 520px; position: relative;">
+          <div style="background: radial-gradient(circle at 50% 40%, #1e293b 0%, #0f172a 100%); border-radius: 14px; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 520px; position: relative;">
             <div id="canvas-wrapper" style="position: relative; width: 500px; height: 500px; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
               <img id="product-base-img" src="${currentImage}" style="width: 100%; height: 100%; object-fit: contain; position: absolute; inset: 0;" />
               <div id="overlay-zones-container" style="position: absolute; inset: 0; pointer-events: none;"></div>
@@ -150,7 +173,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
           <!-- Right: Comprehensive Typography & Styling Inspector -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;" id="studio-inspector">
             <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Layer Inspector & Typography</div>
-            <div id="inspector-content">Select a zone on the canvas to configure typography & position</div>
+            <div id="inspector-content">Select a zone to configure typography & position</div>
           </div>
         </div>
       </div>
@@ -160,27 +183,53 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
     <div id="test-preview-modal-root"></div>
   `;
 
+  // Select a layer and update UI
+  function selectLayer(id) {
+    selectedLayerId = id;
+
+    // Update layer list selection classes
+    container.querySelectorAll('.st-layer-item').forEach(el => {
+      const isSel = el.getAttribute('data-layer-id') === id;
+      el.style.background = isSel ? '#e0f2fe' : '#ffffff';
+      el.style.borderColor = isSel ? '#0284c7' : '#e2e8f0';
+    });
+
+    // Update overlay boxes selection styling
+    container.querySelectorAll('.canvas-zone-box').forEach(box => {
+      const isSel = box.getAttribute('data-layer-id') === id;
+      box.style.border = isSel ? '2px solid #0097D8' : '2px dashed rgba(0, 151, 216, 0.6)';
+      box.style.background = isSel ? 'rgba(0, 151, 216, 0.3)' : 'rgba(255, 255, 255, 0.25)';
+      box.style.zIndex = isSel ? '10' : '1';
+    });
+
+    refreshInspector();
+  }
+
   // Layer list rendering
   function refreshLayers() {
     const list = container.querySelector('#studio-layers-list');
+    const badge = container.querySelector('#layer-count-badge');
+    if (badge) badge.textContent = layers.length;
+
     list.innerHTML = layers.map(layer => `
-      <div class="st-layer-item ${layer.id === selectedLayerId ? 'active' : ''}" data-layer-id="${layer.id}" style="
+      <div class="st-layer-item" data-layer-id="${layer.id}" style="
         padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
         background: ${layer.id === selectedLayerId ? '#e0f2fe' : '#ffffff'};
         border: 1px solid ${layer.id === selectedLayerId ? '#0284c7' : '#e2e8f0'};
+        transition: all 0.15s ease;
       ">
-        <span style="font-size: 12px; font-weight: 700; color: #1e293b;">${layer.label}</span>
-        <button class="btn-del-layer" data-layer-id="${layer.id}" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px;">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 14px;">${layer.type === 'chapter_logo' ? '🏢' : '✍️'}</span>
+          <span style="font-size: 12px; font-weight: 700; color: #1e293b;">${layer.label}</span>
+        </div>
+        <button class="btn-del-layer" data-layer-id="${layer.id}" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px; padding: 2px 6px;">✕</button>
       </div>
     `).join('');
 
     list.querySelectorAll('.st-layer-item').forEach(el => {
       el.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-del-layer')) return;
-        selectedLayerId = el.getAttribute('data-layer-id');
-        refreshLayers();
-        refreshOverlay();
-        refreshInspector();
+        selectLayer(el.getAttribute('data-layer-id'));
       });
     });
 
@@ -189,15 +238,14 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         e.stopPropagation();
         const id = btn.getAttribute('data-layer-id');
         layers = layers.filter(l => l.id !== id);
-        if (selectedLayerId === id) selectedLayerId = layers[0]?.id || null;
+        if (selectedLayerId === id) {
+          selectedLayerId = layers[0]?.id || null;
+        }
         refreshLayers();
         refreshOverlay();
         refreshInspector();
       });
     });
-
-    refreshOverlay();
-    refreshInspector();
   }
 
   // Interactive overlay on canvas
@@ -218,7 +266,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
           width: ${widthPct}%;
           height: ${heightPct}%;
           border: 2px ${isSelected ? 'solid #0097D8' : 'dashed rgba(0, 151, 216, 0.6)'};
-          background: ${isSelected ? 'rgba(0, 151, 216, 0.25)' : 'rgba(255, 255, 255, 0.2)'};
+          background: ${isSelected ? 'rgba(0, 151, 216, 0.3)' : 'rgba(255, 255, 255, 0.25)'};
           pointer-events: auto;
           cursor: move;
           display: flex;
@@ -227,20 +275,24 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
           color: #ffffff;
           font-size: 11px;
           font-weight: 800;
-          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+          text-shadow: 0 1px 4px rgba(0,0,0,0.9);
           user-select: none;
+          z-index: ${isSelected ? 10 : 1};
+          border-radius: 4px;
         ">
           ${layer.label}
         </div>
       `;
     }).join('');
 
-    // Attach dragging support
+    // Attach dragging & selection support without destroying DOM on click
     overlay.querySelectorAll('.canvas-zone-box').forEach(box => {
       box.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         const id = box.getAttribute('data-layer-id');
-        selectedLayerId = id;
-        refreshLayers();
+        selectLayer(id);
 
         const layer = layers.find(l => l.id === id);
         if (!layer) return;
@@ -253,10 +305,18 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         function onMouseMove(moveEvent) {
           const dx = ((moveEvent.clientX - startX) / 500) * canvasWidth;
           const dy = ((moveEvent.clientY - startY) / 500) * canvasHeight;
+
           layer.x = Math.max(0, Math.min(canvasWidth - layer.width, Math.round(initX + dx)));
           layer.y = Math.max(0, Math.min(canvasHeight - layer.height, Math.round(initY + dy)));
-          refreshOverlay();
-          refreshInspector();
+
+          box.style.left = `${(layer.x / canvasWidth) * 100}%`;
+          box.style.top = `${(layer.y / canvasHeight) * 100}%`;
+
+          // Keep Inspector coordinates updated in real-time
+          const xInput = container.querySelector('#insp-x');
+          const yInput = container.querySelector('#insp-y');
+          if (xInput) xInput.value = layer.x;
+          if (yInput) yInput.value = layer.y;
         }
 
         function onMouseUp() {
@@ -276,7 +336,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
     const layer = layers.find(l => l.id === selectedLayerId);
 
     if (!layer) {
-      inspector.innerHTML = `<div style="font-size: 13px; color: #64748b;">No zone selected</div>`;
+      inspector.innerHTML = `<div style="font-size: 13px; color: #64748b; padding: 20px 0; text-align: center;">Click any zone in the canvas or layer list to configure</div>`;
       return;
     }
 
@@ -285,6 +345,17 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         <div>
           <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Zone Label</label>
           <input type="text" id="insp-label" class="form-control" value="${layer.label}" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>
+            <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Pos X (px)</label>
+            <input type="number" id="insp-x" class="form-control" value="${layer.x}" />
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Pos Y (px)</label>
+            <input type="number" id="insp-y" class="form-control" value="${layer.y}" />
+          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -355,8 +426,9 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
             <input type="text" id="insp-default-text" class="form-control" value="${layer.defaultText || ''}" />
           </div>
         ` : `
-          <div style="font-size: 12px; color: #0369a1; background: #e0f2fe; padding: 10px; border-radius: 8px;">
-            ℹ️ When Chapter Presidents view this product, their registered chapter logo is automatically positioned inside this box.
+          <div style="font-size: 12px; color: #0369a1; background: #e0f2fe; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd; line-height: 1.4;">
+            ℹ️ <b>Official Chapter Logo Zone</b><br>
+            When Chapter Presidents view this product, their chapter's official crest logo is automatically scaled and positioned inside this bounding box.
           </div>
         `}
       </div>
@@ -365,18 +437,34 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
     // Hook Inspector inputs
     inspector.querySelector('#insp-label')?.addEventListener('input', (e) => {
       layer.label = e.target.value;
-      container.querySelector(`.st-layer-item[data-layer-id="${layer.id}"] span`).textContent = layer.label;
-      refreshOverlay();
+      const el = container.querySelector(`.st-layer-item[data-layer-id="${layer.id}"] span:last-child`);
+      if (el) el.textContent = layer.label;
+      const box = container.querySelector(`.canvas-zone-box[data-layer-id="${layer.id}"]`);
+      if (box) box.textContent = layer.label;
+    });
+
+    inspector.querySelector('#insp-x')?.addEventListener('input', (e) => {
+      layer.x = parseInt(e.target.value) || 0;
+      const box = container.querySelector(`.canvas-zone-box[data-layer-id="${layer.id}"]`);
+      if (box) box.style.left = `${(layer.x / canvasWidth) * 100}%`;
+    });
+
+    inspector.querySelector('#insp-y')?.addEventListener('input', (e) => {
+      layer.y = parseInt(e.target.value) || 0;
+      const box = container.querySelector(`.canvas-zone-box[data-layer-id="${layer.id}"]`);
+      if (box) box.style.top = `${(layer.y / canvasHeight) * 100}%`;
     });
 
     inspector.querySelector('#insp-w')?.addEventListener('input', (e) => {
       layer.width = parseInt(e.target.value) || 50;
-      refreshOverlay();
+      const box = container.querySelector(`.canvas-zone-box[data-layer-id="${layer.id}"]`);
+      if (box) box.style.width = `${(layer.width / canvasWidth) * 100}%`;
     });
 
     inspector.querySelector('#insp-h')?.addEventListener('input', (e) => {
       layer.height = parseInt(e.target.value) || 20;
-      refreshOverlay();
+      const box = container.querySelector(`.canvas-zone-box[data-layer-id="${layer.id}"]`);
+      if (box) box.style.height = `${(layer.height / canvasHeight) * 100}%`;
     });
 
     inspector.querySelector('#insp-font')?.addEventListener('change', (e) => {
@@ -466,13 +554,18 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         defaultText: type === 'chapter_logo' ? '' : 'Custom Sample Text'
       };
       layers.push(newLayer);
-      selectedLayerId = newLayer.id;
       refreshLayers();
+      refreshOverlay();
+      selectLayer(newLayer.id);
     });
   });
 
   // Save product button
   container.querySelector('#btn-studio-save').addEventListener('click', async () => {
+    const saveBtn = container.querySelector('#btn-studio-save');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
     const payload = {
       id: existingProduct ? existingProduct.id : undefined,
       name: container.querySelector('#st-name').value.trim(),
@@ -498,10 +591,15 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
       if (data.success) {
         alert('✓ Product customization studio settings saved successfully!');
         if (onProductSaved) onProductSaved();
+      } else {
+        alert(data.message || 'Failed to save product');
       }
     } catch (err) {
       console.error(err);
       alert('Failed to save product');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<span>💾</span> Save Product';
     }
   });
 
@@ -510,7 +608,12 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
     openTestPreviewModal(currentImage, layers, canvasWidth, canvasHeight);
   });
 
+  // Initialize
   refreshLayers();
+  refreshOverlay();
+  if (selectedLayerId) {
+    selectLayer(selectedLayerId);
+  }
 }
 
 function openTestPreviewModal(baseImage, layers, width, height) {
