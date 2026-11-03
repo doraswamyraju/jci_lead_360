@@ -27,7 +27,7 @@ export function routeDashboard(user) {
     });
 
     const floatingObj = renderFloatingActions(user, (action) => {
-      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team', 'notices', 'greetings'].includes(action)) {
+      if (['templates', 'frames', 'users', 'calendar', 'flyers', 'team', 'notices', 'greetings', 'overview', 'catalog', 'orders', 'rfqs', 'earnings', 'profile'].includes(action)) {
         currentModule = action;
         buildShell();
       } else if (action === 'new-template') {
@@ -67,6 +67,9 @@ export function routeDashboard(user) {
     // Render internal module based on user role and current selection
     const content = document.getElementById('dashboard-content');
     switch (user.role) {
+      case 'VENDOR':
+        renderVendorDashboard(content, user, currentModule);
+        break;
       case 'SUPER_ADMIN':
       case 'EMPLOYEE':
         renderSuperAdminDashboard(content, user, currentModule);
