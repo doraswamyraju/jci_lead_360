@@ -1,3 +1,4 @@
+import { renderVendorDashboard } from './vendorDashboard.js';
 import { renderSidebar } from './sidebar.js';
 import { renderTopbar } from './topbar.js';
 import { renderFloatingActions } from './floatingActions.js';
@@ -9,7 +10,7 @@ import { clearSession } from './authService.js';
 export function routeDashboard(user) {
   const root = document.getElementById('app-root');
 
-  let currentModule = (user.role === 'SUPER_ADMIN' || user.role === 'EMPLOYEE') ? 'templates' : 'flyers';
+  let currentModule = user.role === 'VENDOR' ? 'overview' : (user.role === 'SUPER_ADMIN' || user.role === 'EMPLOYEE') ? 'templates' : 'flyers';
 
   function buildShell() {
     const sidebarObj = renderSidebar(user, currentModule, (newMod) => {

@@ -257,7 +257,7 @@
       "leadTime": "3-4 Days",
       "description": "Premium crystal memento with JCI logo engraving. Ideal for installations, awards and recognitions.",
       "productCountInCat": 28,
-      "imageUrl": "/assets/logo.png",
+      "imageUrl": "/assets/item_memento.png",
       "createdAt": "2026-11-02T11:38:52.560Z"
     },
     {
@@ -271,7 +271,7 @@
       "leadTime": "24 Hours",
       "description": "Star flex heavy duty roll-up standees (6x3 ft) with metal hardware & zip carry case.",
       "productCountInCat": 16,
-      "imageUrl": "/assets/logo.png",
+      "imageUrl": "/assets/item_banner.png",
       "createdAt": "2026-11-02T11:38:52.598Z"
     },
     {
@@ -285,7 +285,7 @@
       "leadTime": "2 Days",
       "description": "170 GSM art paper tri-fold brochures with glossy lamination for chapter events.",
       "productCountInCat": 12,
-      "imageUrl": "/assets/logo.png",
+      "imageUrl": "/assets/item_brochure.png",
       "createdAt": "2026-11-02T11:38:52.598Z"
     },
     {
@@ -299,7 +299,7 @@
       "leadTime": "5 Days",
       "description": "Official JCI dry-fit collared polo t-shirt with embroidered crest on chest.",
       "productCountInCat": 10,
-      "imageUrl": "/assets/logo.png",
+      "imageUrl": "/assets/item_apparel.png",
       "createdAt": "2026-11-02T11:38:52.598Z"
     }
   ],

@@ -5,6 +5,14 @@
 
 export function renderFloatingActions(user, onActionTrigger) {
   const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.role === 'EMPLOYEE';
+  const isVendor = user.role === 'VENDOR';
+
+  if (isVendor) {
+    return {
+      html: '',
+      attachEvents: () => {}
+    };
+  }
 
   const html = `
     <!-- Floating Action Button (Desktop & Mobile) -->

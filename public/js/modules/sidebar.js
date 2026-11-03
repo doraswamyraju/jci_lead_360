@@ -6,10 +6,20 @@
 export function renderSidebar(user, activeModule, onSelectModule) {
   const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.role === 'EMPLOYEE';
   const isPresident = user.role === 'PRESIDENT';
+  const isVendor = user.role === 'VENDOR';
 
   let navItems = [];
 
-  if (isSuperAdmin) {
+  if (isVendor) {
+    navItems = [
+      { id: 'overview', icon: '📊', label: 'Vendor Overview', badge: 'Live' },
+      { id: 'catalog', icon: '📦', label: 'Product Catalog', badge: null },
+      { id: 'orders', icon: '🚚', label: 'Orders & Production', badge: 'Active' },
+      { id: 'rfqs', icon: '📑', label: 'RFQs & Quotes', badge: 'New' },
+      { id: 'earnings', icon: '💰', label: 'Earnings & Payouts', badge: null },
+      { id: 'profile', icon: '⚙️', label: 'Business Profile', badge: null }
+    ];
+  } else if (isSuperAdmin) {
     navItems = [
       { id: 'templates', icon: '🎨', label: 'Template Studio', badge: 'Active' },
       { id: 'frames', icon: '🖼️', label: 'Frame Studio', badge: null },
