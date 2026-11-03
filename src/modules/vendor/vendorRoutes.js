@@ -280,5 +280,50 @@ router.post('/notifications/read-all', authenticate, (req, res) => {
   }
 });
 
+
+/**
+ * PUT /api/vendor/profile
+ * Update vendor business profile, contact details, GST, and bank settlement
+ */
+router.put('/profile', authenticate, (req, res) => {
+  try {
+    const { businessName, name, phone, email, gstin, serviceAreas, bankDetails, logoUrl } = req.body;
+    const user = db.findUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Vendor not found' });
+    }
+
+    if (businessName) user.businessName = businessName.trim();
+    if (name) user.name = name.trim();
+    if (phone) user.phone = phone.trim();
+    if (email) user.email = email.trim();
+    if (gstin) user.gstin = gstin.trim();
+    if (serviceAreas) user.serviceAreas = serviceAreas.trim();
+    if (logoUrl) user.logoUrl = logoUrl;
+    if (bankDetails) user.bankDetails = bankDetails;
+
+    db.saveUser(user);
+
+    res.json({
+      success: true,
+      message: 'Vendor profile updated successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        businessName: user.businessName,
+        email: user.email,
+        phone: user.phone,
+        gstin: user.gstin,
+        serviceAreas: user.serviceAreas,
+        logoUrl: user.logoUrl,
+        bankDetails: user.bankDetails
+      }
+    });
+  } catch (error) {
+    console.error('Error updating vendor profile:', error);
+    res.status(500).json({ success: false, message: 'Failed to update vendor profile' });
+  }
+});
+
 export default router;
 

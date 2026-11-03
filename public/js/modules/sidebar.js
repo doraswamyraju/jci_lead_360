@@ -23,6 +23,7 @@ export function renderSidebar(user, activeModule, onSelectModule) {
   } else if (isSuperAdmin) {
     navItems = [
       { id: 'templates', icon: '🎨', label: 'Template Studio', badge: 'Active' },
+      { id: 'vendors', icon: '🏪', label: 'Vendors & Products', badge: 'Commerce' },
       { id: 'frames', icon: '🖼️', label: 'Frame Studio', badge: null },
       { id: 'users', icon: '👥', label: 'Leaders & Staff DB', badge: null },
       { id: 'calendar', icon: '📅', label: '100% Efficiency 2027', badge: '2027' }
@@ -30,6 +31,7 @@ export function renderSidebar(user, activeModule, onSelectModule) {
   } else if (isPresident) {
     navItems = [
       { id: 'flyers', icon: '⚡', label: 'Dynamic Flyers', badge: 'Instant' },
+      { id: 'store', icon: '🛒', label: 'Chapter Store & Goods', badge: 'Auto-Branded' },
       { id: 'frames', icon: '📸', label: 'Photo Frames', badge: null },
       { id: 'team', icon: '🤝', label: 'PST Management', badge: null },
       { id: 'calendar', icon: '📅', label: 'Year 2027 Calendar', badge: null }

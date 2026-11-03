@@ -54,11 +54,15 @@ export class CanvasRenderer {
       const h = (layer.height / (template.dimensions?.height || 1080)) * height;
 
       // Extract layer styling options
-      const textColor = layer.textColor || '#ffffff';
-      const textAlign = layer.textAlign || 'left';
+      const textColor = layer.textColor || layer.color || '#ffffff';
+      const textAlign = layer.textAlign || layer.align || 'left';
       const fontSize = layer.fontSize || Math.max(16, Math.round(w * 0.065));
-      const fontWeight = layer.fontWeight || '700';
+      const fontWeight = layer.fontWeight || (layer.bold ? '800' : '500');
+      const fontStyle = layer.fontStyle || (layer.italic ? 'italic' : 'normal');
+      const fontFamily = layer.fontFamily || "'Outfit', 'Inter', sans-serif";
       const hasShadow = layer.hasShadow !== false;
+      const backgroundColor = layer.backgroundColor || null;
+      const isUppercase = layer.uppercase === true;
       const shape = layer.shape || (layer.type.includes('photo') ? 'circle' : 'rectangle');
       const borderWidth = layer.borderWidth ?? (layer.type.includes('photo') ? 4 : 0);
       const borderColor = layer.borderColor || '#ffffff';
@@ -112,33 +116,45 @@ export class CanvasRenderer {
             this.drawText(values.presidentName, x, y, w, h, {
               fontSize: layer.fontSize || Math.max(18, Math.round(w * 0.07)),
               fontWeight,
+              fontStyle,
+              fontFamily,
               color: textColor,
               align: textAlign,
-              hasShadow
+              hasShadow,
+              backgroundColor,
+              isUppercase
             });
           }
           break;
 
         case 'event_date_time':
           if (values.dateTime) {
-            this.drawText(`📅 ${values.dateTime}`, x, y, w, h, {
+            this.drawText(values.dateTime ? (values.dateTime.includes('📅') ? values.dateTime : `📅 ${values.dateTime}`) : '', x, y, w, h, {
               fontSize: layer.fontSize || Math.max(16, Math.round(w * 0.05)),
               fontWeight,
+              fontStyle,
+              fontFamily,
               color: textColor,
               align: textAlign,
-              hasShadow
+              hasShadow,
+              backgroundColor,
+              isUppercase
             });
           }
           break;
 
         case 'event_venue':
           if (values.venue) {
-            this.drawText(`📍 ${values.venue}`, x, y, w, h, {
+            this.drawText(values.venue ? (values.venue.includes('📍') ? values.venue : `📍 ${values.venue}`) : '', x, y, w, h, {
               fontSize: layer.fontSize || Math.max(16, Math.round(w * 0.05)),
               fontWeight,
+              fontStyle,
+              fontFamily,
               color: textColor,
               align: textAlign,
-              hasShadow
+              hasShadow,
+              backgroundColor,
+              isUppercase
             });
           }
           break;
@@ -208,15 +224,27 @@ export class CanvasRenderer {
   /**
    * Helper: Draw wrapped text with dropshadow and precise alignment
    */
-  drawText(text, x, y, maxWidth, maxHeight, { fontSize = 18, fontWeight = '600', color = '#ffffff', align = 'left', hasShadow = false }) {
+  drawText(text, x, y, maxWidth, maxHeight, {
+    fontSize = 18,
+    fontWeight = '600',
+    fontStyle = 'normal',
+    fontFamily = "'Outfit', 'Inter', sans-serif",
+    color = '#ffffff',
+    align = 'left',
+    hasShadow = false,
+    shadowColor = 'rgba(0, 0, 0, 0.85)',
+    backgroundColor = null,
+    isUppercase = false
+  }) {
     this.ctx.save();
-    this.ctx.font = `${fontWeight} ${fontSize}px 'Outfit', 'Inter', -apple-system, sans-serif`;
+    const processedText = isUppercase ? text.toUpperCase() : text;
+    this.ctx.font = `${fontStyle !== 'normal' ? fontStyle + ' ' : ''}${fontWeight} ${fontSize}px ${fontFamily}`;
     this.ctx.fillStyle = color;
     this.ctx.textAlign = align;
     this.ctx.textBaseline = 'top';
 
     if (hasShadow) {
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      this.ctx.shadowColor = shadowColor;
       this.ctx.shadowBlur = 6;
       this.ctx.shadowOffsetX = 2;
       this.ctx.shadowOffsetY = 2;
@@ -230,24 +258,42 @@ export class CanvasRenderer {
       textAnchorX = x + maxWidth;
     }
 
-    const words = text.split(' ');
+    const words = processedText.split(' ');
+    let lines = [];
     let line = '';
-    let currentY = y;
-    const lineHeight = fontSize * 1.35;
 
     for (let i = 0; i < words.length; i++) {
       const testLine = line + words[i] + ' ';
       const metrics = this.ctx.measureText(testLine);
       if (metrics.width > maxWidth && i > 0) {
-        this.ctx.fillText(line.trim(), textAnchorX, currentY);
+        lines.push(line.trim());
         line = words[i] + ' ';
-        currentY += lineHeight;
-        if (currentY + lineHeight > y + maxHeight) break;
       } else {
         line = testLine;
       }
     }
-    this.ctx.fillText(line.trim(), textAnchorX, currentY);
+    lines.push(line.trim());
+
+    const lineHeight = fontSize * 1.35;
+    let currentY = y;
+
+    // Optional background highlight box
+    if (backgroundColor && backgroundColor !== 'transparent') {
+      this.ctx.save();
+      this.ctx.shadowColor = 'transparent';
+      this.ctx.fillStyle = backgroundColor;
+      const totalBlockHeight = Math.min(lines.length * lineHeight + 8, maxHeight);
+      this.ctx.beginPath();
+      this.ctx.roundRect(x - 6, y - 4, maxWidth + 12, totalBlockHeight, 6);
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      if (currentY + lineHeight > y + maxHeight + 10) break;
+      this.ctx.fillText(lines[i], textAnchorX, currentY);
+      currentY += lineHeight;
+    }
     this.ctx.restore();
   }
 

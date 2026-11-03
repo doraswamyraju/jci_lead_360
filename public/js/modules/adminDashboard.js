@@ -1,3 +1,4 @@
+import { renderVendorAdminManager } from './vendorAdminManager.js';
 import { renderTemplateMarker } from './templateMarker.js';
 import { renderFrameStudio } from './frameStudio.js';
 import { renderUserManager } from './userManager.js';
@@ -76,7 +77,9 @@ export function renderSuperAdminDashboard(container, user, activeSubmodule = 'te
   }
 
   // Load the respective standalone submodule
-  if (activeSubmodule === 'frames') {
+  if (activeSubmodule === 'vendors') {
+    renderVendorAdminManager(moduleRoot, refreshStats);
+  } else if (activeSubmodule === 'frames') {
     renderFrameStudio(moduleRoot, refreshStats);
   } else if (activeSubmodule === 'users') {
     renderUserManager(moduleRoot, refreshStats);

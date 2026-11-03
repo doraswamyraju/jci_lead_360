@@ -433,8 +433,11 @@ async function renderCatalogTab(container, user, token) {
               </div>
 
               <div style="display: flex; gap: 8px;">
-                <button class="btn-edit-catalog" data-item-id="${item.id}" style="flex: 1; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 7px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                  ✏️ Edit
+                <button class="btn-studio-edit-catalog" data-item-id="${item.id}" style="flex: 1; background: #e0f2fe; border: 1px solid #bae6fd; color: #0284c7; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                  <span>🛠️ Studio & Preview</span>
+                </button>
+                <button class="btn-edit-catalog" data-item-id="${item.id}" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                  ✏️ Quick
                 </button>
                 <button class="btn-delete-catalog" data-item-id="${item.id}" style="background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
                   🗑️
@@ -445,7 +448,19 @@ async function renderCatalogTab(container, user, token) {
         </div>
       `).join('');
 
-      // Attach Edit Events
+      // Attach Studio Edit & Preview Events
+      grid.querySelectorAll('.btn-studio-edit-catalog').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const itemId = btn.getAttribute('data-item-id');
+          const found = allItems.find(i => i.id === itemId);
+          if (found) {
+            const portalRoot = container.closest('.vendor-web-portal')?.parentElement || container;
+            renderProductStudio(portalRoot, () => renderVendorDashboard(portalRoot, user, 'catalog'), found);
+          }
+        });
+      });
+
+      // Attach Quick Edit Events
       grid.querySelectorAll('.btn-edit-catalog').forEach(btn => {
         btn.addEventListener('click', () => {
           const itemId = btn.getAttribute('data-item-id');
@@ -828,64 +843,166 @@ async function renderEarningsTab(container, user, token) {
 // 6. BUSINESS PROFILE TAB
 // ==========================================
 function renderProfileTab(container, user, token) {
+  let logoUrl = user.logoUrl || '/assets/logo-square.jpg';
+
   container.innerHTML = `
-    <div style="background: #ffffff; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 24px; max-width: 800px; margin: 0 auto;">
-      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0;">
-        <div style="width: 64px; height: 64px; border-radius: 16px; background: #0097D8; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900;">
-          🏪
+    <div style="background: #ffffff; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 26px; max-width: 860px; margin: 0 auto;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="position: relative;">
+            <img id="vendor-logo-preview" src="${logoUrl}" style="width: 72px; height: 72px; border-radius: 16px; object-fit: cover; border: 2px solid #0097D8; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
+            <label for="vendor-logo-input" style="position: absolute; bottom: -4px; right: -4px; background: #0097D8; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; border: 2px solid #fff;" title="Upload Logo">📷</label>
+            <input type="file" id="vendor-logo-input" accept="image/*" style="display: none;" />
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h2 style="font-size: 20px; font-weight: 800; color: var(--dark); margin: 0;">${user.businessName || user.name || 'Rs Creations'}</h2>
+              <span style="background: #dcfce7; color: #166534; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 20px; border: 1px solid #bbf7d0;">✓ Approved Partner</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 2px 0 0 0;">Official Vendor Partner • JCI India Zone IV</p>
+          </div>
         </div>
-        <div>
-          <h2 style="font-size: 20px; font-weight: 800; color: var(--dark); margin: 0;">${user.businessName || user.name || 'Rs Creations'}</h2>
-          <p style="font-size: 13px; color: var(--text-muted); margin: 2px 0 0 0;">JCI Approved Official Vendor • Verified Partner</p>
-        </div>
+        <span style="font-size: 12px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 6px 14px; border-radius: 8px; border: 1px solid #bae6fd;">Verified Vendor ID: ${user.id || 'usr_vnd_01'}</span>
       </div>
 
       <form id="vendor-profile-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
         <div style="grid-column: 1 / -1;">
-          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Business / Agency Legal Name</label>
+          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Business / Agency Legal Name *</label>
           <input type="text" id="prof-business-name" class="form-control" value="${user.businessName || user.name || 'Rs Creations'}" required />
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Contact Person Name</label>
+          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Contact Person Full Name *</label>
           <input type="text" id="prof-contact-name" class="form-control" value="${user.name || 'Rs Creations'}" required />
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Contact Phone Number</label>
+          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Contact Mobile Number *</label>
           <input type="text" id="prof-phone" class="form-control" value="${user.phone || '+91 98765 43210'}" required />
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Official Vendor Email</label>
+          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Official Vendor Email Address *</label>
           <input type="email" id="prof-email" class="form-control" value="${user.email || 'vendor@lead360.com'}" required />
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">GST Registration Number</label>
-          <input type="text" id="prof-gst" class="form-control" value="37AAAAA0000A1Z5" placeholder="GSTIN" />
+          <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">GST Registration Number (GSTIN)</label>
+          <input type="text" id="prof-gst" class="form-control" value="${user.gstin || '37AAAAA0000A1Z5'}" placeholder="e.g. 37AAAAA0000A1Z5" />
         </div>
 
         <div style="grid-column: 1 / -1;">
           <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 6px;">Service Delivery Areas (Chapters / Districts)</label>
-          <input type="text" id="prof-areas" class="form-control" value="Tirupati, Chittoor, Nellore, Kadapa, Ananthapur & Zone IV" />
+          <input type="text" id="prof-areas" class="form-control" value="${user.serviceAreas || 'Tirupati, Chittoor, Nellore, Kadapa, Ananthapur & Zone IV'}" />
         </div>
 
-        <div style="grid-column: 1 / -1; margin-top: 10px;">
-          <button type="submit" style="background: #0097D8; color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer;">
-            ✓ Save Profile Details
+        <!-- Bank Account Settlement Details -->
+        <div style="grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 6px;">
+          <h4 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">🏦 Direct Settlement & Payout Bank Details</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #475569; display: block; margin-bottom: 4px;">Bank Account Holder Name</label>
+              <input type="text" id="bank-holder" class="form-control" value="${user.bankDetails?.holder || 'Rs Creations Enterprise'}" />
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #475569; display: block; margin-bottom: 4px;">Bank Account Number</label>
+              <input type="text" id="bank-acc" class="form-control" value="${user.bankDetails?.accountNumber || '987654321000'}" />
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #475569; display: block; margin-bottom: 4px;">Bank Name</label>
+              <input type="text" id="bank-name" class="form-control" value="${user.bankDetails?.bankName || 'HDFC Bank, Tirupati Branch'}" />
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #475569; display: block; margin-bottom: 4px;">IFSC Code</label>
+              <input type="text" id="bank-ifsc" class="form-control" value="${user.bankDetails?.ifsc || 'HDFC0001234'}" />
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: 1 / -1; margin-top: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <button type="submit" id="btn-save-profile" style="background: #0097D8; color: #ffffff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 151, 216, 0.35);">
+            ✓ Save All Profile & Bank Details
           </button>
+          <div id="prof-save-msg" style="font-size: 13px; font-weight: 700;"></div>
         </div>
       </form>
-      <div id="prof-save-msg" style="margin-top: 12px; font-size: 13px; font-weight: 700;"></div>
     </div>
   `;
 
-  container.querySelector('#vendor-profile-form').addEventListener('submit', (e) => {
+  // Logo upload
+  container.querySelector('#vendor-logo-input')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.fileUrl) {
+        logoUrl = data.fileUrl;
+        container.querySelector('#vendor-logo-preview').src = logoUrl;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // Profile Save
+  container.querySelector('#vendor-profile-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const saveBtn = container.querySelector('#btn-save-profile');
     const msg = container.querySelector('#prof-save-msg');
-    msg.style.color = '#15803d';
-    msg.textContent = '✓ Business profile information updated successfully!';
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const payload = {
+      businessName: container.querySelector('#prof-business-name').value,
+      name: container.querySelector('#prof-contact-name').value,
+      phone: container.querySelector('#prof-phone').value,
+      email: container.querySelector('#prof-email').value,
+      gstin: container.querySelector('#prof-gst').value,
+      serviceAreas: container.querySelector('#prof-areas').value,
+      logoUrl,
+      bankDetails: {
+        holder: container.querySelector('#bank-holder').value,
+        accountNumber: container.querySelector('#bank-acc').value,
+        bankName: container.querySelector('#bank-name').value,
+        ifsc: container.querySelector('#bank-ifsc').value
+      }
+    };
+
+    try {
+      const res = await fetch('/api/vendor/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        msg.style.color = '#15803d';
+        msg.textContent = '✓ Profile & settlement parameters saved to live database!';
+        // Update user session in localStorage
+        const storedSession = JSON.parse(localStorage.getItem('lead360_user') || '{}');
+        Object.assign(storedSession, payload);
+        localStorage.setItem('lead360_user', JSON.stringify(storedSession));
+      } else {
+        msg.style.color = '#dc2626';
+        msg.textContent = data.message || 'Error saving profile';
+      }
+    } catch (err) {
+      msg.style.color = '#dc2626';
+      msg.textContent = 'Network error saving profile';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '✓ Save All Profile & Bank Details';
+    }
   });
 }
 

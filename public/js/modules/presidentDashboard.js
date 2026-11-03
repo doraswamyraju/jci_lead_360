@@ -1,8 +1,13 @@
+import { renderPresidentStore } from './presidentStore.js';
 import { renderFlyerGenerator } from './flyerGenerator.js';
 import { renderFrameMaker } from './frameMaker.js';
 import { renderCalendarModule } from './calendarModule.js';
 
 export function renderPresidentDashboard(container, user, activeSubmodule = 'flyers') {
+  if (activeSubmodule === 'store') {
+    renderPresidentStore(container, user);
+    return;
+  }
   if (activeSubmodule === 'frames') {
     renderFrameMaker(container, user);
     return;

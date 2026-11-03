@@ -3,12 +3,10 @@
  * Allows vendors to:
  * 1. Upload high-res base product mockup (Memento, Trophy, T-Shirt, Standee, Certificate, Badge)
  * 2. Visual Drag & Resize Zone Mapping (Chapter Logo, Award Title, Recipient Name, Custom Text, Year)
- * 3. Inspect & Configure Typography (Color, Font Size, Alignment, Bold)
+ * 3. Inspect & Configure Advanced Typography (Font Family, Style, Size, Color, Background Highlight, Shadow, Uppercase)
  * 4. Live Interactive Preview: Test real-time customization with dummy Chapter name & President profile
  * 5. Save directly into vendor catalog with coordinates for President & Members app view
  */
-
-import { CanvasRenderer } from './canvasRenderer.js';
 
 export function renderProductStudio(container, onProductSaved, existingProduct = null) {
   const token = localStorage.getItem('lead360_token');
@@ -35,8 +33,12 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
       height: 40,
       color: '#fbbf24',
       fontSize: 22,
-      align: 'center',
+      fontFamily: "'Inter', sans-serif",
       bold: true,
+      italic: false,
+      uppercase: true,
+      backgroundColor: 'transparent',
+      align: 'center',
       defaultText: 'OUTSTANDING CHAPTER AWARD'
     },
     {
@@ -49,8 +51,12 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
       height: 35,
       color: '#ffffff',
       fontSize: 18,
-      align: 'center',
+      fontFamily: "'Inter', sans-serif",
       bold: false,
+      italic: false,
+      uppercase: false,
+      backgroundColor: 'transparent',
+      align: 'center',
       defaultText: 'Presented to JC Doraswamy Raju'
     }
   ];
@@ -126,7 +132,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         </div>
 
         <!-- 3-Column Studio: Layers Stack (Left) | Canvas (Center) | Inspector (Right) -->
-        <div style="display: grid; grid-template-columns: 220px 1fr 300px; gap: 20px; align-items: start;">
+        <div style="display: grid; grid-template-columns: 220px 1fr 320px; gap: 20px; align-items: start;">
           <!-- Left: Layers Stack -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
             <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 10px;">Layers Stack</div>
@@ -141,9 +147,9 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
             </div>
           </div>
 
-          <!-- Right: Inspector Controls -->
+          <!-- Right: Comprehensive Typography & Styling Inspector -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;" id="studio-inspector">
-            <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Layer Inspector</div>
+            <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Layer Inspector & Typography</div>
             <div id="inspector-content">Select a zone on the canvas to configure typography & position</div>
           </div>
         </div>
@@ -212,7 +218,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
           width: ${widthPct}%;
           height: ${heightPct}%;
           border: 2px ${isSelected ? 'solid #0097D8' : 'dashed rgba(0, 151, 216, 0.6)'};
-          background: ${isSelected ? 'rgba(0, 151, 216, 0.2)' : 'rgba(255, 255, 255, 0.2)'};
+          background: ${isSelected ? 'rgba(0, 151, 216, 0.25)' : 'rgba(255, 255, 255, 0.2)'};
           pointer-events: auto;
           cursor: move;
           display: flex;
@@ -264,7 +270,7 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
     });
   }
 
-  // Inspector panel
+  // Comprehensive Typography & Styling Inspector
   function refreshInspector() {
     const inspector = container.querySelector('#inspector-content');
     const layer = layers.find(l => l.id === selectedLayerId);
@@ -293,14 +299,55 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         </div>
 
         ${layer.type !== 'chapter_logo' ? `
-          <div>
-            <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Text Color</label>
-            <input type="color" id="insp-color" class="form-control" value="${layer.color || '#ffffff'}" style="height: 38px; padding: 2px;" />
+          <!-- Typography: Font Family & Style -->
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+            <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Font Family</label>
+            <select id="insp-font" class="form-control">
+              <option value="'Inter', sans-serif" ${layer.fontFamily?.includes('Inter') ? 'selected' : ''}>Inter (Modern Clean)</option>
+              <option value="'Outfit', sans-serif" ${layer.fontFamily?.includes('Outfit') ? 'selected' : ''}>Outfit (Executive Geometric)</option>
+              <option value="'Montserrat', sans-serif" ${layer.fontFamily?.includes('Montserrat') ? 'selected' : ''}>Montserrat (Bold Brand)</option>
+              <option value="'Playfair Display', serif" ${layer.fontFamily?.includes('Playfair') ? 'selected' : ''}>Playfair Display (Luxury Serif)</option>
+              <option value="'Cinzel', serif" ${layer.fontFamily?.includes('Cinzel') ? 'selected' : ''}>Cinzel (Trophy Classical)</option>
+              <option value="'Impact', sans-serif" ${layer.fontFamily?.includes('Impact') ? 'selected' : ''}>Impact (Heavy Headline)</option>
+            </select>
           </div>
 
+          <!-- Style Buttons: Bold, Italic, Uppercase -->
           <div>
-            <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Font Size (px)</label>
-            <input type="number" id="insp-size" class="form-control" value="${layer.fontSize || 20}" />
+            <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Font Style & Transform</label>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" id="btn-toggle-bold" style="flex: 1; padding: 6px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; border: 1px solid #cbd5e1; background: ${layer.bold ? '#0097D8' : '#ffffff'}; color: ${layer.bold ? '#fff' : '#334155'};"><b>B</b></button>
+              <button type="button" id="btn-toggle-italic" style="flex: 1; padding: 6px; border-radius: 6px; font-style: italic; font-weight: 700; font-size: 12px; cursor: pointer; border: 1px solid #cbd5e1; background: ${layer.italic ? '#0097D8' : '#ffffff'}; color: ${layer.italic ? '#fff' : '#334155'};"><i>I</i></button>
+              <button type="button" id="btn-toggle-upper" style="flex: 1; padding: 6px; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; border: 1px solid #cbd5e1; background: ${layer.uppercase ? '#0097D8' : '#ffffff'}; color: ${layer.uppercase ? '#fff' : '#334155'};">AA</button>
+            </div>
+          </div>
+
+          <!-- Font Size & Text Alignment -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Size (px)</label>
+              <input type="number" id="insp-size" class="form-control" value="${layer.fontSize || 20}" />
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Alignment</label>
+              <select id="insp-align" class="form-control">
+                <option value="left" ${layer.align === 'left' ? 'selected' : ''}>Left</option>
+                <option value="center" ${layer.align === 'center' ? 'selected' : ''}>Center</option>
+                <option value="right" ${layer.align === 'right' ? 'selected' : ''}>Right</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Color & Background Highlight -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Text Color</label>
+              <input type="color" id="insp-color" class="form-control" value="${layer.color || '#ffffff'}" style="height: 38px; padding: 2px;" />
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Box Background</label>
+              <input type="color" id="insp-bg-color" class="form-control" value="${layer.backgroundColor && layer.backgroundColor !== 'transparent' ? layer.backgroundColor : '#000000'}" style="height: 38px; padding: 2px;" />
+            </div>
           </div>
 
           <div>
@@ -332,12 +379,39 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
       refreshOverlay();
     });
 
-    inspector.querySelector('#insp-color')?.addEventListener('input', (e) => {
-      layer.color = e.target.value;
+    inspector.querySelector('#insp-font')?.addEventListener('change', (e) => {
+      layer.fontFamily = e.target.value;
+    });
+
+    inspector.querySelector('#btn-toggle-bold')?.addEventListener('click', () => {
+      layer.bold = !layer.bold;
+      refreshInspector();
+    });
+
+    inspector.querySelector('#btn-toggle-italic')?.addEventListener('click', () => {
+      layer.italic = !layer.italic;
+      refreshInspector();
+    });
+
+    inspector.querySelector('#btn-toggle-upper')?.addEventListener('click', () => {
+      layer.uppercase = !layer.uppercase;
+      refreshInspector();
     });
 
     inspector.querySelector('#insp-size')?.addEventListener('input', (e) => {
       layer.fontSize = parseInt(e.target.value) || 16;
+    });
+
+    inspector.querySelector('#insp-align')?.addEventListener('change', (e) => {
+      layer.align = e.target.value;
+    });
+
+    inspector.querySelector('#insp-color')?.addEventListener('input', (e) => {
+      layer.color = e.target.value;
+    });
+
+    inspector.querySelector('#insp-bg-color')?.addEventListener('input', (e) => {
+      layer.backgroundColor = e.target.value;
     });
 
     inspector.querySelector('#insp-default-text')?.addEventListener('input', (e) => {
@@ -383,8 +457,12 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
         height: type === 'chapter_logo' ? 80 : 35,
         color: '#ffffff',
         fontSize: 20,
-        align: 'center',
+        fontFamily: "'Inter', sans-serif",
         bold: true,
+        italic: false,
+        uppercase: false,
+        backgroundColor: 'transparent',
+        align: 'center',
         defaultText: type === 'chapter_logo' ? '' : 'Custom Sample Text'
       };
       layers.push(newLayer);
@@ -476,12 +554,31 @@ function openTestPreviewModal(baseImage, layers, width, height) {
         if (layer.type === 'chapter_logo') {
           ctx.drawImage(logoImg, layer.x, layer.y, layer.width, layer.height);
         } else {
+          const fontSize = layer.fontSize || 20;
+          const fontStyle = layer.italic ? 'italic ' : '';
+          const fontWeight = layer.bold ? 'bold ' : 'normal ';
+          const fontFamily = layer.fontFamily || "'Inter', sans-serif";
+          ctx.font = `${fontStyle}${fontWeight}${fontSize}px ${fontFamily}`;
           ctx.fillStyle = layer.color || '#ffffff';
-          ctx.font = `${layer.bold ? 'bold' : 'normal'} ${layer.fontSize || 20}px Arial, sans-serif`;
           ctx.textAlign = layer.align || 'center';
-          const textX = layer.align === 'center' ? (layer.x + layer.width / 2) : layer.x;
-          const textY = layer.y + (layer.height / 2) + ((layer.fontSize || 20) / 3);
-          ctx.fillText(layer.defaultText || 'JCI INNOVATIONS', textX, textY);
+          ctx.textBaseline = 'middle';
+
+          let textVal = layer.defaultText || 'JCI CHAPTER EXCELLENCE';
+          if (layer.uppercase) textVal = textVal.toUpperCase();
+
+          const textX = layer.align === 'center' ? (layer.x + layer.width / 2) : layer.align === 'right' ? (layer.x + layer.width) : layer.x;
+          const textY = layer.y + (layer.height / 2);
+
+          if (layer.backgroundColor && layer.backgroundColor !== 'transparent') {
+            ctx.save();
+            ctx.fillStyle = layer.backgroundColor;
+            ctx.beginPath();
+            ctx.roundRect(layer.x - 4, layer.y - 2, layer.width + 8, layer.height + 4, 4);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          ctx.fillText(textVal, textX, textY);
         }
       });
     };
