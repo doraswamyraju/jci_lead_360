@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -42,8 +43,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.jci2027.lead360.network.ApiService
-import com.jci2027.lead360.network.PlaceOrderRequest
 import com.jci2027.lead360.vendor.model.CatalogItem
+import com.jci2027.lead360.vendor.model.PlaceOrderRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -270,7 +271,7 @@ fun VendorStoreScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Row(verticalAlignment = Alignment.Baseline) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
                                             Text(
                                                 "₹${String.format("%,.0f", item.price)}",
                                                 fontWeight = FontWeight.ExtraBold,

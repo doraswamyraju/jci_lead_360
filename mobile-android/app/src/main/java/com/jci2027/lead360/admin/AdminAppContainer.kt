@@ -378,3 +378,4 @@ fun AdminTemplatesView() {
         }
     }
 }
+
