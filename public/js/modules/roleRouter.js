@@ -57,10 +57,12 @@ export function routeDashboard(user) {
       }
     });
 
+    const isCollapsed = localStorage.getItem('lead360_sidebar_collapsed') === 'true';
+
     root.innerHTML = `
       <div class="app-shell">
         ${sidebarObj.html}
-        <div class="main-wrapper">
+        <div class="main-wrapper ${isCollapsed ? 'sidebar-collapsed' : ''}">
           ${topbarObj.html}
           <main class="page-container" id="dashboard-content"></main>
         </div>

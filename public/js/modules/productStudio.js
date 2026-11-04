@@ -192,10 +192,15 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
           </div>
 
           <!-- Center: Interactive Canvas Wrapper -->
-          <div style="background: radial-gradient(circle at 50% 40%, #1e293b 0%, #0f172a 100%); border-radius: 14px; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 520px; position: relative;">
+          <div style="background: radial-gradient(circle at 50% 40%, #1e293b 0%, #0f172a 100%); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 520px; position: relative;">
             <div id="canvas-wrapper" style="position: relative; width: 500px; height: 500px; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
               <img id="product-base-img" src="${currentImage}" style="width: 100%; height: 100%; object-fit: contain; position: absolute; inset: 0;" />
               <div id="overlay-zones-container" style="position: absolute; inset: 0; pointer-events: none;"></div>
+              
+              <!-- Floating Quick Preview Action Icon in the product box itself -->
+              <button id="btn-quick-canvas-preview" style="position: absolute; top: 12px; right: 12px; background: rgba(0, 151, 216, 0.9); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.4); padding: 7px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(4px); transition: all 0.2s;" title="Instant Preview Proof">
+                <span>👁️</span> Preview
+              </button>
             </div>
           </div>
 
@@ -692,6 +697,10 @@ export function renderProductStudio(container, onProductSaved, existingProduct =
 
   // Test live preview modal (With Multi-User Carousel)
   container.querySelector('#btn-studio-preview').addEventListener('click', () => {
+    openTestPreviewModal(currentImage, layers, canvasWidth, canvasHeight);
+  });
+  container.querySelector('#btn-quick-canvas-preview')?.addEventListener('click', (e) => {
+    e.stopPropagation();
     openTestPreviewModal(currentImage, layers, canvasWidth, canvasHeight);
   });
 

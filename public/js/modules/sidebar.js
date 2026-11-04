@@ -1,6 +1,7 @@
 /**
  * Standalone Sidebar Component
  * Provides clean navigation across modules with role-aware items
+ * Supports responsive collapsing to mini-bar with persist state
  */
 
 export function renderSidebar(user, activeModule, onSelectModule) {
@@ -45,36 +46,42 @@ export function renderSidebar(user, activeModule, onSelectModule) {
     ];
   }
 
+  const isCollapsed = localStorage.getItem('lead360_sidebar_collapsed') === 'true';
+
   const html = `
-    <aside class="sidebar" id="app-sidebar">
-      <!-- Brand Logo Container with Clean White Pill Card -->
-      <div style="padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <div style="background: #ffffff; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
-          <img src="/assets/logo.png" alt="JCI LEAD360" style="max-height: 42px; width: auto; object-fit: contain;" />
+    <aside class="sidebar ${isCollapsed ? 'collapsed' : ''}" id="app-sidebar">
+      <!-- Top Brand Logo + Collapse Toggle Button -->
+      <div style="padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between;">
+        <div class="sidebar-hide-collapsed" style="background: #ffffff; border-radius: 8px; padding: 6px 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); flex: 1; margin-right: 8px;">
+          <img src="/assets/logo.png" alt="JCI LEAD360" style="max-height: 34px; width: auto; object-fit: contain;" />
         </div>
+
+        <button id="btn-toggle-sidebar" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); width: 34px; height: 34px; border-radius: 8px; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;" title="Toggle Sidebar">
+          ${isCollapsed ? '▶' : '◀'}
+        </button>
       </div>
 
       <!-- User Role Indicator Profile Card -->
-      <div style="padding: 16px; margin: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; display: flex; align-items: center; gap: 12px;">
-        <div style="width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #0097D8 0%, #005a9c 100%); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 16px; box-shadow: 0 4px 10px rgba(0, 151, 216, 0.4);">
+      <div style="padding: 12px; margin: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; display: flex; align-items: center; gap: 10px;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, #0097D8 0%, #005a9c 100%); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 15px; box-shadow: 0 4px 10px rgba(0, 151, 216, 0.4); flex-shrink: 0;">
           ${user.name.charAt(0)}
         </div>
-        <div style="overflow: hidden; flex: 1;">
+        <div class="sidebar-hide-collapsed" style="overflow: hidden; flex: 1;">
           <div style="font-size: 13px; font-weight: 700; color: #ffffff; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${user.name}</div>
-          <div style="font-size: 11px; color: #38bdf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${user.role}</div>
+          <div style="font-size: 10px; color: #38bdf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${user.role}</div>
         </div>
       </div>
 
       <!-- Navigation Links -->
-      <nav style="flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; padding: 8px 12px; letter-spacing: 0.8px;">Workspace Modules</div>
+      <nav style="flex: 1; padding: 6px 10px; display: flex; flex-direction: column; gap: 4px;">
+        <div class="sidebar-hide-collapsed" style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; padding: 6px 10px; letter-spacing: 0.8px;">Workspace Modules</div>
         ${navItems.map(item => `
-          <button class="sidebar-item ${activeModule === item.id ? 'active' : ''}" data-id="${item.id}" style="
+          <button class="sidebar-item ${activeModule === item.id ? 'active' : ''}" data-id="${item.id}" title="${item.label}" style="
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 8px;
             background: ${activeModule === item.id ? 'linear-gradient(135deg, #0097D8 0%, #0284c7 100%)' : 'transparent'};
             color: ${activeModule === item.id ? '#ffffff' : '#94a3b8'};
@@ -87,18 +94,18 @@ export function renderSidebar(user, activeModule, onSelectModule) {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           ">
             <span style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 17px;">${item.icon}</span>
+              <span style="font-size: 18px; line-height: 1;">${item.icon}</span>
               <span>${item.label}</span>
             </span>
-            ${item.badge ? `<span style="font-size: 10px; padding: 2px 7px; border-radius: 12px; background: rgba(255,255,255,0.22); color: #fff; font-weight: 700;">${item.badge}</span>` : ''}
+            ${item.badge ? `<span class="sidebar-hide-collapsed" style="font-size: 9px; padding: 2px 6px; border-radius: 12px; background: rgba(255,255,255,0.22); color: #fff; font-weight: 700;">${item.badge}</span>` : ''}
           </button>
         `).join('')}
       </nav>
 
       <!-- Bottom Platform Info -->
-      <div style="padding: 16px; margin: 12px; border-radius: 8px; background: rgba(0,0,0,0.2); font-size: 11px; color: #64748b; text-align: center; border: 1px solid rgba(255,255,255,0.04);">
-        <div style="color: #94a3b8; font-weight: 600; margin-bottom: 2px;">JCI LEAD360 • Year 2027</div>
-        <div style="color: #0097D8; font-size: 10px; font-weight: 700;">● VPS PORT 5087 ACTIVE</div>
+      <div class="sidebar-hide-collapsed" style="padding: 12px; margin: 10px; border-radius: 8px; background: rgba(0,0,0,0.2); font-size: 11px; color: #64748b; text-align: center; border: 1px solid rgba(255,255,255,0.04);">
+        <div style="color: #94a3b8; font-weight: 600; font-size: 10px; margin-bottom: 2px;">JCI LEAD360 • Year 2027</div>
+        <div style="color: #0097D8; font-size: 9px; font-weight: 700;">● VPS PORT 5087 ACTIVE</div>
       </div>
     </aside>
   `;
@@ -106,6 +113,22 @@ export function renderSidebar(user, activeModule, onSelectModule) {
   return {
     html,
     attachEvents: (container) => {
+      // Toggle sidebar collapse
+      const btnToggle = container.querySelector('#btn-toggle-sidebar');
+      const sidebar = container.querySelector('#app-sidebar');
+      const mainWrapper = container.querySelector('.main-wrapper');
+
+      if (btnToggle && sidebar) {
+        btnToggle.addEventListener('click', () => {
+          const isNowCollapsed = sidebar.classList.toggle('collapsed');
+          if (mainWrapper) {
+            mainWrapper.classList.toggle('sidebar-collapsed', isNowCollapsed);
+          }
+          localStorage.setItem('lead360_sidebar_collapsed', isNowCollapsed ? 'true' : 'false');
+          btnToggle.textContent = isNowCollapsed ? '▶' : '◀';
+        });
+      }
+
       container.querySelectorAll('.sidebar-item').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-id');
