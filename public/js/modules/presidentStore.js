@@ -3,8 +3,9 @@
  * Allows Chapter Presidents to:
  * 1. Browse official catalog with sleek studio-grade presentation
  * 2. LIVE AUTO-CUSTOMIZATION: See product automatically branded with their Chapter Logo & details
- * 3. Interactive Split-Screen 3D/Canvas Customizer with real-time editing & instant PNG proof download
- * 4. Place instant procurement orders or request official quotations with bulk pricing
+ * 3. Interactive Split-Screen Customizer with real-time editing & instant PNG proof download
+ * 4. Multi-User / Batch Personalization: Paste 20-50+ recipient names and flip through each live proof
+ * 5. Place instant procurement orders or request official quotations with bulk pricing
  */
 
 export function renderPresidentStore(container, user) {
@@ -212,10 +213,39 @@ export function renderPresidentStore(container, user) {
         const lw = (layer.width / baseW) * w;
         const lh = (layer.height / baseH) * h;
 
-        if (layer.type === 'chapter_logo') {
+        if (layer.type === 'chapter_logo' || layer.type === 'custom_image') {
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
-          logoImg.onload = () => ctx.drawImage(logoImg, lx, ly, lw, lh);
+          logoImg.onload = () => {
+            ctx.save();
+            if (layer.shape === 'circle') {
+              ctx.beginPath();
+              ctx.arc(lx + lw / 2, ly + lh / 2, Math.min(lw, lh) / 2, 0, Math.PI * 2);
+              ctx.closePath();
+              ctx.clip();
+            } else if (layer.shape === 'rounded') {
+              ctx.beginPath();
+              ctx.roundRect(lx, ly, lw, lh, 8);
+              ctx.closePath();
+              ctx.clip();
+            }
+            ctx.drawImage(logoImg, lx, ly, lw, lh);
+
+            if (layer.borderWidth > 0) {
+              ctx.restore();
+              ctx.save();
+              ctx.lineWidth = Math.max(1, Math.round(layer.borderWidth * (w / baseW)));
+              ctx.strokeStyle = layer.borderColor || '#fbbf24';
+              if (layer.shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(lx + lw / 2, ly + lh / 2, Math.min(lw, lh) / 2, 0, Math.PI * 2);
+                ctx.stroke();
+              } else {
+                ctx.strokeRect(lx, ly, lw, lh);
+              }
+            }
+            ctx.restore();
+          };
           logoImg.src = u.chapterLogo || '/assets/logo.png';
         } else {
           ctx.save();
@@ -231,6 +261,7 @@ export function renderPresidentStore(container, user) {
           let textVal = layer.defaultText || 'JCI CHAPTER';
           if (layer.type === 'recipient_name') textVal = `Presented to ${u.name || 'President'}`;
           if (layer.type === 'chapter_name') textVal = (u.chapterName || 'JCI CHAPTER').toUpperCase();
+          if (layer.type === 'date_time') textVal = 'Tenure 2027';
 
           if (layer.uppercase) textVal = textVal.toUpperCase();
 
@@ -287,16 +318,24 @@ export function renderPresidentStore(container, user) {
 }
 
 /**
- * Split-Screen Interactive Product Customizer & Order Modal
+ * Split-Screen Interactive Product Customizer with Multi-User Batch Preview
  */
 function openCustomizerModal(item, user, token, isQuoteOnly) {
   const modalRoot = document.getElementById('pres-order-modal-root');
 
-  // Working state for live mockup customization
+  let orderMode = 'single'; // 'single' or 'batch'
+  let batchRecipients = [
+    { name: `JC HGF ${user.name || 'Doraswamy Raju'}`, title: 'Chapter President' },
+    { name: 'JC Sen. Rajesh Varma', title: 'VP Management' },
+    { name: 'JC Anita Sharma', title: 'Secretary 2027' }
+  ];
+  let currentBatchIdx = 0;
+
   const customValues = {
     chapterName: user.chapterName || 'JCI Tirupati Innovations',
     eventTitle: '34th Annual Installation Ceremony 2027',
     recipientName: `JC HGF ${user.name || 'Doraswamy Raju'}`,
+    dateTime: '15th Jan 2027 • 6:30 PM',
     customNotes: '',
     quantity: 1,
     targetDate: '15 Jan 2027'
@@ -304,32 +343,47 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
 
   modalRoot.innerHTML = `
     <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px;">
-      <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 960px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.35);">
+      <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 980px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.35);">
         
-        <!-- Header -->
+        <!-- Header with Single vs Batch Switcher -->
         <div style="background: linear-gradient(135deg, #002244 0%, #005a9c 100%); padding: 16px 24px; color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 20px;">🎨</span>
             <div>
               <h3 style="margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.2px;">Interactive Customizer: ${item.name}</h3>
-              <p style="margin: 2px 0 0 0; font-size: 11px; color: #94a3b8;">Preview and auto-customize with your chapter details in real time</p>
+              <p style="margin: 2px 0 0 0; font-size: 11px; color: #94a3b8;">Single or Multi-Recipient batch ordering with instant live proofs</p>
             </div>
           </div>
-          <button id="btn-close-customizer-modal" style="background: rgba(255,255,255,0.15); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: rgba(255,255,255,0.15); padding: 4px; border-radius: 8px; display: flex; gap: 4px;">
+              <button id="tab-single-mode" style="background: #ffffff; color: #002244; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer;">Single Order</button>
+              <button id="tab-batch-mode" style="background: transparent; color: #ffffff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">👥 Batch (X Recipients)</button>
+            </div>
+            <button id="btn-close-customizer-modal" style="background: rgba(255,255,255,0.15); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+          </div>
         </div>
 
-        <!-- 2-Column Split Body: Mockup Live Canvas (Left) | Customization Form (Right) -->
+        <!-- 2-Column Split Body -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; overflow-y: auto; flex: 1;">
           
-          <!-- Left Column: Live Mockup Canvas -->
+          <!-- Left Column: Live Mockup Canvas with Carousel -->
           <div style="background: radial-gradient(circle at 50% 35%, #ffffff 0%, #f1f5f9 100%); padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #e2e8f0; position: relative;">
+            
+            <!-- Batch Carousel Controls (Shown in batch mode) -->
+            <div id="batch-carousel-controls" style="display: none; width: 100%; max-width: 400px; margin-bottom: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 12px; justify-content: space-between; align-items: center;">
+              <button id="btn-carousel-prev" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;">◀ Prev</button>
+              <div id="carousel-status-txt" style="font-size: 12px; font-weight: 800; color: #0f172a;">Proof 1 of 3</div>
+              <button id="btn-carousel-next" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Next ▶</button>
+            </div>
+
             <div style="position: relative; width: 100%; max-width: 400px; aspect-ratio: 1 / 1; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); overflow: hidden; display: flex; align-items: center; justify-content: center;">
               <canvas id="interactive-preview-canvas" width="800" height="800" style="width: 100%; height: 100%; object-fit: contain;"></canvas>
             </div>
 
-            <div style="margin-top: 16px; display: flex; gap: 10px; width: 100%; max-width: 400px;">
+            <div style="margin-top: 14px; display: flex; gap: 10px; width: 100%; max-width: 400px;">
               <button id="btn-download-proof" type="button" style="flex: 1; background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                <span>📥 Download Proof (PNG)</span>
+                <span>📥 Download Current Proof (PNG)</span>
               </button>
             </div>
             <div style="font-size: 11px; color: #64748b; margin-top: 6px;">Share sample proof with your Chapter Board on WhatsApp</div>
@@ -339,25 +393,47 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
           <div style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto;">
             <form id="pres-interactive-form" style="display: flex; flex-direction: column; gap: 14px;">
               
-              <div>
-                <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Chapter Name *</label>
-                <input type="text" id="cust-chapter" class="form-control" value="${customValues.chapterName}" required />
+              <!-- Single Mode Fields -->
+              <div id="single-fields-container" style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Chapter Name *</label>
+                  <input type="text" id="cust-chapter" class="form-control" value="${customValues.chapterName}" required />
+                </div>
+
+                <div>
+                  <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Event / Award Title *</label>
+                  <input type="text" id="cust-event" class="form-control" value="${customValues.eventTitle}" required />
+                </div>
+
+                <div>
+                  <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Presented To / Dignitary Name *</label>
+                  <input type="text" id="cust-recipient" class="form-control" value="${customValues.recipientName}" required />
+                </div>
+
+                <div>
+                  <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Date & Time</label>
+                  <input type="text" id="cust-datetime" class="form-control" value="${customValues.dateTime}" />
+                </div>
               </div>
 
-              <div>
-                <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Event / Award Title *</label>
-                <input type="text" id="cust-event" class="form-control" value="${customValues.eventTitle}" required />
+              <!-- Batch Mode Fields (Shown in batch mode) -->
+              <div id="batch-fields-container" style="display: none; flex-direction: column; gap: 12px;">
+                <div style="background: #e0f2fe; border: 1px solid #bae6fd; padding: 12px; border-radius: 8px;">
+                  <div style="font-size: 12px; font-weight: 800; color: #0369a1;">👥 Multi-Recipient Roster (Paste Names)</div>
+                  <div style="font-size: 11px; color: #0c4a6e; margin-top: 2px;">Enter one recipient per line, optionally followed by comma and their award title.</div>
+                </div>
+
+                <div>
+                  <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Recipient List (1 per line)</label>
+                  <textarea id="batch-names-input" class="form-control" rows="5" placeholder="JC Rajesh Kumar, Outstanding VP\nJC Anita Sharma, Best Secretary\nJC Dr. Venkatesh, Project Director">JC HGF Doraswamy Raju, Chapter President\nJC Sen. Rajesh Varma, Outstanding VP Growth\nJC Anita Sharma, Secretary of the Year</textarea>
+                </div>
               </div>
 
-              <div>
-                <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Presented To / Dignitary Name *</label>
-                <input type="text" id="cust-recipient" class="form-control" value="${customValues.recipientName}" required />
-              </div>
-
+              <!-- Shared Quantity & Date -->
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div>
                   <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Quantity Needed *</label>
-                  <input type="number" id="cust-qty" class="form-control" value="1" min="1" required />
+                  <input type="number" id="cust-qty" class="form-control" value="${customValues.quantity}" min="1" required />
                 </div>
                 <div>
                   <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase;">Target Delivery Date *</label>
@@ -398,7 +474,7 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
 
   const canvas = document.getElementById('interactive-preview-canvas');
 
-  // Redraw preview canvas with updated custom values
+  // Redraw preview canvas
   function redrawInteractivePreview() {
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
@@ -413,16 +489,54 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
       const baseW = item.dimensions?.width || 800;
       const baseH = item.dimensions?.height || 800;
 
+      // Determine active recipient info based on mode
+      let activeRecipient = customValues.recipientName;
+      let activeEvent = customValues.eventTitle;
+      if (orderMode === 'batch' && batchRecipients.length > 0) {
+        const itemUser = batchRecipients[currentBatchIdx] || batchRecipients[0];
+        activeRecipient = itemUser.name;
+        if (itemUser.title) activeEvent = itemUser.title;
+      }
+
       (item.layers || []).forEach(layer => {
         const lx = (layer.x / baseW) * w;
         const ly = (layer.y / baseH) * h;
         const lw = (layer.width / baseW) * w;
         const lh = (layer.height / baseH) * h;
 
-        if (layer.type === 'chapter_logo') {
+        if (layer.type === 'chapter_logo' || layer.type === 'custom_image') {
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
-          logoImg.onload = () => ctx.drawImage(logoImg, lx, ly, lw, lh);
+          logoImg.onload = () => {
+            ctx.save();
+            if (layer.shape === 'circle') {
+              ctx.beginPath();
+              ctx.arc(lx + lw / 2, ly + lh / 2, Math.min(lw, lh) / 2, 0, Math.PI * 2);
+              ctx.closePath();
+              ctx.clip();
+            } else if (layer.shape === 'rounded') {
+              ctx.beginPath();
+              ctx.roundRect(lx, ly, lw, lh, 8);
+              ctx.closePath();
+              ctx.clip();
+            }
+            ctx.drawImage(logoImg, lx, ly, lw, lh);
+
+            if (layer.borderWidth > 0) {
+              ctx.restore();
+              ctx.save();
+              ctx.lineWidth = Math.max(1, Math.round(layer.borderWidth * (w / baseW)));
+              ctx.strokeStyle = layer.borderColor || '#fbbf24';
+              if (layer.shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(lx + lw / 2, ly + lh / 2, Math.min(lw, lh) / 2, 0, Math.PI * 2);
+                ctx.stroke();
+              } else {
+                ctx.strokeRect(lx, ly, lw, lh);
+              }
+            }
+            ctx.restore();
+          };
           logoImg.src = user.chapterLogo || '/assets/logo.png';
         } else {
           ctx.save();
@@ -436,9 +550,10 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
           ctx.textBaseline = 'middle';
 
           let textVal = layer.defaultText || 'JCI CHAPTER';
-          if (layer.type === 'recipient_name') textVal = customValues.recipientName;
-          if (layer.type === 'event_name') textVal = customValues.eventTitle;
+          if (layer.type === 'recipient_name') textVal = activeRecipient;
+          if (layer.type === 'event_name') textVal = activeEvent;
           if (layer.type === 'chapter_name') textVal = customValues.chapterName.toUpperCase();
+          if (layer.type === 'date_time') textVal = customValues.dateTime;
 
           if (layer.uppercase) textVal = textVal.toUpperCase();
 
@@ -461,34 +576,112 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
     img.src = item.imageUrl || '/assets/item_memento.png';
   }
 
-  // Hook input events for real-time preview updates
-  document.getElementById('cust-chapter').addEventListener('input', (e) => {
-    customValues.chapterName = e.target.value;
-    redrawInteractivePreview();
-  });
-  document.getElementById('cust-event').addEventListener('input', (e) => {
-    customValues.eventTitle = e.target.value;
-    redrawInteractivePreview();
-  });
-  document.getElementById('cust-recipient').addEventListener('input', (e) => {
-    customValues.recipientName = e.target.value;
+  // Switch between Single and Batch mode
+  const tabSingle = document.getElementById('tab-single-mode');
+  const tabBatch = document.getElementById('tab-batch-mode');
+  const singleContainer = document.getElementById('single-fields-container');
+  const batchContainer = document.getElementById('batch-fields-container');
+  const batchControls = document.getElementById('batch-carousel-controls');
+  const qtyInput = document.getElementById('cust-qty');
+  const totalPriceDisplay = document.getElementById('cust-total-price');
+
+  tabSingle.addEventListener('click', () => {
+    orderMode = 'single';
+    tabSingle.style.background = '#ffffff';
+    tabSingle.style.color = '#002244';
+    tabBatch.style.background = 'transparent';
+    tabBatch.style.color = '#ffffff';
+    singleContainer.style.display = 'flex';
+    batchContainer.style.display = 'none';
+    batchControls.style.display = 'none';
     redrawInteractivePreview();
   });
 
-  const qtyInput = document.getElementById('cust-qty');
-  const totalPriceDisplay = document.getElementById('cust-total-price');
+  tabBatch.addEventListener('click', () => {
+    orderMode = 'batch';
+    tabBatch.style.background = '#ffffff';
+    tabBatch.style.color = '#002244';
+    tabSingle.style.background = 'transparent';
+    tabSingle.style.color = '#ffffff';
+    singleContainer.style.display = 'none';
+    batchContainer.style.display = 'flex';
+    batchControls.style.display = 'flex';
+    parseBatchInput();
+    redrawInteractivePreview();
+  });
+
+  // Batch names input parser
+  function parseBatchInput() {
+    const lines = document.getElementById('batch-names-input').value.split('\n').filter(l => l.trim().length > 0);
+    batchRecipients = lines.map(line => {
+      const parts = line.split(',');
+      return {
+        name: parts[0]?.trim() || 'Guest Recipient',
+        title: parts[1]?.trim() || customValues.eventTitle
+      };
+    });
+    if (batchRecipients.length === 0) {
+      batchRecipients = [{ name: 'Recipient Name', title: customValues.eventTitle }];
+    }
+    currentBatchIdx = 0;
+    qtyInput.value = batchRecipients.length;
+    customValues.quantity = batchRecipients.length;
+    totalPriceDisplay.textContent = `₹${((item.price || 0) * batchRecipients.length).toLocaleString('en-IN')}`;
+    updateBatchStatus();
+  }
+
+  function updateBatchStatus() {
+    const statusTxt = document.getElementById('carousel-status-txt');
+    if (statusTxt) {
+      statusTxt.textContent = `Proof ${currentBatchIdx + 1} of ${batchRecipients.length}: ${batchRecipients[currentBatchIdx]?.name}`;
+    }
+  }
+
+  document.getElementById('batch-names-input')?.addEventListener('input', () => {
+    parseBatchInput();
+    redrawInteractivePreview();
+  });
+
+  document.getElementById('btn-carousel-prev')?.addEventListener('click', () => {
+    currentBatchIdx = (currentBatchIdx - 1 + batchRecipients.length) % batchRecipients.length;
+    updateBatchStatus();
+    redrawInteractivePreview();
+  });
+
+  document.getElementById('btn-carousel-next')?.addEventListener('click', () => {
+    currentBatchIdx = (currentBatchIdx + 1) % batchRecipients.length;
+    updateBatchStatus();
+    redrawInteractivePreview();
+  });
+
+  // Single inputs
+  document.getElementById('cust-chapter')?.addEventListener('input', (e) => {
+    customValues.chapterName = e.target.value;
+    redrawInteractivePreview();
+  });
+  document.getElementById('cust-event')?.addEventListener('input', (e) => {
+    customValues.eventTitle = e.target.value;
+    redrawInteractivePreview();
+  });
+  document.getElementById('cust-recipient')?.addEventListener('input', (e) => {
+    customValues.recipientName = e.target.value;
+    redrawInteractivePreview();
+  });
+  document.getElementById('cust-datetime')?.addEventListener('input', (e) => {
+    customValues.dateTime = e.target.value;
+    redrawInteractivePreview();
+  });
 
   qtyInput.addEventListener('input', () => {
     const q = parseInt(qtyInput.value) || 1;
     customValues.quantity = q;
-    const total = (item.price || 0) * q;
-    totalPriceDisplay.textContent = `₹${total.toLocaleString('en-IN')}`;
+    totalPriceDisplay.textContent = `₹${((item.price || 0) * q).toLocaleString('en-IN')}`;
   });
 
   // Proof download
   document.getElementById('btn-download-proof').addEventListener('click', () => {
     const link = document.createElement('a');
-    link.download = `${item.name.replace(/[^a-z0-9]/gi, '_')}_customized_proof.png`;
+    link.download = `${item.name.replace(/[^a-z0-9]/gi, '_')}_proof.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   });
@@ -508,7 +701,12 @@ function openCustomizerModal(item, user, token, isQuoteOnly) {
     const q = parseInt(qtyInput.value) || 1;
     const notes = document.getElementById('cust-notes').value;
 
-    const summaryText = `Chapter: ${customValues.chapterName} | Event: ${customValues.eventTitle} | Recipient: ${customValues.recipientName} | Target Date: ${document.getElementById('cust-date').value} | Notes: ${notes || 'None'}`;
+    let summaryText = '';
+    if (orderMode === 'batch') {
+      summaryText = `Batch Order (${batchRecipients.length} Recipients):\n` + batchRecipients.map((r, i) => `${i+1}. ${r.name} (${r.title})`).join('\n') + `\nNotes: ${notes || 'None'}`;
+    } else {
+      summaryText = `Chapter: ${customValues.chapterName} | Event: ${customValues.eventTitle} | Recipient: ${customValues.recipientName} | Date: ${customValues.dateTime} | Notes: ${notes || 'None'}`;
+    }
 
     const orderPayload = {
       title: `${item.name} (${q} ${item.unit || 'Nos'})`,
