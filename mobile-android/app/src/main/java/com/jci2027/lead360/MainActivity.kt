@@ -9,8 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import coil.compose.AsyncImage
 import androidx.compose.runtime.*
@@ -239,151 +241,159 @@ class MainActivity : ComponentActivity() {
                             ModalDrawerSheet(
                                 drawerContainerColor = JciColors.DeepNavy,
                                 drawerContentColor = Color.White,
-                                modifier = Modifier.width(300.dp)
+                                modifier = Modifier
+                                    .width(300.dp)
+                                    .fillMaxHeight()
                             ) {
                                 Column(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(20.dp)
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(bottom = 24.dp)
                                 ) {
-                                    // Header: Chapter Logo or Default LEAD360 logo
-                                    Surface(
-                                        shape = RoundedCornerShape(10.dp),
-                                        color = Color.White,
-                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 20.dp, vertical = 16.dp)
                                     ) {
-                                        if (chapterLogoBitmap != null) {
-                                            Image(
-                                                bitmap = chapterLogoBitmap.asImageBitmap(),
-                                                contentDescription = "Chapter Logo",
+                                        // Header: Chapter Logo or Default LEAD360 logo
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = Color.White,
+                                            modifier = Modifier.padding(bottom = 12.dp)
+                                        ) {
+                                            if (chapterLogoBitmap != null) {
+                                                Image(
+                                                    bitmap = chapterLogoBitmap.asImageBitmap(),
+                                                    contentDescription = "Chapter Logo",
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(48.dp)
+                                                        .padding(6.dp),
+                                                    contentScale = ContentScale.Fit
+                                                )
+                                            } else {
+                                                Image(
+                                                    painter = painterResource(id = R.drawable.lead360_logo),
+                                                    contentDescription = "JCI LEAD360 Official Logo",
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(44.dp)
+                                                        .padding(6.dp)
+                                                )
+                                            }
+                                        }
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            Box(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(48.dp)
-                                                    .padding(6.dp),
-                                                contentScale = ContentScale.Fit
-                                            )
-                                        } else {
-                                            Image(
-                                                painter = painterResource(id = R.drawable.lead360_logo),
-                                                contentDescription = "JCI LEAD360 Official Logo",
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(44.dp)
-                                                    .padding(6.dp)
-                                            )
+                                                    .size(42.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFF0097D8)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                if (userProfileBitmap != null) {
+                                                    Image(
+                                                        bitmap = userProfileBitmap.asImageBitmap(),
+                                                        contentDescription = userName,
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentScale = ContentScale.Crop
+                                                    )
+                                                } else if (!serverPhotoUrl.isNullOrBlank()) {
+                                                    val photoFullUrl = if (serverPhotoUrl!!.startsWith("http")) serverPhotoUrl!! else "https://lead.sriddha.com$serverPhotoUrl"
+                                                    AsyncImage(
+                                                        model = photoFullUrl,
+                                                        contentDescription = userName,
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentScale = ContentScale.Crop
+                                                    )
+                                                } else {
+                                                    Text(userName.firstOrNull()?.toString() ?: "P", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                                }
+                                            }
+
+                                            Column {
+                                                Text(userName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                Text(userChapter, color = Color(0xFFBAE6FD), fontSize = 11.sp, maxLines = 1)
+                                            }
                                         }
                                     }
 
+                                    HorizontalDivider(color = Color(0xFF1E293B))
+
+                                    // Drawer Navigation Items
+                                    val drawerItems = listOf(
+                                        Screen.Dashboard,
+                                        Screen.Projects,
+                                        Screen.Members,
+                                        Screen.Resources,
+                                        Screen.ScanCard,
+                                        Screen.Store,
+                                        Screen.Flyers,
+                                        Screen.WebsitePortal,
+                                        Screen.Calendar,
+                                        Screen.Lgb,
+                                        Screen.Frames,
+                                        Screen.Vendor,
+                                        Screen.Profile
+                                    )
+
+                                    drawerItems.forEach { screen ->
+                                        val isSelected = currentScreen == screen
+                                        NavigationDrawerItem(
+                                            label = {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                ) {
+                                                    Text(screen.icon, fontSize = 16.sp)
+                                                    Text(
+                                                        screen.title,
+                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                        color = if (isSelected) Color(0xFFBAE6FD) else Color(0xFFCBD5E1)
+                                                    )
+                                                }
+                                            },
+                                            selected = isSelected,
+                                            onClick = {
+                                                currentScreen = screen
+                                                coroutineScope.launch { drawerState.close() }
+                                            },
+                                            colors = NavigationDrawerItemDefaults.colors(
+                                                selectedContainerColor = Color(0xFF0097D8).copy(alpha = 0.2f),
+                                                unselectedContainerColor = Color.Transparent
+                                            ),
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    HorizontalDivider(color = Color(0xFF1E293B))
+
+                                    // Sign-out link at drawer bottom
                                     Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                prefs.edit().clear().apply()
+                                                token = null
+                                                coroutineScope.launch { drawerState.close() }
+                                            }
+                                            .padding(20.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(42.dp)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFF0097D8)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            if (userProfileBitmap != null) {
-                                                Image(
-                                                    bitmap = userProfileBitmap.asImageBitmap(),
-                                                    contentDescription = userName,
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentScale = ContentScale.Crop
-                                                )
-                                            } else if (!serverPhotoUrl.isNullOrBlank()) {
-                                                val photoFullUrl = if (serverPhotoUrl!!.startsWith("http")) serverPhotoUrl!! else "https://lead.sriddha.com$serverPhotoUrl"
-                                                AsyncImage(
-                                                    model = photoFullUrl,
-                                                    contentDescription = userName,
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentScale = ContentScale.Crop
-                                                )
-                                            } else {
-                                                Text(userName.firstOrNull()?.toString() ?: "P", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                                            }
-                                        }
-
-                                        Column {
-                                            Text(userName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                            Text(userChapter, color = Color(0xFFBAE6FD), fontSize = 11.sp, maxLines = 1)
-                                        }
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_logout),
+                                            contentDescription = "Sign Out",
+                                            tint = Color(0xFFEF4444),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text("Sign Out", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                     }
-                                }
-
-                                Divider(color = Color(0xFF1E293B))
-
-                                // Drawer Navigation Items
-                                val drawerItems = listOf(
-                                    Screen.Dashboard,
-                                    Screen.Projects,
-                                    Screen.Members,
-                                    Screen.Resources,
-                                    Screen.ScanCard,
-                                    Screen.Store,
-                                    Screen.Flyers,
-                                    Screen.WebsitePortal,
-                                    Screen.Calendar,
-                                    Screen.Lgb,
-                                    Screen.Frames,
-                                    Screen.Vendor,
-                                    Screen.Profile
-                                )
-
-                                drawerItems.forEach { screen ->
-                                    val isSelected = currentScreen == screen
-                                    NavigationDrawerItem(
-                                        label = {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                            ) {
-                                                Text(screen.icon, fontSize = 16.sp)
-                                                Text(
-                                                    screen.title,
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                    color = if (isSelected) Color(0xFFBAE6FD) else Color(0xFFCBD5E1)
-                                                )
-                                            }
-                                        },
-                                        selected = isSelected,
-                                        onClick = {
-                                            currentScreen = screen
-                                            coroutineScope.launch { drawerState.close() }
-                                        },
-                                        colors = NavigationDrawerItemDefaults.colors(
-                                            selectedContainerColor = Color(0xFF0097D8).copy(alpha = 0.2f),
-                                            unselectedContainerColor = Color.Transparent
-                                        ),
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.weight(1f))
-
-                                Divider(color = Color(0xFF1E293B))
-
-                                // Sign-out link at drawer bottom
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            prefs.edit().clear().apply()
-                                            token = null
-                                            coroutineScope.launch { drawerState.close() }
-                                        }
-                                        .padding(20.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_logout),
-                                        contentDescription = "Sign Out",
-                                        tint = Color(0xFFEF4444),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text("Sign Out", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                 }
                             }
                         }

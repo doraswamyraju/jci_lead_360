@@ -84,6 +84,9 @@ class AndroidFlyerRenderer(private val context: Context) {
                 else -> {
                     val text = fieldValues[zoneType] ?: layer.label ?: ""
                     if (text.isNotBlank()) {
+                        val baseFontSize = (layer.fontSize ?: 24).toFloat()
+                        // Use accurate font sizing matching web canvas 1080p
+                        val scaledFontSize = if (width >= 1000) baseFontSize * 1.05f else baseFontSize * 0.9f
                         drawWrappedText(
                             canvas = canvas,
                             text = text,
@@ -92,7 +95,7 @@ class AndroidFlyerRenderer(private val context: Context) {
                             maxWidth = w,
                             maxHeight = h,
                             textColor = parseHexColor(layer.textColor, Color.WHITE),
-                            fontSize = (layer.fontSize ?: 24).toFloat() * 1.5f,
+                            fontSize = scaledFontSize,
                             align = layer.textAlign ?: "left",
                             hasShadow = layer.hasShadow != false
                         )

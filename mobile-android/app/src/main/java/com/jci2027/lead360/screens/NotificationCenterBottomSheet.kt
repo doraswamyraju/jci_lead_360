@@ -31,6 +31,7 @@ fun NotificationCenterBottomSheet(
     var notifications by remember { mutableStateOf<List<NotificationItem>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
+    // Fetch live backend notifications + fallback to local contacts exchange check if online list is empty
     LaunchedEffect(token) {
         if (!token.isNullOrBlank()) {
             try {
@@ -41,13 +42,43 @@ fun NotificationCenterBottomSheet(
                         .build()
                     val service = retrofit.create(ApiService::class.java)
                     val res = service.getNotifications("Bearer $token")
-                    if (res.isSuccessful && res.body()?.success == true) {
-                        withContext(Dispatchers.Main) {
-                            notifications = res.body()?.notifications.orEmpty()
-                            isLoading = false
+                    var loadedNotifs = if (res.isSuccessful && res.body()?.success == true) {
+                        res.body()?.notifications.orEmpty()
+                    } else emptyList()
+
+                    // Also fetch contacts to ensure any recent QR reciprocal exchanges generate an instant notification card
+                    val contactsRes = service.getContacts("Bearer $token")
+                    if (contactsRes.isSuccessful && contactsRes.body()?.success == true) {
+                        val backendContacts = contactsRes.body()?.contacts.orEmpty()
+                        val exchangeContacts = backendContacts.filter { 
+                            it.eventTag.contains("Exchange", ignoreCase = true) || it.id.startsWith("c_recip_") 
                         }
-                    } else {
-                        withContext(Dispatchers.Main) { isLoading = false }
+                        
+                        val syntheticNotifs = exchangeContacts.map { c ->
+                            NotificationItem(
+                                id = "notif_contact_${c.id}",
+                                title = "📇 Exchanged: ${c.name}",
+                                message = "${c.name} (${c.designation.ifBlank { "Visitor" }} at ${c.company.ifBlank { c.city.ifBlank { "JCI Event" } }}) scanned your QR code and exchanged contacts.",
+                                type = "contact_exchange",
+                                contactId = c.id,
+                                createdAt = c.followUpDate.ifBlank { "Just now" }
+                            )
+                        }
+
+                        // Combine without duplicates
+                        val existingIds = loadedNotifs.map { it.id }.toSet()
+                        val combined = loadedNotifs.toMutableList()
+                        syntheticNotifs.forEach { syn ->
+                            if (!existingIds.contains(syn.id) && !combined.any { it.contactId == syn.contactId }) {
+                                combined.add(0, syn)
+                            }
+                        }
+                        loadedNotifs = combined
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        notifications = loadedNotifs
+                        isLoading = false
                     }
                 }
             } catch (e: Exception) {
@@ -159,13 +190,14 @@ fun NotificationCenterBottomSheet(
             } else {
                 notifications.forEach { notif ->
                     val isExchange = notif.type == "contact_exchange" || notif.title.contains("Contact", ignoreCase = true)
+                    val targetContactId = notif.contactId ?: notif.data?.get("contactId")?.toString()
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 if (isExchange && onNavigateToContact != null) {
                                     onDismiss()
-                                    onNavigateToContact(notif.contactId)
+                                    onNavigateToContact(targetContactId)
                                 }
                             },
                         shape = RoundedCornerShape(12.dp),

@@ -133,54 +133,62 @@ fun ScanCardModuleScreen(
     var showCreateDialog by remember { mutableStateOf(false) }
     var contactToDelete by remember { mutableStateOf<ScannedCardModel?>(null) }
 
-    // Fetch live backend contacts
-    LaunchedEffect(token) {
-        if (!token.isNullOrBlank()) {
-            try {
-                withContext(Dispatchers.IO) {
-                    val response = apiService.getContacts("Bearer $token")
-                    if (response.isSuccessful && response.body()?.success == true) {
-                        val backendList = response.body()?.contacts.orEmpty()
-                        withContext(Dispatchers.Main) {
-                            backendList.forEach { c ->
-                                val existingIndex = contactList.indexOfFirst { it.id == c.id }
-                                val model = ScannedCardModel(
-                                    id = c.id,
-                                    name = c.name,
-                                    designation = c.designation,
-                                    company = c.company,
-                                    phone = c.phone,
-                                    email = c.email,
-                                    website = c.website,
-                                    address = c.address,
-                                    eventTag = c.eventTag.ifBlank { "QR Contact Exchange" },
-                                    city = c.city,
-                                    notes = c.notes,
-                                    confidence = "HIGH"
-                                )
-                                if (existingIndex >= 0) {
-                                    contactList[existingIndex] = model
-                                } else {
-                                    val dupPhone = contactList.any {
-                                        it.phone.filter { ch -> ch.isDigit() } == c.phone.filter { ch -> ch.isDigit() }
-                                    }
-                                    if (!dupPhone) {
-                                        contactList.add(0, model)
-                                    }
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    suspend fun refreshContactsFromBackend() {
+        if (token.isNullOrBlank()) return
+        try {
+            withContext(Dispatchers.IO) {
+                val response = apiService.getContacts("Bearer $token")
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val backendList = response.body()?.contacts.orEmpty()
+                    withContext(Dispatchers.Main) {
+                        backendList.forEach { c ->
+                            val existingIndex = contactList.indexOfFirst { it.id == c.id }
+                            val model = ScannedCardModel(
+                                id = c.id,
+                                name = c.name,
+                                designation = c.designation,
+                                company = c.company,
+                                phone = c.phone,
+                                email = c.email,
+                                website = c.website,
+                                address = c.address,
+                                eventTag = c.eventTag.ifBlank { "QR Contact Exchange" },
+                                city = c.city,
+                                notes = c.notes,
+                                confidence = "HIGH"
+                            )
+                            if (existingIndex >= 0) {
+                                contactList[existingIndex] = model
+                            } else {
+                                val dupPhone = contactList.any {
+                                    it.phone.filter { ch -> ch.isDigit() } == c.phone.filter { ch -> ch.isDigit() }
+                                }
+                                if (!dupPhone) {
+                                    contactList.add(0, model)
                                 }
                             }
+                        }
 
-                            // If an initial contact ID was passed (e.g. from notification click), open it directly
-                            if (!initialTargetContactId.isNullOrBlank()) {
-                                contactList.find { it.id == initialTargetContactId }?.let { target ->
-                                    viewContactDetail = target
-                                }
+                        // If an initial contact ID was passed (e.g. from notification click), open it directly
+                        if (!initialTargetContactId.isNullOrBlank()) {
+                            contactList.find { it.id == initialTargetContactId }?.let { target ->
+                                viewContactDetail = target
                             }
                         }
                     }
                 }
-            } catch (e: Exception) {
-                // Keep local contacts on error
+            }
+        } catch (_: Exception) {}
+    }
+
+    // Auto-poll contacts periodically (every 5 seconds) so newly exchanged contacts appear live without restarting screen
+    LaunchedEffect(token) {
+        if (!token.isNullOrBlank()) {
+            while (true) {
+                refreshContactsFromBackend()
+                kotlinx.coroutines.delay(5000)
             }
         }
     }
@@ -294,6 +302,18 @@ fun ScanCardModuleScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                isRefreshing = true
+                                refreshContactsFromBackend()
+                                isRefreshing = false
+                                Toast.makeText(context, "Directory synced", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ) {
+                        Text("🔄", fontSize = 16.sp)
+                    }
                     Button(
                         onClick = { showCreateDialog = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),

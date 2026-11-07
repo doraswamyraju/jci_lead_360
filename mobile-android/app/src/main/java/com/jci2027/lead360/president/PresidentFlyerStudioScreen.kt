@@ -72,7 +72,14 @@ fun PresidentFlyerStudioScreen(
     var activeStudioTab by remember { mutableStateOf(0) }
 
     // Categories Filter
-    val categories = listOf("All", "⭐ 100% Efficiency", "🏛️ GBM & Meetings", "🎓 Training", "🌍 Special Days", "🤝 Community")
+    val categories = listOf(
+        "All",
+        "🏛️ GBM & Meetings",
+        "⭐ 100% Efficiency",
+        "🎓 Training & Conclaves",
+        "💼 Business & Networking",
+        "🤝 Community & Social"
+    )
     var selectedCategory by remember { mutableStateOf("All") }
 
     // Aspect Ratio Selector: 1:1 Square vs 4:5 Portrait Story
@@ -233,7 +240,7 @@ fun PresidentFlyerStudioScreen(
         if (selectedCategory == "All") {
             templates
         } else {
-            val key = selectedCategory.replace("⭐", "").replace("🏛️", "").replace("🎓", "").replace("🌍", "").replace("🤝", "").trim()
+            val key = selectedCategory.replace("⭐", "").replace("🏛️", "").replace("🎓", "").replace("💼", "").replace("🤝", "").trim()
             templates.filter { it.category?.contains(key, ignoreCase = true) == true }
         }
     }
@@ -441,6 +448,7 @@ fun PresidentFlyerStudioScreen(
                     modifier = Modifier.padding(14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Top control bar
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -453,7 +461,7 @@ fun PresidentFlyerStudioScreen(
                                 color = if (selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
                                 modifier = Modifier.clickable { selectedAspectSquare = true }
                             ) {
-                                Text("1:1 Square", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                                Text("1:1 Square", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
                             }
 
                             Surface(
@@ -461,47 +469,29 @@ fun PresidentFlyerStudioScreen(
                                 color = if (!selectedAspectSquare) Color(0xFF0097D8) else Color(0x22FFFFFF),
                                 modifier = Modifier.clickable { selectedAspectSquare = false }
                             ) {
-                                Text("4:5 Story", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                                Text("4:5 Story", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
                             }
                         }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFF1E293B)
-                            ) {
-                                Text(
-                                    text = selectedTemplate?.title ?: "Select Template",
-                                    color = Color(0xFFBAE6FD),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    maxLines = 1
-                                )
+                        // Full screen & Zoom trigger button
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color(0xFF0097D8),
+                            modifier = Modifier.clickable {
+                                zoomModalBitmap = compositeBitmap
+                                zoomModalTitle = selectedTemplate?.title ?: "Flyer Preview"
+                                val rawUrl = selectedTemplate?.baseImageUrl
+                                zoomModalRawUrl = if (rawUrl != null) (if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl") else null
+                                showFullScreenZoom = true
                             }
-
-                            // Full screen & Zoom trigger button
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFF0097D8),
-                                modifier = Modifier.clickable {
-                                    zoomModalBitmap = compositeBitmap
-                                    zoomModalTitle = selectedTemplate?.title ?: "Flyer Preview"
-                                    val rawUrl = selectedTemplate?.baseImageUrl
-                                    zoomModalRawUrl = if (rawUrl != null) (if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl") else null
-                                    showFullScreenZoom = true
-                                }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text(
-                                    text = "🔍 Zoom / Fullscreen",
-                                    color = Color.White,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
+                                Text("🔍", fontSize = 11.sp)
+                                Text("Zoom Preview", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }

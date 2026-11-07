@@ -102,6 +102,8 @@ data class NotificationItem(
     val type: String? = "order",
     val read: Boolean = false,
     val contactId: String? = null,
+    val data: Map<String, Any?>? = null,
+    val createdAt: String? = null,
     val timestamp: String? = null
 )
 
