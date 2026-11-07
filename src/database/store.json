@@ -182,6 +182,1146 @@
       "createdById": "usr_superadmin_01",
       "createdByName": "Super Admin",
       "createdAt": "2026-11-02T14:12:46.484Z"
+    },
+    {
+      "id": "tpl_gbm_02",
+      "title": "LOM Board of Directors Meeting",
+      "category": "GBM & Meetings",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Venue",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Special Invitee",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.277Z"
+    },
+    {
+      "id": "tpl_gbm_03",
+      "title": "Extraordinary General Meeting (EGM)",
+      "category": "GBM & Meetings",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Venue",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_gbm_04",
+      "title": "Chapter Installation & Induction Ceremony",
+      "category": "GBM & Meetings",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Venue",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Installing Officer",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "Charter President",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_eff_02",
+      "title": "100% Efficiency: TOYP Nominations 2027",
+      "category": "100% Efficiency",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Deadline",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "Portal",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_eff_03",
+      "title": "100% Efficiency: Mid-Term Chapter Review",
+      "category": "100% Efficiency",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Review Date",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "Zone Conclave",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_eff_04",
+      "title": "100% Efficiency: Annual Dues & Census Submission",
+      "category": "100% Efficiency",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Census Due Date",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "National Secretariat",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_train_01",
+      "title": "LOTS - Local Officer Training Seminar",
+      "category": "Training & Conclaves",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Academy Venue",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Head Coach / Pilot Faculty",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_train_02",
+      "title": "Speech Craft & Public Speaking Masterclass",
+      "category": "Training & Conclaves",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Hall of Excellence",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Prime Faculty",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_train_03",
+      "title": "Zone Conference & Youth Leadership Conclave",
+      "category": "Training & Conclaves",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Conclave Dates",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Convention Center",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "National President / Guest",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "Host Chapter President",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_train_04",
+      "title": "Future Leaders Induction Academy (FLIA)",
+      "category": "Training & Conclaves",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Retreat Center",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Leadership Mentor",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_biz_01",
+      "title": "JBN Business Showcase & Trade Expo 2027",
+      "category": "Business & Networking",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Expo Date",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Trade Expo Hub",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Keynote Speaker",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_biz_02",
+      "title": "Power Networking Breakfast & Pitch Session",
+      "category": "Business & Networking",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Executive Lounge",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Featured Entrepreneur",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_biz_03",
+      "title": "B2B Founders Roundtable & Angel Conclave",
+      "category": "Business & Networking",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "Innovation Hub",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "Angel Investor / Mentor",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_biz_04",
+      "title": "JBN Cross-Chapter Business Referral Meet",
+      "category": "Business & Networking",
+      "baseImageUrl": "/assets/tpl_gbm_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 80,
+          "y": 60,
+          "width": 220,
+          "height": 90
+        },
+        {
+          "type": "event_date_time",
+          "label": "Date & Time",
+          "x": 90,
+          "y": 730,
+          "width": 400,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "event_venue",
+          "label": "City Chamber Hall",
+          "x": 90,
+          "y": 790,
+          "width": 400,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20,
+          "align": "left",
+          "bold": false
+        },
+        {
+          "type": "chief_guest",
+          "label": "JBN Director",
+          "x": 590,
+          "y": 740,
+          "width": 400,
+          "height": 70,
+          "color": "#fef08a",
+          "fontSize": 24,
+          "align": "left",
+          "bold": true
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 80,
+          "y": 940,
+          "width": 420,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26,
+          "align": "left",
+          "bold": true
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_comm_01",
+      "title": "Jaycee Blood Donation Mega Camp",
+      "category": "Community & Social",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Camp Date",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "Red Cross Center",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_comm_02",
+      "title": "Green Earth: Tree Plantation Drive",
+      "category": "Community & Social",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Drive Date",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "City Eco Park",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_comm_03",
+      "title": "Project Suvidha: Child Education & Kit Distribution",
+      "category": "Community & Social",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Event Date",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "Govt Model School",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_comm_04",
+      "title": "Free Health Screening & Eye Checkup Camp",
+      "category": "Community & Social",
+      "baseImageUrl": "/assets/tpl_efficiency_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1350
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 90,
+          "y": 90,
+          "width": 240,
+          "height": 100
+        },
+        {
+          "type": "event_date_time",
+          "label": "Camp Date",
+          "x": 90,
+          "y": 880,
+          "width": 450,
+          "height": 40,
+          "color": "#ffffff",
+          "fontSize": 24
+        },
+        {
+          "type": "event_venue",
+          "label": "Community Health Hall",
+          "x": 90,
+          "y": 940,
+          "width": 450,
+          "height": 40,
+          "color": "#cbd5e1",
+          "fontSize": 20
+        },
+        {
+          "type": "president_name",
+          "label": "President Name",
+          "x": 90,
+          "y": 1180,
+          "width": 400,
+          "height": 45,
+          "color": "#38bdf8",
+          "fontSize": 26
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-07T14:04:05.279Z"
     }
   ],
   "frames": [
