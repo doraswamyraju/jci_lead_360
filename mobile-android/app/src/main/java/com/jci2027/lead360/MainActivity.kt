@@ -545,6 +545,9 @@ class MainActivity : ComponentActivity() {
                                     Screen.Dashboard -> DashboardOverviewScreen(
                                         presidentName = userName,
                                         chapterName = userChapter,
+                                        presidentPhotoBitmap = userProfileBitmap,
+                                        serverPhotoUrl = serverPhotoUrl,
+                                        chapterLogoBitmap = chapterLogoBitmap,
                                         onNavigateTab = { tabId ->
                                             currentScreen = when (tabId) {
                                                 "projects" -> Screen.Projects

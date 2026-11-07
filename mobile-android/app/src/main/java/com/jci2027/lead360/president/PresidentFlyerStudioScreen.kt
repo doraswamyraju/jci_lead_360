@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -79,11 +80,17 @@ fun PresidentFlyerStudioScreen(
 
     // Full-screen Zoom Modal State
     var showFullScreenZoom by remember { mutableStateOf(false) }
+    var zoomModalBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var zoomModalTitle by remember { mutableStateOf("Flyer Preview") }
+    var zoomModalRawUrl by remember { mutableStateOf<String?>(null) }
 
     val fieldValues = remember { mutableStateMapOf<String, String>() }
     var compositeBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isRendering by remember { mutableStateOf(false) }
     var cachedBaseBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    // Cache of auto-customized live composite bitmaps for catalogue cards
+    val catalogueComposites = remember { mutableStateMapOf<String, Bitmap>() }
 
     // Quick Venue Presets
     val venuePresets = listOf("Hotel Royal Grand, Main Hall", "Rotary Convention Center", "Chapter Secretariat", "Online Zoom Meeting")
@@ -188,6 +195,7 @@ fun PresidentFlyerStudioScreen(
                     if (bmp != null) {
                         triggerComposite(flyerRenderer, tpl, bmp, chapterLogoBitmap, presidentPhotoBitmap, fieldValues) { resultBmp ->
                             compositeBitmap = resultBmp
+                            catalogueComposites[tpl.id] = resultBmp
                             isRendering = false
                         }
                     } else {
@@ -317,6 +325,7 @@ fun PresidentFlyerStudioScreen(
                             val rawUrl = tpl.baseImageUrl
                             val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
                             val isSelected = tpl.id == selectedTemplate?.id
+                            val customBmp = catalogueComposites[tpl.id]
 
                             Card(
                                 modifier = Modifier
@@ -338,54 +347,62 @@ fun PresidentFlyerStudioScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(130.dp)
+                                            .height(145.dp)
                                             .background(Color(0xFF091322))
                                     ) {
-                                        AsyncImage(
-                                            model = imageUrl,
-                                            contentDescription = tpl.title,
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
+                                        if (customBmp != null) {
+                                            Image(
+                                                bitmap = customBmp.asImageBitmap(),
+                                                contentDescription = tpl.title,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Fit
+                                            )
+                                        } else {
+                                            AsyncImage(
+                                                model = imageUrl,
+                                                contentDescription = tpl.title,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Fit
+                                            )
+                                        }
 
-                                        // Marked fields overlay on top of template creative
-                                        tpl.layers?.let { layers ->
-                                            Box(modifier = Modifier.fillMaxSize()) {
-                                                layers.forEach { layer ->
-                                                    val zoneType = (layer.type ?: layer.key ?: "").lowercase()
-                                                    val xPct = if (layer.xPercent > 0f) layer.xPercent else ((layer.x / 1080f) * 100f)
-                                                    val yPct = if (layer.yPercent > 0f) layer.yPercent else ((layer.y / 1080f) * 100f)
-
-                                                    val badgeText = when {
-                                                        zoneType.contains("logo") -> "🏛️ Logo"
-                                                        zoneType.contains("photo") -> "👤 Photo"
-                                                        zoneType.contains("date") -> "📅 Date"
-                                                        zoneType.contains("venue") -> "📍 Venue"
-                                                        zoneType.contains("president") -> "👤 President"
-                                                        else -> layer.label ?: "✏️ Text"
-                                                    }
-
-                                                    Surface(
-                                                        shape = RoundedCornerShape(4.dp),
-                                                        color = Color(0xCC091322),
-                                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8)),
-                                                        modifier = Modifier
-                                                            .offset(
-                                                                x = ((xPct / 100f) * 140).dp,
-                                                                y = ((yPct / 100f) * 90).dp
-                                                            )
-                                                    ) {
-                                                        Text(
-                                                            text = badgeText,
-                                                            fontSize = 7.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = Color(0xFFBAE6FD),
-                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                                                            maxLines = 1
-                                                        )
-                                                    }
+                                        // Zoom Preview Icon Button
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = Color(0xCC091322),
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8)),
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(6.dp)
+                                                .clickable {
+                                                    zoomModalBitmap = customBmp
+                                                    zoomModalTitle = tpl.title
+                                                    zoomModalRawUrl = imageUrl
+                                                    showFullScreenZoom = true
                                                 }
-                                            }
+                                        ) {
+                                            Text(
+                                                text = "🔍 Zoom",
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFFBAE6FD),
+                                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                            )
+                                        }
+
+                                        // Auto-Customized Indicator Pill
+                                        Surface(
+                                            shape = RoundedCornerShape(topEnd = 6.dp),
+                                            color = Color(0xDD0369A1),
+                                            modifier = Modifier.align(Alignment.BottomStart)
+                                        ) {
+                                            Text(
+                                                text = if (customBmp != null) "✨ Customized" else "📄 Template Base",
+                                                fontSize = 8.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
                                         }
                                     }
                                     Column(modifier = Modifier.padding(10.dp)) {
@@ -470,7 +487,13 @@ fun PresidentFlyerStudioScreen(
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
                                 color = Color(0xFF0097D8),
-                                modifier = Modifier.clickable { showFullScreenZoom = true }
+                                modifier = Modifier.clickable {
+                                    zoomModalBitmap = compositeBitmap
+                                    zoomModalTitle = selectedTemplate?.title ?: "Flyer Preview"
+                                    val rawUrl = selectedTemplate?.baseImageUrl
+                                    zoomModalRawUrl = if (rawUrl != null) (if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl") else null
+                                    showFullScreenZoom = true
+                                }
                             ) {
                                 Text(
                                     text = "🔍 Zoom / Fullscreen",
@@ -493,9 +516,11 @@ fun PresidentFlyerStudioScreen(
                             .background(Color(0xFF040810), RoundedCornerShape(10.dp))
                             .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp))
                             .clickable {
-                                if (compositeBitmap != null) {
-                                    showFullScreenZoom = true
-                                }
+                                zoomModalBitmap = compositeBitmap
+                                zoomModalTitle = selectedTemplate?.title ?: "Flyer Preview"
+                                val rawUrl = selectedTemplate?.baseImageUrl
+                                zoomModalRawUrl = if (rawUrl != null) (if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl") else null
+                                showFullScreenZoom = true
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -601,10 +626,11 @@ fun PresidentFlyerStudioScreen(
                         val isSelected = (tpl.id == selectedTemplate?.id)
                         val rawUrl = tpl.baseImageUrl
                         val imageUrl = if (rawUrl.startsWith("http")) rawUrl else "$baseUrl$rawUrl"
+                        val customBmp = catalogueComposites[tpl.id]
 
                         Card(
                             modifier = Modifier
-                                .width(120.dp)
+                                .width(130.dp)
                                 .clickable {
                                     selectedTemplate = tpl
                                     initDefaultFieldValues(tpl, presidentName, fieldValues)
@@ -617,15 +643,45 @@ fun PresidentFlyerStudioScreen(
                             )
                         ) {
                             Column {
-                                AsyncImage(
-                                    model = imageUrl,
-                                    contentDescription = tpl.title,
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(80.dp)
-                                        .background(Color(0xFF091322)),
-                                    contentScale = ContentScale.Crop
-                                )
+                                        .height(95.dp)
+                                        .background(Color(0xFF091322))
+                                ) {
+                                    if (customBmp != null) {
+                                        Image(
+                                            bitmap = customBmp.asImageBitmap(),
+                                            contentDescription = tpl.title,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit
+                                        )
+                                    } else {
+                                        AsyncImage(
+                                            model = imageUrl,
+                                            contentDescription = tpl.title,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit
+                                        )
+                                    }
+
+                                    // Quick Zoom Icon
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color(0xCC091322),
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(4.dp)
+                                            .clickable {
+                                                zoomModalBitmap = customBmp
+                                                zoomModalTitle = tpl.title
+                                                zoomModalRawUrl = imageUrl
+                                                showFullScreenZoom = true
+                                            }
+                                    ) {
+                                        Text("🔍", fontSize = 10.sp, modifier = Modifier.padding(4.dp))
+                                    }
+                                }
                                 Text(
                                     text = tpl.title,
                                     fontSize = 10.sp,
@@ -738,7 +794,7 @@ fun PresidentFlyerStudioScreen(
         }
 
         // Fullscreen Interactive Zoom Dialog Modal
-        if (showFullScreenZoom && compositeBitmap != null) {
+        if (showFullScreenZoom && (zoomModalBitmap != null || !zoomModalRawUrl.isNullOrBlank())) {
             var scale by remember { mutableFloatStateOf(1f) }
             var offset by remember { mutableStateOf(Offset.Zero) }
             val state = rememberTransformableState { zoomChange, offsetChange, _ ->
@@ -755,21 +811,38 @@ fun PresidentFlyerStudioScreen(
                         .fillMaxSize()
                         .background(Color.Black)
                 ) {
-                    // Zoomable Image
-                    Image(
-                        bitmap = compositeBitmap!!.asImageBitmap(),
-                        contentDescription = "Zoomed Flyer Creative",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .transformable(state = state)
-                            .graphicsLayer(
-                                scaleX = scale,
-                                scaleY = scale,
-                                translationX = offset.x,
-                                translationY = offset.y
-                            ),
-                        contentScale = ContentScale.Fit
-                    )
+                    // Zoomable Image (Either composite bitmap or remote image url)
+                    if (zoomModalBitmap != null) {
+                        Image(
+                            bitmap = zoomModalBitmap!!.asImageBitmap(),
+                            contentDescription = zoomModalTitle,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .transformable(state = state)
+                                .graphicsLayer(
+                                    scaleX = scale,
+                                    scaleY = scale,
+                                    translationX = offset.x,
+                                    translationY = offset.y
+                                ),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else if (!zoomModalRawUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = zoomModalRawUrl,
+                            contentDescription = zoomModalTitle,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .transformable(state = state)
+                                .graphicsLayer(
+                                    scaleX = scale,
+                                    scaleY = scale,
+                                    translationX = offset.x,
+                                    translationY = offset.y
+                                ),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
 
                     // Controls Header
                     Row(
@@ -784,7 +857,7 @@ fun PresidentFlyerStudioScreen(
                             color = Color(0x99000000)
                         ) {
                             Text(
-                                text = "Pinch to Zoom (${String.format("%.1f", scale)}x)",
+                                text = "$zoomModalTitle • Pinch to Zoom (${String.format("%.1f", scale)}x)",
                                 color = Color.White,
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

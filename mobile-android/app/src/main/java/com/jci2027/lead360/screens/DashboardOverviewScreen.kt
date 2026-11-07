@@ -1,9 +1,11 @@
 package com.jci2027.lead360.screens
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,16 +25,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.jci2027.lead360.R
 import com.jci2027.lead360.theme.JciColors
 
 @Composable
 fun DashboardOverviewScreen(
     chapterName: String = "JCI Tirupati Innovations",
     presidentName: String = "JC Doraswamy Raju",
+    presidentPhotoBitmap: Bitmap? = null,
+    serverPhotoUrl: String? = null,
+    chapterLogoBitmap: Bitmap? = null,
     onNavigateTab: (String) -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
@@ -46,12 +56,13 @@ fun DashboardOverviewScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // ==========================================
-        // 1. EXECUTIVE PRESTIGE HERO CARD (Official JCI Shield & Navy/Sky/Teal Gradient)
+        // 1. ULTRA-LUXURY EXECUTIVE HERO CARD WITH PRESIDENT PORTRAIT & DUAL ACCENT SHIELD
         // ==========================================
         Card(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(26.dp),
             colors = CardDefaults.cardColors(containerColor = JciColors.DeepNavy),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.35f)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
@@ -60,25 +71,27 @@ fun DashboardOverviewScreen(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                JciColors.DeepNavy,
-                                Color(0xFF10284C),
-                                JciColors.RoyalBlue,
-                                JciColors.SkyBlue
+                                Color(0xFF061426),
+                                Color(0xFF0A2240),
+                                Color(0xFF003B73),
+                                Color(0xFF0072CE),
+                                Color(0xFF00A3E0)
                             )
                         )
                     )
             ) {
-                // Official JCI Shield Dual-Accent Accent Arc (Sky Blue & Teal ribbons)
+                // Background Decorative Luxury Halo Ribbon
                 Box(
                     modifier = Modifier
-                        .size(170.dp)
+                        .size(240.dp)
                         .align(Alignment.TopEnd)
-                        .offset(x = 50.dp, y = (-40).dp)
+                        .offset(x = 70.dp, y = (-60).dp)
                         .background(
                             Brush.sweepGradient(
                                 listOf(
-                                    JciColors.SkyBlue.copy(alpha = 0.25f),
-                                    JciColors.ShieldTeal.copy(alpha = 0.35f),
+                                    Color(0xFF38BDF8).copy(alpha = 0.30f),
+                                    Color(0xFF59BDBD).copy(alpha = 0.20f),
+                                    Color(0xFFF59E0B).copy(alpha = 0.15f),
                                     Color.Transparent
                                 )
                             ),
@@ -90,7 +103,7 @@ fun DashboardOverviewScreen(
                     modifier = Modifier.padding(22.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Top Bar inside Hero: Organization identity + Live Pill
+                    // Top Bar: Flag + Live President Pill + Official Year 2027 Badge
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -98,89 +111,144 @@ fun DashboardOverviewScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color.White.copy(alpha = 0.18f),
+                                shape = RoundedCornerShape(20.dp),
+                                color = Color.White.copy(alpha = 0.15f),
                                 border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f))
                             ) {
-                                Text(
-                                    "🇮🇳 JCI INDIA 2027",
-                                    color = Color.White,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.2.sp,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text("🇮🇳", fontSize = 11.sp)
+                                    Text(
+                                        "JCI INDIA",
+                                        color = Color.White,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 1.sp
+                                    )
+                                }
                             }
+
                             Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = JciColors.ShieldTeal.copy(alpha = 0.25f),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, JciColors.ShieldTeal.copy(alpha = 0.5f))
+                                shape = RoundedCornerShape(20.dp),
+                                color = Color(0xFF0284C7).copy(alpha = 0.35f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.6f))
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
                                     Box(
                                         modifier = Modifier
                                             .size(6.dp)
-                                            .background(JciColors.ShieldTeal, CircleShape)
+                                            .background(Color(0xFF38BDF8), CircleShape)
                                     )
                                     Text(
                                         "PRESIDENT PORTAL",
-                                        color = Color(0xFFA7F3D0),
+                                        color = Color(0xFFBAE6FD),
                                         fontSize = 9.sp,
-                                        fontWeight = FontWeight.ExtraBold
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 0.5.sp
                                     )
                                 }
                             }
                         }
 
-                        // JCI Emblem Monogram
+                        // Tenure Badge
                         Surface(
-                            shape = CircleShape,
-                            color = Color.White.copy(alpha = 0.15f),
-                            border = androidx.compose.foundation.BorderStroke(1.5.dp, JciColors.ShieldTeal),
-                            modifier = Modifier.size(42.dp)
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFF59E0B).copy(alpha = 0.20f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFBBF24).copy(alpha = 0.5f))
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text("🛡️", fontSize = 20.sp)
-                            }
+                            Text(
+                                "YEAR 2027",
+                                color = Color(0xFFFEF08A),
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                            )
                         }
                     }
 
-                    // Welcome + President details
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            "Welcome Back,",
-                            color = Color(0xFFBAE6FD),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            presidentName,
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    // President Executive Welcome Row with High-Res Portrait Avatar
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        // High-Resolution Glow Avatar
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF0097D8))
+                                .border(2.5.dp, Color(0xFFBAE6FD), CircleShape)
+                                .clickable { onNavigateTab("profile") },
+                            contentAlignment = Alignment.Center
                         ) {
+                            if (presidentPhotoBitmap != null) {
+                                Image(
+                                    bitmap = presidentPhotoBitmap.asImageBitmap(),
+                                    contentDescription = presidentName,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else if (!serverPhotoUrl.isNullOrBlank()) {
+                                val fullUrl = if (serverPhotoUrl.startsWith("http")) serverPhotoUrl else "https://lead.sriddha.com$serverPhotoUrl"
+                                AsyncImage(
+                                    model = fullUrl,
+                                    contentDescription = presidentName,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Text(
+                                    presidentName.firstOrNull()?.toString() ?: "P",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 24.sp
+                                )
+                            }
+                        }
+
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                "🏛️ $chapterName",
-                                color = Color(0xFFE0F2FE),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text("•", color = Color(0xFF93C5FD), fontSize = 12.sp)
-                            Text(
-                                "Zone XXVI",
+                                "Welcome Back,",
                                 color = Color(0xFFBAE6FD),
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.SemiBold
                             )
+                            Text(
+                                presidentName,
+                                color = Color.White,
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = (-0.4).sp,
+                                maxLines = 1
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    "🏛️ $chapterName",
+                                    color = Color(0xFFE0F2FE),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                Text("•", color = Color(0xFF93C5FD), fontSize = 11.sp)
+                                Text(
+                                    "Zone IV",
+                                    color = Color(0xFFBAE6FD),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
 
