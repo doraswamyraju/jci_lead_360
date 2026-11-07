@@ -83,6 +83,22 @@ router.post('/exchange', async (req, res) => {
 
     db.saveContact(newContact);
 
+    // Create an in-app and push notification for the President / Leader who received the contact exchange
+    try {
+      db.addNotification({
+        id: `notif_exchange_${Date.now()}`,
+        title: `📇 New Contact Exchanged: ${newContact.name}`,
+        message: `${newContact.name} (${newContact.designation || 'Visitor'} at ${newContact.company || newContact.city || 'JCI Event'}) scanned your QR and exchanged contacts.`,
+        type: 'contact_exchange',
+        contactId: newContact.id,
+        targetUserId: leaderId || 'usr_president',
+        targetRole: 'PRESIDENT',
+        timestamp: new Date().toISOString()
+      });
+    } catch (notifErr) {
+      console.warn('[Exchange] Failed to create notification for leader:', notifErr.message);
+    }
+
     // Fetch leader details dynamically from database
     const users = db.getUsers();
     const leader = (leaderId && db.findUserById(leaderId)) || users.find(u => u.role === 'PRESIDENT') || users[0] || {

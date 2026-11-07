@@ -101,6 +101,7 @@ data class NotificationItem(
     val message: String,
     val type: String? = "order",
     val read: Boolean = false,
+    val contactId: String? = null,
     val timestamp: String? = null
 )
 
@@ -123,6 +124,13 @@ interface ApiService {
     @POST("/api/contacts")
     suspend fun saveContact(
         @Header("Authorization") token: String,
+        @Body contact: SaveContactRequest
+    ): Response<SaveContactResponse>
+
+    @PUT("/api/contacts/{id}")
+    suspend fun updateContact(
+        @Header("Authorization") token: String,
+        @Path("id") id: String,
         @Body contact: SaveContactRequest
     ): Response<SaveContactResponse>
 

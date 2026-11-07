@@ -71,6 +71,50 @@ router.post('/', (req, res, next) => {
   }
 });
 
+// PUT /api/contacts/:id - Update an existing contact
+router.put('/:id', (req, res, next) => {
+  if (req.headers.authorization) return authenticate(req, res, next);
+  next();
+}, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, company, designation, phone, email, website, address, eventTag, locationName, city, notes, followUpDate, photoUrl } = req.body;
+
+    const existingList = db.getContacts(null);
+    const existing = existingList.find(c => c.id === id);
+
+    const updated = {
+      ...(existing || {}),
+      id,
+      name: name !== undefined ? name : (existing?.name || ''),
+      company: company !== undefined ? company : (existing?.company || ''),
+      designation: designation !== undefined ? designation : (existing?.designation || ''),
+      phone: phone !== undefined ? phone : (existing?.phone || ''),
+      email: email !== undefined ? email : (existing?.email || ''),
+      website: website !== undefined ? website : (existing?.website || ''),
+      photoUrl: photoUrl !== undefined ? photoUrl : (existing?.photoUrl || ''),
+      address: address !== undefined ? address : (existing?.address || ''),
+      eventTag: eventTag !== undefined ? eventTag : (existing?.eventTag || 'General Networking'),
+      locationName: locationName !== undefined ? locationName : (existing?.locationName || ''),
+      city: city !== undefined ? city : (existing?.city || ''),
+      notes: notes !== undefined ? notes : (existing?.notes || ''),
+      followUpDate: followUpDate !== undefined ? followUpDate : (existing?.followUpDate || ''),
+      updatedAt: new Date().toISOString()
+    };
+
+    db.saveContact(updated);
+
+    res.json({
+      success: true,
+      message: 'Contact updated successfully',
+      contact: updated
+    });
+  } catch (error) {
+    console.error('Error updating contact:', error);
+    res.status(500).json({ success: false, message: 'Failed to update contact' });
+  }
+});
+
 // DELETE /api/contacts/:id - Delete a contact
 router.delete('/:id', (req, res) => {
   try {

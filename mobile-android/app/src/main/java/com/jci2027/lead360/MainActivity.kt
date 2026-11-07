@@ -115,10 +115,17 @@ class MainActivity : ComponentActivity() {
                         Screen.Store
                     )
 
+                    var targetContactId by remember { mutableStateOf<String?>(null) }
+
                     // Modal BottomSheet Notification Center
                     if (showNotificationBottomSheet) {
                         NotificationCenterBottomSheet(
-                            onDismiss = { showNotificationBottomSheet = false }
+                            token = token,
+                            onDismiss = { showNotificationBottomSheet = false },
+                            onNavigateToContact = { contactId ->
+                                targetContactId = contactId
+                                currentScreen = Screen.ScanCard
+                            }
                         )
                     }
 
@@ -578,7 +585,11 @@ class MainActivity : ComponentActivity() {
                                     Screen.ScanCard -> ScanCardModuleScreen(
                                         chapterName = userChapter,
                                         token = token,
-                                        onBack = { currentScreen = Screen.Dashboard }
+                                        initialTargetContactId = targetContactId,
+                                        onBack = { 
+                                            targetContactId = null
+                                            currentScreen = Screen.Dashboard 
+                                        }
                                     )
                                     Screen.Store -> VendorStoreScreen(
                                         chapterName = userChapter,
