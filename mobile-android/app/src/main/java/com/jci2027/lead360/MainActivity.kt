@@ -40,6 +40,7 @@ import com.jci2027.lead360.screens.ProfileScreen
 import com.jci2027.lead360.screens.ProjectsAndTasksScreen
 import com.jci2027.lead360.screens.ScanCardModuleScreen
 import com.jci2027.lead360.screens.VendorStoreScreen
+import com.jci2027.lead360.engine.QrCodeGenerator
 import com.jci2027.lead360.theme.JciColors
 import kotlinx.coroutines.launch
 
@@ -103,6 +104,7 @@ class MainActivity : ComponentActivity() {
                     val coroutineScope = rememberCoroutineScope()
                     var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
                     var showNotificationBottomSheet by remember { mutableStateOf(false) }
+                    var showExchangeQrModal by remember { mutableStateOf(false) }
 
                     // Navigation items for BottomBar (Report Primary Navigation)
                     val bottomNavItems = listOf(
@@ -117,6 +119,109 @@ class MainActivity : ComponentActivity() {
                     if (showNotificationBottomSheet) {
                         NotificationCenterBottomSheet(
                             onDismiss = { showNotificationBottomSheet = false }
+                        )
+                    }
+
+                    // Luxury Instant Exchange QR Code Modal Dialog
+                    if (showExchangeQrModal) {
+                        val exchangeUrl = QrCodeGenerator.buildExchangeUrl(leaderId = "usr_president", baseUrl = "https://lead.sriddha.com")
+                        val qrBitmap = remember {
+                            QrCodeGenerator.generateQrBitmap(exchangeUrl, width = 480, height = 480)
+                        }
+
+                        AlertDialog(
+                            onDismissRequest = { showExchangeQrModal = false },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showExchangeQrModal = false
+                                        currentScreen = Screen.ScanCard
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097D8)),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("Open Full Scanner", fontWeight = FontWeight.Bold)
+                                }
+                            },
+                            dismissButton = {
+                                OutlinedButton(
+                                    onClick = { showExchangeQrModal = false },
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("Close")
+                                }
+                            },
+                            title = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .background(
+                                                androidx.compose.ui.graphics.Brush.linearGradient(
+                                                    listOf(Color(0xFF0097D8), Color(0xFF002F6C))
+                                                ),
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_qr_code),
+                                            contentDescription = "QR Code",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                    Column {
+                                        Text("Exchange Contacts", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = Color(0xFF0F172A))
+                                        Text("President Digital Card", fontSize = 11.sp, color = Color(0xFF64748B))
+                                    }
+                                }
+                            },
+                            text = {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color.White,
+                                        border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFE2E8F0)),
+                                        shadowElevation = 6.dp,
+                                        modifier = Modifier.padding(8.dp)
+                                    ) {
+                                        if (qrBitmap != null) {
+                                            Image(
+                                                bitmap = qrBitmap.asImageBitmap(),
+                                                contentDescription = "President Contact Exchange QR Code",
+                                                modifier = Modifier
+                                                    .size(220.dp)
+                                                    .padding(14.dp)
+                                            )
+                                        } else {
+                                            Box(
+                                                modifier = Modifier.size(220.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                CircularProgressIndicator(color = Color(0xFF0097D8))
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = "Scan with any smartphone camera to instantly exchange contacts with $userName",
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF475569),
+                                        lineHeight = 16.sp
+                                    )
+                                }
+                            },
+                            containerColor = Color.White,
+                            shape = RoundedCornerShape(20.dp)
                         )
                     }
 
@@ -319,16 +424,39 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     actions = {
+                                        // Quick Access Contact Exchange QR Code Action
+                                        IconButton(onClick = { showExchangeQrModal = true }) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(
+                                                        androidx.compose.ui.graphics.Brush.linearGradient(
+                                                            listOf(Color(0xFF0097D8), Color(0xFF002F6C))
+                                                        )
+                                                    )
+                                                    .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_qr_code),
+                                                    contentDescription = "Contact Exchange QR",
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+
                                         // Notification Bell -> Opens BottomSheet
                                         IconButton(onClick = { showNotificationBottomSheet = true }) {
                                             Text("🔔", fontSize = 18.sp)
                                         }
 
-                                        // Profile Avatar Shortcut (Displays actual User Photo if available)
+                                        // Profile Avatar Shortcut (Displays actual User Photo or Server Photo if available)
                                         IconButton(onClick = { currentScreen = Screen.Profile }) {
                                             Box(
                                                 modifier = Modifier
-                                                    .size(34.dp)
+                                                    .size(36.dp)
                                                     .clip(CircleShape)
                                                     .background(Color(0xFF0097D8))
                                                     .border(1.5.dp, Color(0xFFBAE6FD), CircleShape),
@@ -337,6 +465,14 @@ class MainActivity : ComponentActivity() {
                                                 if (userProfileBitmap != null) {
                                                     Image(
                                                         bitmap = userProfileBitmap.asImageBitmap(),
+                                                        contentDescription = userName,
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentScale = ContentScale.Crop
+                                                    )
+                                                } else if (!serverPhotoUrl.isNullOrBlank()) {
+                                                    val photoFullUrl = if (serverPhotoUrl!!.startsWith("http")) serverPhotoUrl!! else "https://lead.sriddha.com$serverPhotoUrl"
+                                                    AsyncImage(
+                                                        model = photoFullUrl,
                                                         contentDescription = userName,
                                                         modifier = Modifier.fillMaxSize(),
                                                         contentScale = ContentScale.Crop
@@ -490,6 +626,7 @@ class MainActivity : ComponentActivity() {
                                             userChapter = updatedChapter
                                             userPhotoPath = photoPath
                                             chapterLogoPath = logoPath
+                                            serverPhotoUrl = prefs.getString("president_photo_server_url", null)
                                         }
                                     )
                                 }

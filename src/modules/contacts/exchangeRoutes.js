@@ -93,7 +93,7 @@ router.post('/exchange', async (req, res) => {
       email: ''
     };
 
-    // Build standard RFC vCard 3.0 with resized JPEG photo
+    // Build standard RFC vCard 3.0 with crisp high-res 720x720 JPEG photo
     let photoVcardLine = '';
     const photoPathRel = leader.profilePhotoUrl || leader.photoUrl;
     if (photoPathRel) {
@@ -103,8 +103,8 @@ router.post('/exchange', async (req, res) => {
         if (fs.existsSync(fullDiskPath)) {
           const fileBuf = fs.readFileSync(fullDiskPath);
           const resizedBuf = await sharp(fileBuf)
-            .resize(320, 320, { fit: 'cover' })
-            .jpeg({ quality: 82 })
+            .resize(720, 720, { fit: 'cover', position: 'center' })
+            .jpeg({ quality: 92 })
             .toBuffer();
           photoVcardLine = `PHOTO;ENCODING=b;TYPE=JPEG:${resizedBuf.toString('base64')}`;
         }

@@ -53,7 +53,7 @@ app.get('/card/:userId/vcf', async (req, res) => {
     return res.status(404).send('Leader not found');
   }
 
-  // Load and embed photo as base64 in vCard (resized to 320x320 JPEG for fast and reliable phone contact rendering)
+  // Load and embed photo as base64 in vCard (crisp high-res 720x720 JPEG for sharp phone contact display)
   let photoVcardLine = '';
   const photoPathRel = user.profilePhotoUrl || user.photoUrl;
   if (photoPathRel) {
@@ -63,8 +63,8 @@ app.get('/card/:userId/vcf', async (req, res) => {
       if (fs.existsSync(fullDiskPath)) {
         const fileBuf = fs.readFileSync(fullDiskPath);
         const resizedBuf = await sharp(fileBuf)
-          .resize(320, 320, { fit: 'cover' })
-          .jpeg({ quality: 82 })
+          .resize(720, 720, { fit: 'cover', position: 'center' })
+          .jpeg({ quality: 92 })
           .toBuffer();
         const base64Data = resizedBuf.toString('base64');
         photoVcardLine = `PHOTO;ENCODING=b;TYPE=JPEG:${base64Data}`;
