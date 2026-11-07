@@ -227,4 +227,69 @@ interface ApiService {
     suspend fun getAllUsers(
         @Header("Authorization") token: String
     ): Response<UsersListResponse>
+
+    // Chapter Members & Approvals APIs
+    @GET("/api/members")
+    suspend fun getMembers(
+        @Header("Authorization") token: String
+    ): Response<MembersResponse>
+
+    @POST("/api/members")
+    suspend fun saveMember(
+        @Header("Authorization") token: String,
+        @Body member: MemberDto
+    ): Response<GenericSuccessResponse>
+
+    @PUT("/api/members/{id}")
+    suspend fun updateMember(
+        @Header("Authorization") token: String,
+        @Path("id") id: String,
+        @Body member: MemberDto
+    ): Response<GenericSuccessResponse>
+
+    @POST("/api/members/{id}/approve")
+    suspend fun approveMember(
+        @Header("Authorization") token: String,
+        @Path("id") id: String
+    ): Response<GenericSuccessResponse>
+
+    @DELETE("/api/members/{id}")
+    suspend fun deleteMember(
+        @Header("Authorization") token: String,
+        @Path("id") id: String
+    ): Response<GenericSuccessResponse>
 }
+
+data class MemberDto(
+    val id: String,
+    val name: String,
+    val phone: String,
+    val email: String? = "",
+    val role: String? = "Member",
+    val membershipType: String? = "Active Member",
+    val joinYear: String? = "2027",
+    val bloodGroup: String? = "O+",
+    val dob: String? = "",
+    val anniversaryDate: String? = "",
+    val chapterName: String? = "",
+    val chapterId: String? = "",
+    val zone: String? = "",
+    val businessName: String? = "",
+    val designation: String? = "",
+    val businessCategory: String? = "",
+    val businessPhone: String? = "",
+    val businessAddress: String? = "",
+    val city: String? = "",
+    val website: String? = "",
+    val services: String? = "",
+    val status: String? = "Active",
+    val photoUrl: String? = null,
+    val lat: Double? = 13.6288,
+    val lng: Double? = 79.4192
+)
+
+data class MembersResponse(
+    val success: Boolean,
+    val count: Int,
+    val members: List<MemberDto>
+)

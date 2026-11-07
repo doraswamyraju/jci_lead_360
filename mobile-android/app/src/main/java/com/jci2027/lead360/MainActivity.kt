@@ -441,28 +441,31 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     actions = {
-                                        // Quick Access Contact Exchange QR Code Action
-                                        IconButton(onClick = { showExchangeQrModal = true }) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(36.dp)
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(
-                                                        androidx.compose.ui.graphics.Brush.linearGradient(
-                                                            listOf(Color(0xFF0097D8), Color(0xFF002F6C))
-                                                        )
-                                                    )
-                                                    .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
-                                                contentAlignment = Alignment.Center
+                                        // Quick Access Contact Exchange QR Code Action (Explicit QR Badge)
+                                        Surface(
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = Color(0xFF0097D8).copy(alpha = 0.25f),
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.6f)),
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .clickable { showExchangeQrModal = true }
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                                             ) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_qr_code),
                                                     contentDescription = "Contact Exchange QR",
                                                     tint = Color.White,
-                                                    modifier = Modifier.size(20.dp)
+                                                    modifier = Modifier.size(16.dp)
                                                 )
+                                                Text("QR", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
                                             }
                                         }
+
+                                        Spacer(modifier = Modifier.width(4.dp))
 
                                         // Notification Bell -> Opens BottomSheet
                                         IconButton(onClick = { showNotificationBottomSheet = true }) {

@@ -258,6 +258,31 @@ export const db = {
     writeStore(store);
     return true;
   },
+  // Chapter Members & Approvals Engine
+  getMembers: (chapterId) => {
+    const store = readStore();
+    if (!store.chapter_members) store.chapter_members = [];
+    return chapterId ? store.chapter_members.filter(m => m.chapterId === chapterId || !m.chapterId) : store.chapter_members;
+  },
+  saveMember: (member) => {
+    const store = readStore();
+    if (!store.chapter_members) store.chapter_members = [];
+    const idx = store.chapter_members.findIndex(m => m.id === member.id);
+    if (idx >= 0) {
+      store.chapter_members[idx] = { ...store.chapter_members[idx], ...member, updatedAt: new Date().toISOString() };
+    } else {
+      store.chapter_members.unshift({ ...member, createdAt: new Date().toISOString() });
+    }
+    writeStore(store);
+    return member;
+  },
+  deleteMember: (id) => {
+    const store = readStore();
+    if (!store.chapter_members) store.chapter_members = [];
+    store.chapter_members = store.chapter_members.filter(m => m.id !== id);
+    writeStore(store);
+    return true;
+  },
   getStats: () => {
     const store = readStore();
     return {
