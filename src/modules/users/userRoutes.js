@@ -268,4 +268,26 @@ router.post('/officer-details', authenticate, (req, res) => {
   }
 });
 
+/**
+ * POST /api/users/fcm-token
+ * Register device FCM push token for logged-in user
+ */
+router.post('/fcm-token', authenticate, (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    if (!fcmToken) {
+      return res.status(400).json({ success: false, message: 'fcmToken is required' });
+    }
+    const user = db.findUserById(req.user.id);
+    if (user) {
+      user.fcmToken = fcmToken;
+      db.saveUser(user);
+      console.log(`[FCM] Registered token for user ${user.name} (${user.role})`);
+    }
+    res.json({ success: true, message: 'FCM token registered successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 export default router;

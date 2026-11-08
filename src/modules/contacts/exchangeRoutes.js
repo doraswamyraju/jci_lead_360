@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import { db } from '../../database/db.js';
+import { sendPushNotification } from '../../utils/firebasePush.js';
 
 const router = express.Router();
 
@@ -85,7 +86,7 @@ router.post('/exchange', async (req, res) => {
 
     // Create an in-app and push notification for the President / Leader who received the contact exchange
     try {
-      db.saveNotification({
+      const notifItem = {
         id: `notif_exchange_${Date.now()}`,
         title: `📇 New Contact Exchanged: ${newContact.name}`,
         message: `${newContact.name} (${newContact.designation || 'Visitor'} at ${newContact.company || newContact.city || 'JCI Event'}) scanned your QR and exchanged contacts.`,
@@ -93,6 +94,19 @@ router.post('/exchange', async (req, res) => {
         targetUserId: leaderId || 'usr_president',
         targetRole: 'PRESIDENT',
         data: { contactId: newContact.id }
+      };
+      db.saveNotification(notifItem);
+
+      // Trigger Instant Google Firebase FCM Push Notification to Leader's Device
+      const recipientUser = db.findUserById(leaderId) || users.find(u => u.role === 'PRESIDENT');
+      sendPushNotification({
+        token: recipientUser?.fcmToken,
+        title: `📇 New Contact Exchanged!`,
+        body: `${newContact.name} scanned your QR code and exchanged contacts.`,
+        data: {
+          contactId: newContact.id,
+          openScreen: 'scan_card'
+        }
       });
     } catch (notifErr) {
       console.warn('[Exchange] Failed to create notification for leader:', notifErr.message);
