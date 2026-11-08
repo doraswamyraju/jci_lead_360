@@ -349,3 +349,4 @@ struct ProfileView: View {
         .background(Color.jciBackgroundLight.ignoresSafeArea())
     }
 }
+

@@ -59,3 +59,4 @@ struct JciGradients {
         endPoint: .trailing
     )
 }
+

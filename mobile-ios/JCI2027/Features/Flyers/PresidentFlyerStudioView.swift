@@ -206,3 +206,4 @@ struct ShareActivitySheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
+

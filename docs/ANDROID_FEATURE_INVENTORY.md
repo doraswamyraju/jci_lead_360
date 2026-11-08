@@ -50,3 +50,4 @@ The application serves three distinct user roles with dedicated routing containe
    - APNs / FCM token registration (`POST /api/users/fcm-token`), topic broadcast (`presidents`), and deep link routing to `scan_card`.
 5. **Native Sharing & Export**:
    - `UIActivityViewController` sharing high-res PNG/JPEG directly to WhatsApp, AirDrop, Messages, and saving to Photos library / iOS Contacts.
+

@@ -24,3 +24,4 @@
 | **JCI Resources** | `JciResourcesScreen.kt` | `JciResourcesView` | **100%** | Download cards for constitution, brand & protocols |
 | **Calendar** | `InteractiveCalendarScreen.kt` | `InteractiveCalendarView` | **100%** | Event list with direct flyer generator action |
 | **LGB & PST Board** | `LgbAndPstManagementScreen.kt` | `LgbAndPstManagementView` | **100%** | Officer directory with 1-tap `tel:` phone call action |
+

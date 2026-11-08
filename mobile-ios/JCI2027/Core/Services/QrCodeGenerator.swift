@@ -25,3 +25,4 @@ class QrCodeGenerator {
         return UIImage(cgImage: cgImage)
     }
 }
+

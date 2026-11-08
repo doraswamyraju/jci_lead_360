@@ -68,3 +68,4 @@ extension LinearGradient {
 3. **Modals & Sheets**: Native `.sheet` presentation with `.presentationDetents([.medium, .large])` for BottomSheets (e.g. Notifications, Contact Details, Customizer).
 4. **Haptics**: `UIImpactFeedbackGenerator(style: .medium).impactOccurred()` on primary button presses and scan actions.
 5. **Interactive Controls**: iOS native `Picker(.segmented)` for category and status filtering, native `Toggle`, and native `DatePicker`.
+

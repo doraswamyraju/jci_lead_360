@@ -23,3 +23,4 @@
 | 14 | **Notification Center** | `Features/Dashboard/NotificationCenterSheet.swift` | **Verified** | Live `GET /api/vendor/notifications`, Mark all read, Tap notification to deep link directly to contact card |
 | 15 | **Admin App Container** | `Features/Admin/AdminAppContainerView.swift` | **Verified** | Multi-tab container (Vendors & Products, Chapter Leaders DB, Templates), Sign Out |
 | 16 | **Vendor App Container** | `Features/Vendor/VendorAppContainerView.swift` | **Verified** | Multi-tab container (Home, Catalog, Orders, RFQs), Sign Out |
+
