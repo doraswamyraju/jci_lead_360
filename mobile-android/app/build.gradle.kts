@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -61,6 +62,11 @@ dependencies {
 
     // Google ML Kit Text Recognition for Business Card OCR
     implementation("com.google.mlkit:text-recognition:16.0.1")
+
+    // Firebase Cloud Messaging (FCM) & Analytics
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     // ZXing Core for Dynamic Contact Exchange QR Code Generation
     implementation("com.google.zxing:core:3.5.3")

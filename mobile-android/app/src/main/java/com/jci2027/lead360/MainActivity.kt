@@ -117,7 +117,35 @@ class MainActivity : ComponentActivity() {
                         Screen.Store
                     )
 
-                    var targetContactId by remember { mutableStateOf<String?>(null) }
+                    var targetContactId by remember { mutableStateOf<String?>(intent.getStringExtra("target_contact_id")) }
+
+                    // Check notification launch intents
+                    LaunchedEffect(Unit) {
+                        val openScreen = intent.getStringExtra("open_screen")
+                        if (openScreen == "scan_card" || !targetContactId.isNullOrBlank()) {
+                            currentScreen = Screen.ScanCard
+                        }
+
+                        // Register FCM Token with backend
+                        com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val fcmToken = task.result
+                                prefs.edit().putString("fcm_device_token", fcmToken).apply()
+                                if (!token.isNullOrBlank()) {
+                                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                                        try {
+                                            val retrofit = retrofit2.Retrofit.Builder()
+                                                .baseUrl("https://lead.sriddha.com")
+                                                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+                                                .build()
+                                            val service = retrofit.create(com.jci2027.lead360.network.ApiService::class.java)
+                                            service.updateFcmToken("Bearer $token", mapOf("fcmToken" to fcmToken))
+                                        } catch (_: Exception) {}
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     // Modal BottomSheet Notification Center
                     if (showNotificationBottomSheet) {

@@ -222,6 +222,12 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<GenericSuccessResponse>
 
+    @POST("/api/users/fcm-token")
+    suspend fun updateFcmToken(
+        @Header("Authorization") token: String,
+        @Body body: Map<String, String>
+    ): Response<GenericSuccessResponse>
+
     // Super Admin APIs
     @GET("/api/users")
     suspend fun getAllUsers(

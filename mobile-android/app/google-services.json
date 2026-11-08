@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "349954048226",
+    "project_id": "lead360-4b266",
+    "storage_bucket": "lead360-4b266.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349954048226:android:b5f3e7468fa04f7edfdebb",
+        "android_client_info": {
+          "package_name": "com.jci2027.lead360"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfv8TU5M61JiG5NWuYOCE-uQeSRmPkrv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
