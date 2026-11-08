@@ -231,6 +231,7 @@ fun LoginScreen(
                                         }
                                         // Save active session token and profile parameters
                                         putString("auth_token", token)
+                                        putString("auth_user_id", user?.id)
                                         putString("auth_role", role)
                                         putString("auth_name", name)
                                         putString("auth_chapter", chapter)

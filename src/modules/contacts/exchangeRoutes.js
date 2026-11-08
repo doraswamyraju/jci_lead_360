@@ -63,10 +63,15 @@ router.post('/exchange', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide at least your Name and Phone or Email' });
     }
 
+    // Fetch leader / president details dynamically from database
+    const users = db.getUsers();
+    const recipientUser = (leaderId && db.findUserById(leaderId)) || users.find(u => u.role === 'PRESIDENT') || users[0];
+    const actualLeaderId = recipientUser?.id || leaderId || 'usr_pres_01';
+
     // Save visitor contact into leader's directory
     const newContact = {
       id: `c_recip_${Date.now()}`,
-      userId: leaderId || 'usr_president',
+      userId: actualLeaderId,
       name: name.trim(),
       company: (company || '').trim(),
       designation: (designation || '').trim(),
@@ -91,16 +96,16 @@ router.post('/exchange', async (req, res) => {
         title: `📇 New Contact Exchanged: ${newContact.name}`,
         message: `${newContact.name} (${newContact.designation || 'Visitor'} at ${newContact.company || newContact.city || 'JCI Event'}) scanned your QR and exchanged contacts.`,
         type: 'contact_exchange',
-        targetUserId: leaderId || 'usr_president',
-        targetRole: 'PRESIDENT',
+        targetUserId: actualLeaderId,
+        targetRole: recipientUser?.role || 'PRESIDENT',
         data: { contactId: newContact.id }
       };
       db.saveNotification(notifItem);
 
-      // Trigger Instant Google Firebase FCM Push Notification to Leader's Device
-      const recipientUser = db.findUserById(leaderId) || users.find(u => u.role === 'PRESIDENT');
+      // Trigger Instant Google Firebase FCM Push Notification to Leader's Device (or topic fallback)
       sendPushNotification({
-        token: recipientUser?.fcmToken,
+        token: recipientUser?.fcmToken || undefined,
+        topic: 'presidents',
         title: `📇 New Contact Exchanged!`,
         body: `${newContact.name} scanned your QR code and exchanged contacts.`,
         data: {
@@ -112,9 +117,7 @@ router.post('/exchange', async (req, res) => {
       console.warn('[Exchange] Failed to create notification for leader:', notifErr.message);
     }
 
-    // Fetch leader details dynamically from database
-    const users = db.getUsers();
-    const leader = (leaderId && db.findUserById(leaderId)) || users.find(u => u.role === 'PRESIDENT') || users[0] || {
+    const leader = recipientUser || {
       name: 'Leader',
       role: 'PRESIDENT',
       chapterName: 'JCI Chapter',

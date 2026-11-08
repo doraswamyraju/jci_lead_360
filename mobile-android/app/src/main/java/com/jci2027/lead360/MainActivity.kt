@@ -1,9 +1,12 @@
 package com.jci2027.lead360
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -118,9 +121,27 @@ class MainActivity : ComponentActivity() {
                     )
 
                     var targetContactId by remember { mutableStateOf<String?>(intent.getStringExtra("target_contact_id")) }
+                    val currentUserId = remember { prefs.getString("auth_user_id", "usr_pres_01") ?: "usr_pres_01" }
 
-                    // Check notification launch intents
+                    // Notification permission launcher for Android 13+ (TIRAMISU)
+                    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = { isGranted ->
+                            android.util.Log.d("FCM", "POST_NOTIFICATIONS granted: $isGranted")
+                        }
+                    )
+
+                    // Check notification launch intents & register FCM tokens/topics
                     LaunchedEffect(Unit) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        }
+
+                        // Subscribe to broadcast presidents topic so alerts are delivered even before individual token sync
+                        try {
+                            com.google.firebase.messaging.FirebaseMessaging.getInstance().subscribeToTopic("presidents")
+                        } catch (_: Exception) {}
+
                         val openScreen = intent.getStringExtra("open_screen")
                         if (openScreen == "scan_card" || !targetContactId.isNullOrBlank()) {
                             currentScreen = Screen.ScanCard
@@ -161,8 +182,8 @@ class MainActivity : ComponentActivity() {
 
                     // Luxury Instant Exchange QR Code Modal Dialog
                     if (showExchangeQrModal) {
-                        val exchangeUrl = QrCodeGenerator.buildExchangeUrl(leaderId = "usr_president", baseUrl = "https://lead.sriddha.com")
-                        val qrBitmap = remember {
+                        val exchangeUrl = QrCodeGenerator.buildExchangeUrl(leaderId = currentUserId, baseUrl = "https://lead.sriddha.com")
+                        val qrBitmap = remember(currentUserId) {
                             QrCodeGenerator.generateQrBitmap(exchangeUrl, width = 480, height = 480)
                         }
 

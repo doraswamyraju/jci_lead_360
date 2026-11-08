@@ -1,17 +1,18 @@
-import admin from 'firebase-admin';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getMessaging } from 'firebase-admin/messaging';
 import fs from 'fs';
 import path from 'path';
 
-let firebaseInitialized = false;
+let messagingInstance = null;
 
 try {
   const serviceAccountPath = path.join(process.cwd(), 'firebase-adminsdk.json');
   if (fs.existsSync(serviceAccountPath)) {
     const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    firebaseInitialized = true;
+    const app = getApps().length === 0
+      ? initializeApp({ credential: cert(serviceAccount) })
+      : getApps()[0];
+    messagingInstance = getMessaging(app);
     console.log('[Firebase] Admin SDK initialized successfully');
   } else {
     console.warn('[Firebase] firebase-adminsdk.json not found. Push notifications will be mocked.');
@@ -24,7 +25,7 @@ try {
  * Send FCM push notification to specific device token or topic
  */
 export async function sendPushNotification({ token, topic = 'presidents', title, body, data = {} }) {
-  if (!firebaseInitialized) {
+  if (!messagingInstance) {
     console.log('[FCM MOCK] Push would be sent:', { title, body, data });
     return false;
   }
@@ -51,12 +52,12 @@ export async function sendPushNotification({ token, topic = 'presidents', title,
 
     if (token) {
       message.token = token;
-      const res = await admin.messaging().send(message);
+      const res = await messagingInstance.send(message);
       console.log('[FCM] Successfully sent message to device:', res);
       return true;
     } else {
       message.topic = topic;
-      const res = await admin.messaging().send(message);
+      const res = await messagingInstance.send(message);
       console.log(`[FCM] Successfully sent message to topic ${topic}:`, res);
       return true;
     }
