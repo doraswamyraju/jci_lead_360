@@ -1,0 +1,510 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		244F0BCC54CDF2CB734B57B7 /* AdminAppContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */; };
+		2494867F0E969932352BB5D4 /* QrCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */; };
+		25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E905AC23C0667A2AE2AE73E /* LoginView.swift */; };
+		3A44DC358D16DA3B25AC39BF /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73009F97F3C9613B73097A74 /* ApiService.swift */; };
+		53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */; };
+		5950139218F350E61D82BE2B /* JciTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6244A457E27AE50F1076D524 /* JciTheme.swift */; };
+		6D023989A37180B556EBF927 /* PresidentFlyerStudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */; };
+		7D16F4BE18D108FC082202FC /* iOSFlyerRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C3798AF5A2F10E75B716A7 /* iOSFlyerRenderer.swift */; };
+		7EC718D31468637AFF30CD27 /* MembersAndNetworkingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76A682E44A15575086761388 /* MembersAndNetworkingView.swift */; };
+		858F035A94DEFFE6B4E975A9 /* ScanCardModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F80D0BEF47A296C43EC73FA /* ScanCardModuleView.swift */; };
+		85D015E250BFFABEC70DCAC3 /* VendorAppContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */; };
+		A4089ACF0E7661CBAF7028B0 /* JCI2027App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CC4EE655F3F263BADF78CE /* JCI2027App.swift */; };
+		A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */; };
+		B439592D93C0DC6947971B9D /* SecondaryScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */; };
+		C49587BF080DAF29B4BC13AE /* ProjectsAndTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */; };
+		DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7BE6964FFD652A939E1F7E /* AppModels.swift */; };
+		F1A23784F8945F4549516A63 /* VendorStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardOverviewView.swift; sourceTree = "<group>"; };
+		1F80D0BEF47A296C43EC73FA /* ScanCardModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanCardModuleView.swift; sourceTree = "<group>"; };
+		34CC4EE655F3F263BADF78CE /* JCI2027App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JCI2027App.swift; sourceTree = "<group>"; };
+		3F7BE6964FFD652A939E1F7E /* AppModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModels.swift; sourceTree = "<group>"; };
+		4E905AC23C0667A2AE2AE73E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		58C3798AF5A2F10E75B716A7 /* iOSFlyerRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSFlyerRenderer.swift; sourceTree = "<group>"; };
+		614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentFlyerStudioView.swift; sourceTree = "<group>"; };
+		61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryScreens.swift; sourceTree = "<group>"; };
+		6244A457E27AE50F1076D524 /* JciTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JciTheme.swift; sourceTree = "<group>"; };
+		73009F97F3C9613B73097A74 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
+		76A682E44A15575086761388 /* MembersAndNetworkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersAndNetworkingView.swift; sourceTree = "<group>"; };
+		7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAppContainerView.swift; sourceTree = "<group>"; };
+		7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorAppContainerView.swift; sourceTree = "<group>"; };
+		86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorStoreView.swift; sourceTree = "<group>"; };
+		8F7CF65D98445E15DD1C8B7D /* JCI2027.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = JCI2027.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsAndTasksView.swift; sourceTree = "<group>"; };
+		B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeGenerator.swift; sourceTree = "<group>"; };
+		E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterSheet.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0164BE8682BCD9932A0804EE /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				A5103ECEE6CD81E7811A41F0 /* DesignSystem */,
+				DC6AC0C05C21A59D1AC66AEF /* Models */,
+				8D8C95ED87B81566D6E19EE6 /* Networking */,
+				FCD7167328EEA57B95FEFD7E /* Services */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		0835FDE082D3C5977DC54F07 /* ScanCard */ = {
+			isa = PBXGroup;
+			children = (
+				1F80D0BEF47A296C43EC73FA /* ScanCardModuleView.swift */,
+			);
+			path = ScanCard;
+			sourceTree = "<group>";
+		};
+		18F9278FB3EA20B42A4667E4 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */,
+				E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */,
+				61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		287D70475DC3F96A3D6F7848 /* Members */ = {
+			isa = PBXGroup;
+			children = (
+				76A682E44A15575086761388 /* MembersAndNetworkingView.swift */,
+			);
+			path = Members;
+			sourceTree = "<group>";
+		};
+		3FD3B4B397187EE6B45DBAFA /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */,
+			);
+			path = Projects;
+			sourceTree = "<group>";
+		};
+		526DA1A5E4876B4B8CBE48D9 /* Flyers */ = {
+			isa = PBXGroup;
+			children = (
+				614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */,
+			);
+			path = Flyers;
+			sourceTree = "<group>";
+		};
+		5A8384FF75FE10B742D07F44 /* JCI2027 */ = {
+			isa = PBXGroup;
+			children = (
+				6AB11454094E71C446B3AAD0 /* App */,
+				0164BE8682BCD9932A0804EE /* Core */,
+				64DE1D285A369B3C450C2DF2 /* Features */,
+				BB8492D3BAA486C46CAED68F /* FlyerEngine */,
+			);
+			path = JCI2027;
+			sourceTree = "<group>";
+		};
+		64DE1D285A369B3C450C2DF2 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				F91D7978F027A26CF8BB887C /* Admin */,
+				9896FA28B7554550F543A3E7 /* Auth */,
+				18F9278FB3EA20B42A4667E4 /* Dashboard */,
+				526DA1A5E4876B4B8CBE48D9 /* Flyers */,
+				287D70475DC3F96A3D6F7848 /* Members */,
+				3FD3B4B397187EE6B45DBAFA /* Projects */,
+				0835FDE082D3C5977DC54F07 /* ScanCard */,
+				B72A133A9630C79AAC877F44 /* Store */,
+				FDE0973F647BEB36B060BC12 /* Vendor */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		6AB11454094E71C446B3AAD0 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				34CC4EE655F3F263BADF78CE /* JCI2027App.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		6ADED523E29A56BB8298B30B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8F7CF65D98445E15DD1C8B7D /* JCI2027.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8D8C95ED87B81566D6E19EE6 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				73009F97F3C9613B73097A74 /* ApiService.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		9896FA28B7554550F543A3E7 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				4E905AC23C0667A2AE2AE73E /* LoginView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		A5103ECEE6CD81E7811A41F0 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				6244A457E27AE50F1076D524 /* JciTheme.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		B72A133A9630C79AAC877F44 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		BB8492D3BAA486C46CAED68F /* FlyerEngine */ = {
+			isa = PBXGroup;
+			children = (
+				58C3798AF5A2F10E75B716A7 /* iOSFlyerRenderer.swift */,
+			);
+			path = FlyerEngine;
+			sourceTree = "<group>";
+		};
+		DC6AC0C05C21A59D1AC66AEF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3F7BE6964FFD652A939E1F7E /* AppModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F7F12A857C6F6BA53D7529DC = {
+			isa = PBXGroup;
+			children = (
+				5A8384FF75FE10B742D07F44 /* JCI2027 */,
+				6ADED523E29A56BB8298B30B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F91D7978F027A26CF8BB887C /* Admin */ = {
+			isa = PBXGroup;
+			children = (
+				7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */,
+			);
+			path = Admin;
+			sourceTree = "<group>";
+		};
+		FCD7167328EEA57B95FEFD7E /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		FDE0973F647BEB36B060BC12 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */,
+			);
+			path = Vendor;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1823F1BA3B25180B9CC0E9F3 /* JCI2027 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 857AE94E0398F7913034DDEB /* Build configuration list for PBXNativeTarget "JCI2027" */;
+			buildPhases = (
+				4E4A60832F9D1040467D4D0C /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JCI2027;
+			packageProductDependencies = (
+			);
+			productName = JCI2027;
+			productReference = 8F7CF65D98445E15DD1C8B7D /* JCI2027.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AB896724F1C4DD02E385F0D5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1823F1BA3B25180B9CC0E9F3 = {
+						DevelopmentTeam = UDYR7AUVZ7;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = FE4E54DA0DCF0E9886EC1139 /* Build configuration list for PBXProject "JCI2027" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = F7F12A857C6F6BA53D7529DC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6ADED523E29A56BB8298B30B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1823F1BA3B25180B9CC0E9F3 /* JCI2027 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4E4A60832F9D1040467D4D0C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				244F0BCC54CDF2CB734B57B7 /* AdminAppContainerView.swift in Sources */,
+				3A44DC358D16DA3B25AC39BF /* ApiService.swift in Sources */,
+				DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */,
+				53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */,
+				A4089ACF0E7661CBAF7028B0 /* JCI2027App.swift in Sources */,
+				5950139218F350E61D82BE2B /* JciTheme.swift in Sources */,
+				25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */,
+				7EC718D31468637AFF30CD27 /* MembersAndNetworkingView.swift in Sources */,
+				A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */,
+				6D023989A37180B556EBF927 /* PresidentFlyerStudioView.swift in Sources */,
+				C49587BF080DAF29B4BC13AE /* ProjectsAndTasksView.swift in Sources */,
+				2494867F0E969932352BB5D4 /* QrCodeGenerator.swift in Sources */,
+				858F035A94DEFFE6B4E975A9 /* ScanCardModuleView.swift in Sources */,
+				B439592D93C0DC6947971B9D /* SecondaryScreens.swift in Sources */,
+				85D015E250BFFABEC70DCAC3 /* VendorAppContainerView.swift in Sources */,
+				F1A23784F8945F4549516A63 /* VendorStoreView.swift in Sources */,
+				7D16F4BE18D108FC082202FC /* iOSFlyerRenderer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0459174C7ACDF12184F2CACD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UDYR7AUVZ7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "JCI LEAD360 needs camera access to scan visiting cards.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "JCI LEAD360 needs contacts access to save scanned business card contacts.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "JCI LEAD360 needs photo library access to save generated flyers.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "JCI LEAD360 needs photo library access to select pictures.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.jci.lead360.JCI2027;
+				PRODUCT_NAME = JCI2027;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		90FBB3A3395732045C631E89 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		CEE271F54C0DAB7BBA09537D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UDYR7AUVZ7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "JCI LEAD360 needs camera access to scan visiting cards.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "JCI LEAD360 needs contacts access to save scanned business card contacts.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "JCI LEAD360 needs photo library access to save generated flyers.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "JCI LEAD360 needs photo library access to select pictures.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.jci.lead360.JCI2027;
+				PRODUCT_NAME = JCI2027;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DDAB10A03A32B44DE4CAC52A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		857AE94E0398F7913034DDEB /* Build configuration list for PBXNativeTarget "JCI2027" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEE271F54C0DAB7BBA09537D /* Debug */,
+				0459174C7ACDF12184F2CACD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FE4E54DA0DCF0E9886EC1139 /* Build configuration list for PBXProject "JCI2027" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDAB10A03A32B44DE4CAC52A /* Debug */,
+				90FBB3A3395732045C631E89 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AB896724F1C4DD02E385F0D5 /* Project object */;
+}

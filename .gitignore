@@ -32,6 +32,8 @@ uploads/temp/
 # Mobile build caches
 .gradle/
 *.gradle
+xcuserdata/
+*.xcuserdata
 
 # Secret Keys
 *firebase-adminsdk*.json
