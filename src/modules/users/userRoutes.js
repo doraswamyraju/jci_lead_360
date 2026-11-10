@@ -270,21 +270,24 @@ router.post('/officer-details', authenticate, (req, res) => {
 
 /**
  * POST /api/users/fcm-token
- * Register device FCM push token for logged-in user
+ * Register device FCM / APNs push token for logged-in user (Android & iOS)
  */
 router.post('/fcm-token', authenticate, (req, res) => {
   try {
-    const { fcmToken } = req.body;
-    if (!fcmToken) {
-      return res.status(400).json({ success: false, message: 'fcmToken is required' });
+    const { fcmToken, apnsToken, deviceToken, platform } = req.body;
+    const tokenToSave = fcmToken || apnsToken || deviceToken;
+    if (!tokenToSave) {
+      return res.status(400).json({ success: false, message: 'fcmToken or deviceToken is required' });
     }
     const user = db.findUserById(req.user.id);
     if (user) {
-      user.fcmToken = fcmToken;
+      user.fcmToken = tokenToSave;
+      user.deviceToken = tokenToSave;
+      user.platform = platform || (apnsToken ? 'ios' : (req.body.fcmToken ? 'android' : 'ios'));
       db.saveUser(user);
-      console.log(`[FCM] Registered token for user ${user.name} (${user.role})`);
+      console.log(`[Push] Registered ${user.platform.toUpperCase()} token for user ${user.name} (${user.role}): ${tokenToSave.substring(0, 16)}...`);
     }
-    res.json({ success: true, message: 'FCM token registered successfully' });
+    res.json({ success: true, message: 'Push notification token registered successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

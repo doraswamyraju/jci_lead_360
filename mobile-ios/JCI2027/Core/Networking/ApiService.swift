@@ -97,11 +97,79 @@ class ApiService {
         return (response as? HTTPURLResponse)?.statusCode == 200
     }
 
+    // MARK: - Flyer Templates & Calendar Events (Live Backend Data)
+    func getTemplates(token: String) async throws -> [FlyerTemplate] {
+        let request = createRequest(path: "/api/templates", token: token)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(TemplatesResponse.self, from: data)
+        return response.templates ?? []
+    }
+
+    func getCalendarEvents(token: String) async throws -> [CalendarEventDto] {
+        let request = createRequest(path: "/api/templates/calendar/events", token: token)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(CalendarEventsResponse.self, from: data)
+        return response.events ?? []
+    }
+
+    func getLeaderProfile(userId: String) async throws -> LeaderDto? {
+        let request = createRequest(path: "/api/card/profile/\(userId)")
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(LeaderProfileResponse.self, from: data)
+        return response.leader
+    }
+
     // MARK: - FCM Device Token Sync
     func updateFcmToken(token: String, fcmToken: String) async throws {
         let reqData = try JSONEncoder().encode(["fcmToken": fcmToken])
         let request = createRequest(path: "/api/users/fcm-token", method: "POST", token: token, body: reqData)
         _ = try await URLSession.shared.data(for: request)
+    }
+
+    // MARK: - Officer & Chapter Profile Sync
+    func updateOfficerDetails(token: String, name: String, phone: String, email: String, photoUrl: String? = nil, role: String? = nil) async throws -> Bool {
+        var payload: [String: String] = ["name": name, "phone": phone, "email": email]
+        if let photoUrl = photoUrl { payload["photoUrl"] = photoUrl }
+        if let role = role { payload["role"] = role }
+        let reqData = try JSONSerialization.data(withJSONObject: payload)
+        let request = createRequest(path: "/api/users/officer-details", method: "POST", token: token, body: reqData)
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode == 200
+    }
+
+    func updateChapterDetails(token: String, chapterName: String, zone: String, phone: String, email: String, logoUrl: String? = nil) async throws -> Bool {
+        var payload: [String: String] = ["chapterName": chapterName, "zone": zone, "phone": phone, "email": email]
+        if let logoUrl = logoUrl { payload["logoUrl"] = logoUrl }
+        let reqData = try JSONSerialization.data(withJSONObject: payload)
+        let request = createRequest(path: "/api/users/chapter-details", method: "POST", token: token, body: reqData)
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode == 200
+    }
+
+    func uploadImage(token: String?, imageData: Data, filename: String = "profile.jpg") async throws -> String? {
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: URL(string: "\(baseUrl)/api/upload/image")!)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"image\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if (response as? HTTPURLResponse)?.statusCode == 200,
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let fileUrl = json["fileUrl"] as? String {
+            return fileUrl
+        }
+        return nil
     }
 }
 

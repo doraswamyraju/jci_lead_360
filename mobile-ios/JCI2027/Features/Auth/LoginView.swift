@@ -8,7 +8,7 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var errorMessage: String? = nil
 
-    var onLoginSuccess: (String, String, String, String, String) -> Void
+    var onLoginSuccess: (String, String, String, String, String, String?) -> Void
 
     var body: some View {
         ZStack {
@@ -154,7 +154,11 @@ struct LoginView: View {
                         let name = user.name ?? "JC Leader"
                         let chapter = user.chapterName ?? "JCI Chapter"
                         let userId = user.id ?? "usr_pres_01"
-                        onLoginSuccess(token, role, name, chapter, userId)
+                        let photoUrl = user.photoUrl
+                        if let photoUrl = photoUrl {
+                            UserDefaults.standard.set(photoUrl, forKey: "auth_photo_url")
+                        }
+                        onLoginSuccess(token, role, name, chapter, userId, photoUrl)
                     } else {
                         errorMessage = response.message ?? "Authentication failed"
                     }

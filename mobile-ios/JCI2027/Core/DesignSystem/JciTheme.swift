@@ -32,6 +32,7 @@ extension Color {
     static let jciSkyBlue = Color(hex: "0097D8")
     static let jciShieldTeal = Color(hex: "36BBA6")
     static let jciTealLight = Color(hex: "E6F8F5")
+    static let jciShieldTealLight = Color(hex: "E6F8F5")
     static let jciBackgroundLight = Color(hex: "F6F8FC")
     static let jciCardSurface = Color.white
     static let jciBorderSubtle = Color(hex: "E2E8F0")

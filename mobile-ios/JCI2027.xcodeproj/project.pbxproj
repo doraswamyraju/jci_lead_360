@@ -18,33 +18,49 @@
 		7EC718D31468637AFF30CD27 /* MembersAndNetworkingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76A682E44A15575086761388 /* MembersAndNetworkingView.swift */; };
 		858F035A94DEFFE6B4E975A9 /* ScanCardModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F80D0BEF47A296C43EC73FA /* ScanCardModuleView.swift */; };
 		85D015E250BFFABEC70DCAC3 /* VendorAppContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */; };
+		8AF50547040B484D7FAC17AE /* ExchangeQrDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B523F5E67FCEC46D090CB9D /* ExchangeQrDialogView.swift */; };
+		92349257FBFE1F0BD0435026 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */; };
+		96EDB5FF7F6FC5F1892AD709 /* TopBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF98F1C98434EF3F46110180 /* TopBarView.swift */; };
 		A4089ACF0E7661CBAF7028B0 /* JCI2027App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CC4EE655F3F263BADF78CE /* JCI2027App.swift */; };
 		A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */; };
 		B439592D93C0DC6947971B9D /* SecondaryScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */; };
 		C49587BF080DAF29B4BC13AE /* ProjectsAndTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */; };
 		DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7BE6964FFD652A939E1F7E /* AppModels.swift */; };
+		DFBAD7941A7960FF71F89B04 /* AppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7057367FB2D38B8316008814 /* AppScreen.swift */; };
+		E9B59B1A13F24F3706001853 /* BottomNavigationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */; };
 		F1A23784F8945F4549516A63 /* VendorStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */; };
+		F4B4BDC09BAE587BACBD181A /* SidebarDrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F2BC3ADA718675C87F6CA5 /* SidebarDrawerView.swift */; };
+		F4B61AC0F2B856466A67EF6F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0675DFFDB90D8235D30AB540 /* ProfileView.swift */; };
+		F8E9EF2DDF54A4469F8AB557 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DEBF96B6654FC92841F07B7 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0675DFFDB90D8235D30AB540 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		0DEBF96B6654FC92841F07B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardOverviewView.swift; sourceTree = "<group>"; };
 		1F80D0BEF47A296C43EC73FA /* ScanCardModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanCardModuleView.swift; sourceTree = "<group>"; };
 		34CC4EE655F3F263BADF78CE /* JCI2027App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JCI2027App.swift; sourceTree = "<group>"; };
+		3B523F5E67FCEC46D090CB9D /* ExchangeQrDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeQrDialogView.swift; sourceTree = "<group>"; };
 		3F7BE6964FFD652A939E1F7E /* AppModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModels.swift; sourceTree = "<group>"; };
 		4E905AC23C0667A2AE2AE73E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		58C3798AF5A2F10E75B716A7 /* iOSFlyerRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSFlyerRenderer.swift; sourceTree = "<group>"; };
 		614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentFlyerStudioView.swift; sourceTree = "<group>"; };
 		61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryScreens.swift; sourceTree = "<group>"; };
 		6244A457E27AE50F1076D524 /* JciTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JciTheme.swift; sourceTree = "<group>"; };
+		7057367FB2D38B8316008814 /* AppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppScreen.swift; sourceTree = "<group>"; };
 		73009F97F3C9613B73097A74 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		76A682E44A15575086761388 /* MembersAndNetworkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersAndNetworkingView.swift; sourceTree = "<group>"; };
 		7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAppContainerView.swift; sourceTree = "<group>"; };
 		7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorAppContainerView.swift; sourceTree = "<group>"; };
 		86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorStoreView.swift; sourceTree = "<group>"; };
+		89F2BC3ADA718675C87F6CA5 /* SidebarDrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarDrawerView.swift; sourceTree = "<group>"; };
 		8F7CF65D98445E15DD1C8B7D /* JCI2027.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = JCI2027.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsAndTasksView.swift; sourceTree = "<group>"; };
 		B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeGenerator.swift; sourceTree = "<group>"; };
+		BF98F1C98434EF3F46110180 /* TopBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBarView.swift; sourceTree = "<group>"; };
 		E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterSheet.swift; sourceTree = "<group>"; };
+		E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBarView.swift; sourceTree = "<group>"; };
+		F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -72,6 +88,7 @@
 			children = (
 				1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */,
 				E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */,
+				0675DFFDB90D8235D30AB540 /* ProfileView.swift */,
 				61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */,
 			);
 			path = Dashboard;
@@ -104,6 +121,7 @@
 		5A8384FF75FE10B742D07F44 /* JCI2027 */ = {
 			isa = PBXGroup;
 			children = (
+				0DEBF96B6654FC92841F07B7 /* Assets.xcassets */,
 				6AB11454094E71C446B3AAD0 /* App */,
 				0164BE8682BCD9932A0804EE /* Core */,
 				64DE1D285A369B3C450C2DF2 /* Features */,
@@ -120,6 +138,7 @@
 				18F9278FB3EA20B42A4667E4 /* Dashboard */,
 				526DA1A5E4876B4B8CBE48D9 /* Flyers */,
 				287D70475DC3F96A3D6F7848 /* Members */,
+				BA2190E3F1C59180BC861A44 /* Navigation */,
 				3FD3B4B397187EE6B45DBAFA /* Projects */,
 				0835FDE082D3C5977DC54F07 /* ScanCard */,
 				B72A133A9630C79AAC877F44 /* Store */,
@@ -176,6 +195,18 @@
 			path = Store;
 			sourceTree = "<group>";
 		};
+		BA2190E3F1C59180BC861A44 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				7057367FB2D38B8316008814 /* AppScreen.swift */,
+				E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */,
+				3B523F5E67FCEC46D090CB9D /* ExchangeQrDialogView.swift */,
+				89F2BC3ADA718675C87F6CA5 /* SidebarDrawerView.swift */,
+				BF98F1C98434EF3F46110180 /* TopBarView.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
 		BB8492D3BAA486C46CAED68F /* FlyerEngine */ = {
 			isa = PBXGroup;
 			children = (
@@ -211,6 +242,7 @@
 		FCD7167328EEA57B95FEFD7E /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */,
 				B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */,
 			);
 			path = Services;
@@ -232,6 +264,7 @@
 			buildConfigurationList = 857AE94E0398F7913034DDEB /* Build configuration list for PBXNativeTarget "JCI2027" */;
 			buildPhases = (
 				4E4A60832F9D1040467D4D0C /* Sources */,
+				EF2A2D04F5E85BCDA27054B0 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -278,6 +311,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		EF2A2D04F5E85BCDA27054B0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F8E9EF2DDF54A4469F8AB557 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		4E4A60832F9D1040467D4D0C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -286,17 +330,24 @@
 				244F0BCC54CDF2CB734B57B7 /* AdminAppContainerView.swift in Sources */,
 				3A44DC358D16DA3B25AC39BF /* ApiService.swift in Sources */,
 				DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */,
+				DFBAD7941A7960FF71F89B04 /* AppScreen.swift in Sources */,
+				E9B59B1A13F24F3706001853 /* BottomNavigationBarView.swift in Sources */,
 				53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */,
+				8AF50547040B484D7FAC17AE /* ExchangeQrDialogView.swift in Sources */,
 				A4089ACF0E7661CBAF7028B0 /* JCI2027App.swift in Sources */,
 				5950139218F350E61D82BE2B /* JciTheme.swift in Sources */,
 				25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */,
 				7EC718D31468637AFF30CD27 /* MembersAndNetworkingView.swift in Sources */,
 				A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */,
 				6D023989A37180B556EBF927 /* PresidentFlyerStudioView.swift in Sources */,
+				F4B61AC0F2B856466A67EF6F /* ProfileView.swift in Sources */,
 				C49587BF080DAF29B4BC13AE /* ProjectsAndTasksView.swift in Sources */,
+				92349257FBFE1F0BD0435026 /* PushNotificationManager.swift in Sources */,
 				2494867F0E969932352BB5D4 /* QrCodeGenerator.swift in Sources */,
 				858F035A94DEFFE6B4E975A9 /* ScanCardModuleView.swift in Sources */,
 				B439592D93C0DC6947971B9D /* SecondaryScreens.swift in Sources */,
+				F4B4BDC09BAE587BACBD181A /* SidebarDrawerView.swift in Sources */,
+				96EDB5FF7F6FC5F1892AD709 /* TopBarView.swift in Sources */,
 				85D015E250BFFABEC70DCAC3 /* VendorAppContainerView.swift in Sources */,
 				F1A23784F8945F4549516A63 /* VendorStoreView.swift in Sources */,
 				7D16F4BE18D108FC082202FC /* iOSFlyerRenderer.swift in Sources */,

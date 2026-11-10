@@ -78,6 +78,23 @@ struct ChapterWebsiteBuilderView: View {
     }
 }
 
+struct CustomStudioField: View {
+    let label: String
+    @Binding var text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.jciTextMuted)
+            TextField(label, text: $text)
+                .padding(12)
+                .background(Color.jciBackgroundLight)
+                .cornerRadius(10)
+        }
+    }
+}
+
 // MARK: - JCI Resources Screen
 struct JciResourcesView: View {
     let chapterName: String
@@ -149,6 +166,7 @@ struct JciResourcesView: View {
 
 // MARK: - Interactive Calendar Screen
 struct InteractiveCalendarView: View {
+    var onBack: (() -> Void)? = nil
     let onNavigateToFlyer: () -> Void
 
     let events = [
@@ -161,11 +179,24 @@ struct InteractiveCalendarView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                Text("Chapter & National Calendar")
-                    .font(.system(size: 20, weight: .bold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                HStack {
+                    if let onBack = onBack {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.jciTextDark)
+                                .padding(8)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                        }
+                    }
+                    Text("Chapter & National Calendar")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.jciTextDark)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
 
                 VStack(spacing: 12) {
                     ForEach(events, id: \.1) { ev in
@@ -222,6 +253,7 @@ struct LgbAndPstManagementView: View {
     let token: String
     let chapterName: String
     let presidentName: String
+    var onBack: (() -> Void)? = nil
 
     let officers = [
         ("JC HGF Doraswamy Raju", "President", "+91 98765 43210"),
@@ -234,11 +266,24 @@ struct LgbAndPstManagementView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                Text("LGB & Past Presidents Directory")
-                    .font(.system(size: 20, weight: .bold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                HStack {
+                    if let onBack = onBack {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.jciTextDark)
+                                .padding(8)
+                                .background(Color.white)
+                                .clipShape(Circle())
+                        }
+                    }
+                    Text("LGB & Past Presidents Directory")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.jciTextDark)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
 
                 VStack(spacing: 12) {
                     ForEach(officers, id: \.0) { off in
@@ -277,13 +322,28 @@ struct LgbAndPstManagementView: View {
 
 // MARK: - Photo Frames Screen
 struct FramesView: View {
+    var onBack: (() -> Void)? = nil
+
     var body: some View {
         VStack(spacing: 20) {
-            Text("JCI Official Photo Frames")
-                .font(.system(size: 20, weight: .bold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
+            HStack {
+                if let onBack = onBack {
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.jciTextDark)
+                            .padding(8)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                    }
+                }
+                Text("JCI Official Photo Frames")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.jciTextDark)
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
 
             VStack(spacing: 12) {
                 Image(systemName: "photo.artframe")
@@ -302,49 +362,6 @@ struct FramesView: View {
             .padding(.horizontal, 20)
 
             Spacer()
-        }
-        .background(Color.jciBackgroundLight.ignoresSafeArea())
-    }
-}
-
-// MARK: - Profile Screen
-struct ProfileView: View {
-    let name: String
-    let chapterName: String
-    let role: String
-    let onLogout: () -> Void
-
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                VStack(spacing: 10) {
-                    ZStack {
-                        Circle().fill(JciGradients.hero).frame(width: 80, height: 80)
-                        Text(String(name.prefix(1))).font(.system(size: 32, weight: .black)).foregroundColor(.white)
-                    }
-                    Text(name).font(.system(size: 22, weight: .bold))
-                    Text("\(role) • \(chapterName)")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.jciRoyalBlue)
-                }
-                .padding(.top, 20)
-
-                VStack(spacing: 12) {
-                    Button(action: onLogout) {
-                        HStack {
-                            Image(systemName: "arrow.right.square.fill")
-                            Text("Sign Out")
-                        }
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(14)
-                    }
-                }
-                .padding(20)
-            }
         }
         .background(Color.jciBackgroundLight.ignoresSafeArea())
     }

@@ -47,6 +47,22 @@ export async function sendPushNotification({ token, topic = 'presidents', title,
           channelId: 'jci_lead360_exchange_channel',
           priority: 'high'
         }
+      },
+      apns: {
+        headers: {
+          'apns-priority': '10',
+          'apns-push-type': 'alert'
+        },
+        payload: {
+          aps: {
+            alert: {
+              title,
+              body
+            },
+            sound: 'default',
+            badge: 1
+          }
+        }
       }
     };
 

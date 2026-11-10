@@ -119,17 +119,83 @@ struct NotificationsResponse: Codable {
 }
 
 // MARK: - Template Models
+struct TemplateDimensions: Codable {
+    let width: Double?
+    let height: Double?
+}
+
+struct TemplateLayer: Codable, Identifiable {
+    var id: String { "\(type ?? "layer")_\(Int(x ?? 0))_\(Int(y ?? 0))" }
+    let type: String?
+    let label: String?
+    let x: Double?
+    let y: Double?
+    let width: Double?
+    let height: Double?
+    let color: String?
+    let fontSize: Double?
+    let align: String?
+    let bold: Bool?
+    let shape: String?
+    let borderWidth: Double?
+    let borderColor: String?
+}
+
 struct FlyerTemplate: Codable, Identifiable {
     let id: String
-    let name: String
+    let title: String
     let category: String
-    let assetPath: String
-    let primaryColorHex: String?
+    let baseImageUrl: String
+    let dimensions: TemplateDimensions?
+    let layers: [TemplateLayer]?
+    let createdById: String?
+    let createdByName: String?
+    let createdAt: String?
+    
+    // Compatibility helpers
+    var name: String { title }
+    var assetPath: String { baseImageUrl }
 }
 
 struct TemplatesResponse: Codable {
     let success: Bool
+    let count: Int?
     let templates: [FlyerTemplate]?
+}
+
+// MARK: - Calendar Models
+struct CalendarEventDto: Codable, Identifiable {
+    let id: String
+    let title: String
+    let category: String?
+    let targetDate: String
+    let mandatory: Bool?
+    let description: String?
+    let templateId: String?
+}
+
+struct CalendarEventsResponse: Codable {
+    let success: Bool
+    let count: Int?
+    let events: [CalendarEventDto]?
+}
+
+// MARK: - Leader Profile Models
+struct LeaderDto: Codable, Identifiable {
+    let id: String
+    let name: String?
+    let role: String?
+    let chapter: String?
+    let zone: String?
+    let phone: String?
+    let email: String?
+    let website: String?
+    let photoUrl: String?
+}
+
+struct LeaderProfileResponse: Codable {
+    let success: Bool
+    let leader: LeaderDto?
 }
 
 // MARK: - Vendor & Catalog Models
