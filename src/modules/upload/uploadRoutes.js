@@ -59,10 +59,11 @@ const upload = multer({
 const router = express.Router();
 
 /**
- * Upload Asset Endpoint (Protected for Super Admin and Employees)
- * Handles multer errors explicitly so the client receives clear JSON errors instead of unhandled 500 crashes
+ * Handle image upload for assets, visitor contact photos, and profile avatars.
+ * IMPORTANT: Never arbitrarily overwrite the President's profile photo when
+ * unauthenticated visitors upload an image in the reciprocal exchange form.
  */
-router.post('/', (req, res, next) => { if (req.headers.authorization) return authenticate(req, res, next); next(); }, (req, res) => {
+const handleUpload = (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       console.error('[Multer Error]:', err.message);
@@ -77,19 +78,22 @@ router.post('/', (req, res, next) => { if (req.headers.authorization) return aut
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
-    try {
-      const users = db.getUsers();
-      let user = (req.user && req.user.id) ? db.findUserById(req.user.id) : null;
-      if (!user) user = users.find(u => u.role === 'PRESIDENT') || users[0];
-      if (user) {
-        user.photoUrl = fileUrl;
-        user.profilePhotoUrl = fileUrl;
-        user.updatedAt = new Date().toISOString();
-        db.saveUser(user);
+
+    // Only link to user account if the request was explicitly authenticated AND explicitly requested as an avatar update
+    if (req.user && req.query.type === 'avatar') {
+      try {
+        const user = db.findUserById(req.user.id);
+        if (user) {
+          user.photoUrl = fileUrl;
+          user.profilePhotoUrl = fileUrl;
+          user.updatedAt = new Date().toISOString();
+          db.saveUser(user);
+        }
+      } catch (saveErr) {
+        console.error('[Upload] Error linking photo to user:', saveErr);
       }
-    } catch (saveErr) {
-      console.error('[Upload] Error linking photo to user:', saveErr);
     }
+
     return res.json({
       success: true,
       fileUrl,
@@ -97,6 +101,9 @@ router.post('/', (req, res, next) => { if (req.headers.authorization) return aut
       size: req.file.size
     });
   });
-});
+};
+
+router.post('/', (req, res, next) => { if (req.headers.authorization) return authenticate(req, res, next); next(); }, handleUpload);
+router.post('/image', (req, res, next) => { if (req.headers.authorization) return authenticate(req, res, next); next(); }, handleUpload);
 
 export default router;
