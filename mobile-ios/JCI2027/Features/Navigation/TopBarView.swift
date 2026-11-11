@@ -112,6 +112,7 @@ struct TopBarView: View {
                                     .foregroundColor(.white)
                             }
                         }
+                        .id(fullUrl)
                     } else {
                         Text(String(userName.prefix(1)).uppercased())
                             .font(.system(size: 14, weight: .bold))

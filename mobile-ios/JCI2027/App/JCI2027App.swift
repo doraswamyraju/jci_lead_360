@@ -126,6 +126,9 @@ struct MainPresidentContainerView: View {
                         chapterName: chapterName,
                         userId: userId,
                         serverPhotoUrl: userPhotoUrl,
+                        onPhotoUrlRefreshed: { newPhoto in
+                            self.userPhotoUrl = newPhoto
+                        },
                         onNavigateTab: { route in
                             handleSubRoute(route)
                         },
@@ -202,7 +205,13 @@ struct MainPresidentContainerView: View {
                         role: "PRESIDENT",
                         token: token,
                         onLogout: onSignOut,
-                        onBack: { currentScreen = .dashboard }
+                        onBack: { currentScreen = .dashboard },
+                        onProfileUpdated: { newName, newChapter, newPhoto in
+                            if let newPhoto = newPhoto, !newPhoto.isEmpty {
+                                self.userPhotoUrl = newPhoto
+                                UserDefaults.standard.set(newPhoto, forKey: "auth_photo_url")
+                            }
+                        }
                     )
                 }
             }
@@ -270,17 +279,13 @@ struct MainPresidentContainerView: View {
             }
         }
         .onAppear {
-            if userPhotoUrl == nil || userPhotoUrl?.isEmpty == true {
-                userPhotoUrl = initialPhotoUrl ?? UserDefaults.standard.string(forKey: "auth_photo_url")
-            }
-            if userPhotoUrl == nil || userPhotoUrl?.isEmpty == true {
-                Task {
-                    if let leader = try? await ApiService.shared.getLeaderProfile(userId: userId),
-                       let photo = leader.photoUrl, !photo.isEmpty {
-                        await MainActor.run {
-                            self.userPhotoUrl = photo
-                            UserDefaults.standard.set(photo, forKey: "auth_photo_url")
-                        }
+            userPhotoUrl = initialPhotoUrl ?? UserDefaults.standard.string(forKey: "auth_photo_url")
+            Task {
+                if let leader = try? await ApiService.shared.getLeaderProfile(userId: userId),
+                   let photo = leader.photoUrl, !photo.isEmpty {
+                    await MainActor.run {
+                        self.userPhotoUrl = photo
+                        UserDefaults.standard.set(photo, forKey: "auth_photo_url")
                     }
                 }
             }

@@ -9,6 +9,7 @@ struct DashboardOverviewView: View {
     let chapterName: String
     var userId: String = "usr_pres_01"
     var serverPhotoUrl: String? = nil
+    var onPhotoUrlRefreshed: ((String) -> Void)? = nil
     let onNavigateTab: (String) -> Void
     let onOpenQrExchange: () -> Void
     let onOpenNotifications: () -> Void
@@ -536,6 +537,7 @@ struct DashboardOverviewView: View {
             if let photo = leader?.photoUrl, !photo.isEmpty {
                 self.livePhotoUrl = photo
                 UserDefaults.standard.set(photo, forKey: "auth_photo_url")
+                self.onPhotoUrlRefreshed?(photo)
             }
 
             // Update next meet from live calendar events
