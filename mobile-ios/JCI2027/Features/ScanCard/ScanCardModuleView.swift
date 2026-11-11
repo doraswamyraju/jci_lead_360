@@ -482,36 +482,59 @@ struct ScanCardModuleView: View {
     }
 
     private func saveToPhoneContacts(_ contact: SaveContactRequest) {
-        let store = CNContactStore()
-        let newContact = CNMutableContact()
-        newContact.givenName = contact.name
-        newContact.organizationName = contact.company
-        newContact.jobTitle = contact.designation
-        newContact.note = "Connected via JCI LEAD360. Note: \(contact.notes)"
+        Task {
+            let store = CNContactStore()
+            let newContact = CNMutableContact()
+            newContact.givenName = contact.name
+            newContact.organizationName = contact.company
+            newContact.jobTitle = contact.designation
+            newContact.note = "Connected via JCI LEAD360. Note: \(contact.notes)"
 
-        if !contact.phone.isEmpty {
-            newContact.phoneNumbers = [CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: contact.phone))]
-        }
-        if !contact.email.isEmpty {
-            newContact.emailAddresses = [CNLabeledValue(label: CNLabelWork, value: contact.email as NSString)]
-        }
+            if !contact.phone.isEmpty {
+                newContact.phoneNumbers = [CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: contact.phone))]
+            }
+            if !contact.email.isEmpty {
+                newContact.emailAddresses = [CNLabeledValue(label: CNLabelWork, value: contact.email as NSString)]
+            }
 
-        let request = CNSaveRequest()
-        request.add(newContact, toContainerWithIdentifier: nil)
-
-        store.requestAccess(for: .contacts) { granted, _ in
-            DispatchQueue.main.async {
-                if granted {
-                    do {
-                        try store.execute(request)
-                        let generator = UINotificationFeedbackGenerator()
-                        generator.notificationOccurred(.success)
-                        self.showToast("Saved to iPhone Contacts! 📲")
-                    } catch {
-                        self.showToast("Failed to save contact")
+            // Attach contact photo if available
+            if let photoStr = contact.photoUrl, !photoStr.isEmpty {
+                let fullUrlString: String = {
+                    if photoStr.hasPrefix("http://") || photoStr.hasPrefix("https://") {
+                        return photoStr
                     }
-                } else {
-                    self.showToast("Contacts permission required")
+                    let base = ApiService.shared.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                    let path = photoStr.hasPrefix("/") ? photoStr : "/\(photoStr)"
+                    return "\(base)\(path)"
+                }()
+                if let url = URL(string: fullUrlString),
+                   let (data, _) = try? await URLSession.shared.data(from: url) {
+                    newContact.imageData = data
+                }
+            }
+
+            let request = CNSaveRequest()
+            request.add(newContact, toContainerWithIdentifier: nil)
+
+            do {
+                let granted = try await store.requestAccess(for: .contacts)
+                await MainActor.run {
+                    if granted {
+                        do {
+                            try store.execute(request)
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.success)
+                            self.showToast("Saved to iPhone Contacts! 📲")
+                        } catch {
+                            self.showToast("Failed to save contact")
+                        }
+                    } else {
+                        self.showToast("Contacts permission required")
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.showToast("Contacts permission error")
                 }
             }
         }
@@ -536,6 +559,55 @@ struct RolodexContactCard: View {
 
     var cleanPhone: String {
         contact.phone.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+    }
+
+    private var fullPhotoUrl: URL? {
+        guard let raw = contact.photoUrl, !raw.isEmpty else { return nil }
+        if raw.hasPrefix("http://") || raw.hasPrefix("https://") {
+            return URL(string: raw)
+        }
+        let base = ApiService.shared.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let path = raw.hasPrefix("/") ? raw : "/\(raw)"
+        return URL(string: "\(base)\(path)")
+    }
+
+    @ViewBuilder
+    private var contactAvatarView: some View {
+        if let fullUrl = fullPhotoUrl {
+            AsyncImage(url: fullUrl) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 44, height: 44)
+                        .clipShape(Circle())
+                default:
+                    fallbackInitialsAvatar
+                }
+            }
+            .id(fullUrl)
+        } else {
+            fallbackInitialsAvatar
+        }
+    }
+
+    private var fallbackInitialsAvatar: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: "0097D8"), Color(hex: "002F6C")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 44, height: 44)
+
+            Text(String(contact.name.prefix(2)).uppercased())
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(.white)
+        }
     }
 
     var body: some View {
@@ -588,21 +660,7 @@ struct RolodexContactCard: View {
                 // Contact Core Info (Tap to view detail)
                 Button(action: onSelect) {
                     HStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(hex: "0097D8"), Color(hex: "002F6C")],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 44, height: 44)
-
-                            Text(String(contact.name.prefix(2)).uppercased())
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.white)
-                        }
+                        contactAvatarView
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(contact.name)
@@ -723,27 +781,66 @@ struct ContactDetailSheet: View {
         contact.phone.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
     }
 
+    private var fullPhotoUrl: URL? {
+        guard let raw = contact.photoUrl, !raw.isEmpty else { return nil }
+        if raw.hasPrefix("http://") || raw.hasPrefix("https://") {
+            return URL(string: raw)
+        }
+        let base = ApiService.shared.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let path = raw.hasPrefix("/") ? raw : "/\(raw)"
+        return URL(string: "\(base)\(path)")
+    }
+
+    @ViewBuilder
+    private var detailAvatarView: some View {
+        if let fullUrl = fullPhotoUrl {
+            AsyncImage(url: fullUrl) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 72, height: 72)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(Color(hex: "0097D8").opacity(0.3), lineWidth: 2)
+                        )
+                default:
+                    fallbackDetailInitialsAvatar
+                }
+            }
+            .id(fullUrl)
+        } else {
+            fallbackDetailInitialsAvatar
+        }
+    }
+
+    private var fallbackDetailInitialsAvatar: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: "0097D8"), Color(hex: "002F6C")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 72, height: 72)
+
+            Text(String(contact.name.prefix(2)).uppercased())
+                .font(.system(size: 24, weight: .heavy))
+                .foregroundColor(.white)
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     // Avatar & Name Card
                     VStack(spacing: 6) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(hex: "0097D8"), Color(hex: "002F6C")],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 72, height: 72)
-
-                            Text(String(contact.name.prefix(2)).uppercased())
-                                .font(.system(size: 24, weight: .heavy))
-                                .foregroundColor(.white)
-                        }
+                        detailAvatarView
 
                         Text(contact.name)
                             .font(.system(size: 20, weight: .heavy))
