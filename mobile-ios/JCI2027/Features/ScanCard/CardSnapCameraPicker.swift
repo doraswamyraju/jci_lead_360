@@ -45,3 +45,4 @@ struct CardSnapCameraPicker: UIViewControllerRepresentable {
         }
     }
 }
+
