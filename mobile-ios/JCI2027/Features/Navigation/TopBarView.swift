@@ -7,6 +7,7 @@ struct TopBarView: View {
     let userName: String
     let chapterName: String
     var photoUrl: String? = nil
+    var localImage: UIImage? = nil
     var unreadCount: Int = 0
     var onOpenSidebar: () -> Void
     var onNavigateToDashboard: () -> Void
@@ -96,7 +97,13 @@ struct TopBarView: View {
                         .fill(Color(hex: "0097D8"))
                         .frame(width: 34, height: 34)
 
-                    if let photo = photoUrl, !photo.isEmpty {
+                    if let local = localImage {
+                        Image(uiImage: local)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 34, height: 34)
+                            .clipShape(Circle())
+                    } else if let photo = photoUrl, !photo.isEmpty {
                         let fullUrl = photo.starts(with: "http") ? photo : "\(ApiService.shared.baseUrl)\(photo)"
                         AsyncImage(url: URL(string: fullUrl)) { phase in
                             switch phase {

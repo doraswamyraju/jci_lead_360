@@ -106,6 +106,7 @@ struct MainPresidentContainerView: View {
 
     @StateObject private var pushManager = PushNotificationManager.shared
     @State private var userPhotoUrl: String? = nil
+    @State private var userProfileImage: UIImage? = nil
     @State private var currentScreen: AppScreen = .dashboard
     @State private var isDrawerOpen = false
     @State private var showExchangeQrModal = false
@@ -206,7 +207,10 @@ struct MainPresidentContainerView: View {
                         token: token,
                         onLogout: onSignOut,
                         onBack: { currentScreen = .dashboard },
-                        onProfileUpdated: { newName, newChapter, newPhoto in
+                        onProfileUpdated: { newName, newChapter, newPhoto, newImage in
+                            if let newImage = newImage {
+                                self.userProfileImage = newImage
+                            }
                             if let newPhoto = newPhoto, !newPhoto.isEmpty {
                                 self.userPhotoUrl = newPhoto
                                 UserDefaults.standard.set(newPhoto, forKey: "auth_photo_url")
@@ -222,6 +226,7 @@ struct MainPresidentContainerView: View {
                     userName: presidentName,
                     chapterName: chapterName,
                     photoUrl: userPhotoUrl,
+                    localImage: userProfileImage,
                     unreadCount: pushManager.unreadCount,
                     onOpenSidebar: {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
@@ -279,6 +284,7 @@ struct MainPresidentContainerView: View {
             }
         }
         .onAppear {
+            loadLocalPortrait()
             userPhotoUrl = initialPhotoUrl ?? UserDefaults.standard.string(forKey: "auth_photo_url")
             Task {
                 if let leader = try? await ApiService.shared.getLeaderProfile(userId: userId),
@@ -302,6 +308,16 @@ struct MainPresidentContainerView: View {
                     self.targetContactId = cid
                     self.currentScreen = .scanCard
                 }
+            }
+        }
+    }
+
+    private func loadLocalPortrait() {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        if let docDir = paths.first {
+            let portraitURL = docDir.appendingPathComponent("president_portrait.jpg")
+            if let data = try? Data(contentsOf: portraitURL), let img = UIImage(data: data) {
+                self.userProfileImage = img
             }
         }
     }

@@ -148,7 +148,7 @@ class ApiService {
 
     func uploadImage(token: String?, imageData: Data, filename: String = "profile.jpg") async throws -> String? {
         let boundary = "Boundary-\(UUID().uuidString)"
-        var request = URLRequest(url: URL(string: "\(baseUrl)/api/upload/image")!)
+        var request = URLRequest(url: URL(string: "\(baseUrl)/api/upload?type=avatar")!)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         if let token = token {

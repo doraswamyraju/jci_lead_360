@@ -16,7 +16,7 @@ struct ProfileView: View {
     var userId: String = UserDefaults.standard.string(forKey: "auth_user_id") ?? "usr_pres_01"
     var onLogout: () -> Void
     var onBack: (() -> Void)? = nil
-    var onProfileUpdated: ((String, String, String?) -> Void)? = nil
+    var onProfileUpdated: ((String, String, String?, UIImage?) -> Void)? = nil
 
     // State persisted in UserDefaults
     @State private var presidentNameInput: String
@@ -44,7 +44,7 @@ struct ProfileView: View {
         token: String? = nil,
         onLogout: @escaping () -> Void,
         onBack: (() -> Void)? = nil,
-        onProfileUpdated: ((String, String, String?) -> Void)? = nil
+        onProfileUpdated: ((String, String, String?, UIImage?) -> Void)? = nil
     ) {
         self.name = name
         self.chapterName = chapterName
@@ -308,13 +308,16 @@ struct ProfileView: View {
         .background(Color.jciBackgroundLight.ignoresSafeArea())
         .onAppear {
             loadPersistedImages()
+            if let img = portraitImage {
+                onProfileUpdated?(presidentNameInput, chapterNameInput, serverPhotoUrl, img)
+            }
             Task {
                 if let leader = try? await ApiService.shared.getLeaderProfile(userId: userId),
                    let photo = leader.photoUrl, !photo.isEmpty {
                     await MainActor.run {
                         self.serverPhotoUrl = photo
                         UserDefaults.standard.set(photo, forKey: "auth_photo_url")
-                        self.onProfileUpdated?(self.presidentNameInput, self.chapterNameInput, photo)
+                        self.onProfileUpdated?(self.presidentNameInput, self.chapterNameInput, photo, self.portraitImage)
                     }
                 }
             }
@@ -326,6 +329,7 @@ struct ProfileView: View {
                     await MainActor.run {
                         self.portraitImage = uiImage
                         saveImageToDisk(data: data, filename: "president_portrait.jpg")
+                        self.onProfileUpdated?(self.presidentNameInput, self.chapterNameInput, self.serverPhotoUrl, uiImage)
                     }
                     // Upload to server asynchronously and persist URL
                     if let token = token {
@@ -333,7 +337,7 @@ struct ProfileView: View {
                             await MainActor.run {
                                 self.serverPhotoUrl = uploadedUrl
                                 UserDefaults.standard.set(uploadedUrl, forKey: "auth_photo_url")
-                                self.onProfileUpdated?(self.presidentNameInput, self.chapterNameInput, uploadedUrl)
+                                self.onProfileUpdated?(self.presidentNameInput, self.chapterNameInput, uploadedUrl, uiImage)
                             }
                             _ = try? await ApiService.shared.updateOfficerDetails(
                                 token: token,
@@ -413,7 +417,7 @@ struct ProfileView: View {
         UserDefaults.standard.set(chapterEmail.trimmingCharacters(in: .whitespaces), forKey: "chapter_email")
         UserDefaults.standard.set(chapterPhone.trimmingCharacters(in: .whitespaces), forKey: "chapter_phone")
 
-        onProfileUpdated?(presidentNameInput, chapterNameInput, serverPhotoUrl)
+        onProfileUpdated?(presidentNameInput, chapterNameInput, serverPhotoUrl, portraitImage)
 
         Task {
             if let token = token {
@@ -422,6 +426,7 @@ struct ProfileView: View {
                     name: presidentNameInput,
                     phone: presidentPhone,
                     email: presidentEmail,
+                    photoUrl: serverPhotoUrl.isEmpty ? nil : serverPhotoUrl,
                     role: role
                 )
                 _ = try? await ApiService.shared.updateChapterDetails(
