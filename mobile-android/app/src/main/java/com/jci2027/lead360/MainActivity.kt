@@ -110,6 +110,7 @@ class MainActivity : ComponentActivity() {
                     var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
                     var showNotificationBottomSheet by remember { mutableStateOf(false) }
                     var showExchangeQrModal by remember { mutableStateOf(false) }
+                    var startWithScanner by remember { mutableStateOf(false) }
 
                     // Navigation items for BottomBar (Report Primary Navigation)
                     val bottomNavItems = listOf(
@@ -618,6 +619,9 @@ class MainActivity : ComponentActivity() {
                                         serverPhotoUrl = serverPhotoUrl,
                                         chapterLogoBitmap = chapterLogoBitmap,
                                         onNavigateTab = { tabId ->
+                                            if (tabId == "scan_card") {
+                                                startWithScanner = true
+                                            }
                                             currentScreen = when (tabId) {
                                                 "projects" -> Screen.Projects
                                                 "members" -> Screen.Members
@@ -642,13 +646,18 @@ class MainActivity : ComponentActivity() {
                                         chapterName = userChapter,
                                         token = token,
                                         onBack = { currentScreen = Screen.Dashboard },
-                                        onNavigateToScanCard = { currentScreen = Screen.ScanCard }
+                                        onNavigateToScanCard = { 
+                                            startWithScanner = false
+                                            currentScreen = Screen.ScanCard 
+                                        }
                                     )
                                     Screen.ScanCard -> ScanCardModuleScreen(
                                         chapterName = userChapter,
                                         token = token,
                                         initialTargetContactId = targetContactId,
+                                        startWithScanner = startWithScanner,
                                         onBack = { 
+                                            startWithScanner = false
                                             targetContactId = null
                                             currentScreen = Screen.Dashboard 
                                         }

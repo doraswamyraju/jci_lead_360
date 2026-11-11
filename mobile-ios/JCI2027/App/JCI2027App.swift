@@ -112,6 +112,7 @@ struct MainPresidentContainerView: View {
     @State private var showExchangeQrModal = false
     @State private var showNotificationCenter = false
     @State private var targetContactId: String? = nil
+    @State private var scanCardStartWithScanner = false
 
     var body: some View {
         ZStack {
@@ -156,7 +157,11 @@ struct MainPresidentContainerView: View {
                         chapterName: chapterName,
                         token: token,
                         initialTargetContactId: targetContactId,
-                        onBack: { currentScreen = .dashboard }
+                        startWithScanner: scanCardStartWithScanner,
+                        onBack: {
+                            scanCardStartWithScanner = false
+                            currentScreen = .dashboard
+                        }
                     )
                 case .flyers:
                     PresidentFlyerStudioView(
@@ -326,7 +331,9 @@ struct MainPresidentContainerView: View {
         switch route {
         case "projects": currentScreen = .projects
         case "members": currentScreen = .members
-        case "scan_card": currentScreen = .scanCard
+        case "scan_card":
+            scanCardStartWithScanner = true
+            currentScreen = .scanCard
         case "flyers": currentScreen = .flyers
         case "store": currentScreen = .store
         case "website_builder", "website_portal": currentScreen = .websitePortal

@@ -15,6 +15,7 @@ struct ScanCardModuleView: View {
     let chapterName: String
     let token: String?
     let initialTargetContactId: String?
+    var startWithScanner: Bool = false
     let onBack: () -> Void
 
     @State private var contacts: [SaveContactRequest] = []
@@ -26,6 +27,15 @@ struct ScanCardModuleView: View {
     @State private var contactToEdit: SaveContactRequest? = nil
     @State private var showCreateDialog = false
     @State private var toastMessage: String? = nil
+
+    // CardSnap OCR Scanner States
+    @State private var showCameraPicker = false
+    @State private var showPhotoLibraryPicker = false
+    @State private var isProcessingOcr = false
+    @State private var capturedCardImage: UIImage? = nil
+    @State private var parsedCardData: ParsedCardData? = nil
+    @State private var showReviewSheet = false
+    @State private var showScanSourceActionSheet = false
 
     // Form fields (Create / Edit)
     @State private var formName = ""
@@ -98,6 +108,31 @@ struct ScanCardModuleView: View {
                         .frame(width: 34, height: 34)
                         .background(Color(hex: "F1F5F9"))
                         .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+
+                // 📸 CardSnap Business Card Camera Scanner
+                Button(action: {
+                    showScanSourceActionSheet = true
+                }) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 11, weight: .bold))
+                        Text("Scan Card")
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "0284C7"), Color(hex: "002F6C")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(8)
+                    .shadow(color: Color(hex: "0284C7").opacity(0.3), radius: 2, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
 
@@ -267,6 +302,11 @@ struct ScanCardModuleView: View {
         }
         .onAppear {
             loadContacts()
+            if startWithScanner {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showScanSourceActionSheet = true
+                }
+            }
         }
         .task {
             // Auto-poll contacts periodically (every 5 seconds) matching Android parity so newly exchanged contacts appear live
@@ -304,6 +344,57 @@ struct ScanCardModuleView: View {
         // Edit Contact Sheet
         .sheet(item: $contactToEdit) { _ in
             contactFormSheet(isEditing: true)
+        }
+        // CardSnap Source Action Sheet (Camera vs Photos)
+        .confirmationDialog("CardSnap Scanner", isPresented: $showScanSourceActionSheet, titleVisibility: .visible) {
+            Button("📷 Scan with Camera") {
+                showCameraPicker = true
+            }
+            Button("🖼️ Pick from Photos / Gallery") {
+                showPhotoLibraryPicker = true
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        // Camera Picker Sheet
+        .sheet(isPresented: $showCameraPicker) {
+            CardSnapCameraPicker(sourceType: .camera) { image in
+                showCameraPicker = false
+                processCapturedCard(image: image)
+            } onCancel: {
+                showCameraPicker = false
+            }
+        }
+        // Photo Library Picker Sheet
+        .sheet(isPresented: $showPhotoLibraryPicker) {
+            CardSnapCameraPicker(sourceType: .photoLibrary) { image in
+                showPhotoLibraryPicker = false
+                processCapturedCard(image: image)
+            } onCancel: {
+                showPhotoLibraryPicker = false
+            }
+        }
+        // Extract & Review Sheet
+        .sheet(isPresented: $showReviewSheet) {
+            if let parsed = parsedCardData {
+                ExtractAndReviewSheet(
+                    capturedImage: capturedCardImage,
+                    parsed: parsed,
+                    token: token,
+                    onSave: { newContact in
+                        contacts.insert(newContact, at: 0)
+                        showToast("Card Saved to Directory! 📇")
+                        Task {
+                            if let token = token {
+                                _ = try? await ApiService.shared.saveContact(token: token, contact: newContact)
+                            }
+                        }
+                    },
+                    onRescan: {
+                        showReviewSheet = false
+                        showCameraPicker = true
+                    }
+                )
+            }
         }
     }
 
@@ -536,6 +627,22 @@ struct ScanCardModuleView: View {
                 await MainActor.run {
                     self.showToast("Contacts permission error")
                 }
+            }
+        }
+    }
+
+    private func processCapturedCard(image: UIImage) {
+        capturedCardImage = image
+        isProcessingOcr = true
+        showToast("Analyzing card with OCR... ⚡")
+
+        Task {
+            let rawText = (try? await BusinessCardOcrEngine.shared.recognizeText(from: image)) ?? ""
+            let parsed = BusinessCardOcrEngine.shared.parse(rawText: rawText)
+            await MainActor.run {
+                self.parsedCardData = parsed
+                self.isProcessingOcr = false
+                self.showReviewSheet = true
             }
         }
     }
