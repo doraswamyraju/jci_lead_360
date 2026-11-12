@@ -295,6 +295,12 @@ fun DashboardOverviewScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ActionQuickPill(
+                emoji = "🎉",
+                title = "Celebrations",
+                accent = Color(0xFFEC4899),
+                onClick = { onNavigateTab("celebrations") }
+            )
+            ActionQuickPill(
                 emoji = "🎨",
                 title = "Logo Maker",
                 accent = JciColors.SkyBlue,

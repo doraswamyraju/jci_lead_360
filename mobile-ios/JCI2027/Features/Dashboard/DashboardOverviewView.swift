@@ -25,11 +25,16 @@ struct DashboardOverviewView: View {
     @State private var localPortrait: UIImage? = nil
     @State private var livePhotoUrl: String? = nil
     @State private var isLoadingData = true
+    @State private var todayCelebrationCount: Int = 0
+    @State private var todayCelebrationText: String = ""
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 16) {
                 heroCardView
+                if todayCelebrationCount > 0 {
+                    celebrationAlertBanner
+                }
                 quickActionPillsView
                 kpiMetricsView
                 resourcesBannerView
@@ -253,12 +258,82 @@ struct DashboardOverviewView: View {
     }
 
     // ==========================================
+    // 1.5 CELEBRATION ALERT BANNER
+    // ==========================================
+    @ViewBuilder
+    private var celebrationAlertBanner: some View {
+        Button(action: { onNavigateTab("celebrations") }) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "FEE2E2"))
+                        .frame(width: 44, height: 44)
+                    Text("🎉")
+                        .font(.system(size: 22))
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text("\(todayCelebrationCount) Celebration\(todayCelebrationCount > 1 ? "s" : "") Today!")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(Color(hex: "991B1B"))
+                        Text("AUTO FLYER READY")
+                            .font(.system(size: 8, weight: .black))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color(hex: "DC2626"))
+                            .cornerRadius(4)
+                    }
+                    Text(todayCelebrationText)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Color(hex: "7F1D1D"))
+                        .lineLimit(1)
+                }
+                Spacer()
+                HStack(spacing: 4) {
+                    Text("View Flyer")
+                        .font(.system(size: 11, weight: .bold))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .bold))
+                }
+                .foregroundColor(Color(hex: "991B1B"))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.white.opacity(0.8))
+                .cornerRadius(8)
+            }
+            .padding(12)
+            .background(
+                LinearGradient(
+                    colors: [Color(hex: "FEF2F2"), Color(hex: "FFF1F2")],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color(hex: "FECACA"), lineWidth: 1.5)
+            )
+            .shadow(color: Color(hex: "DC2626").opacity(0.1), radius: 8, y: 3)
+            .padding(.horizontal, 16)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // ==========================================
     // 2. QUICK HORIZONTAL ACTION CHIPS
     // ==========================================
     @ViewBuilder
     private var quickActionPillsView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
+                ActionQuickPill(
+                    emoji: "🎉",
+                    title: "Celebrations",
+                    accent: Color(hex: "EC4899"),
+                    onClick: { onNavigateTab("celebrations") }
+                )
                 ActionQuickPill(
                     emoji: "🎨",
                     title: "Logo Maker",
@@ -485,6 +560,23 @@ struct DashboardOverviewView: View {
 
                 HStack(spacing: 10) {
                     ExecutiveActionTile(
+                        emoji: "🎉",
+                        title: "Celebrations",
+                        subtitle: "Auto-Flyer for B'days",
+                        accentColor: Color(hex: "EC4899"),
+                        onClick: { onNavigateTab("celebrations") }
+                    )
+                    ExecutiveActionTile(
+                        emoji: "⚡",
+                        title: "Flyer Studio",
+                        subtitle: "Official JCI templates",
+                        accentColor: Color(hex: "0284C7"),
+                        onClick: { onNavigateTab("flyers") }
+                    )
+                }
+
+                HStack(spacing: 10) {
+                    ExecutiveActionTile(
                         emoji: "🛍️",
                         title: "Vendor Store",
                         subtitle: "Order official mementos",
@@ -522,8 +614,18 @@ struct DashboardOverviewView: View {
         let contacts = (try? await ApiService.shared.getContacts(token: token)) ?? []
         let events = (try? await ApiService.shared.getCalendarEvents(token: token)) ?? []
         let leader = try? await ApiService.shared.getLeaderProfile(userId: userId)
+        let celebData = try? await ApiService.shared.getCelebrations(token: token)
 
         await MainActor.run {
+            // Update live celebrations
+            if let celeb = celebData {
+                self.todayCelebrationCount = celeb.todayCount
+                var names: [String] = []
+                names.append(contentsOf: celeb.todayBirthdays.map { "🎂 \($0.name)" })
+                names.append(contentsOf: celeb.todayAnniversaries.map { "💍 \($0.name)" })
+                self.todayCelebrationText = names.joined(separator: ", ")
+            }
+
             // Update live members
             let active = members.filter { ($0.status ?? "active").lowercased() == "active" }.count
             let pending = members.filter { ($0.status ?? "").lowercased() == "pending" }.count

@@ -1322,6 +1322,286 @@
       "createdById": "usr_superadmin_01",
       "createdByName": "Super Admin",
       "createdAt": "2026-11-07T14:04:05.279Z"
+    },
+    {
+      "id": "tpl_birthday_gold_01",
+      "title": "Royal Gold Birthday Celebration",
+      "category": "Birthdays",
+      "baseImageUrl": "/assets/tpl_birthday_gold_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 60,
+          "y": 60,
+          "width": 200,
+          "height": 70
+        },
+        {
+          "type": "member_photo",
+          "label": "Member Portrait",
+          "x": 360,
+          "y": 270,
+          "width": 360,
+          "height": 360,
+          "shape": "circle",
+          "borderWidth": 4,
+          "borderColor": "#EAB308"
+        },
+        {
+          "type": "member_name",
+          "label": "Member Name",
+          "x": 80,
+          "y": 670,
+          "width": 920,
+          "height": 65,
+          "color": "#FFFFFF",
+          "fontSize": 44,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "member_designation",
+          "label": "Designation & Chapter",
+          "x": 80,
+          "y": 740,
+          "width": 920,
+          "height": 45,
+          "color": "#FACC15",
+          "fontSize": 24,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "celebration_date",
+          "label": "Celebration Date",
+          "x": 80,
+          "y": 790,
+          "width": 920,
+          "height": 35,
+          "color": "#93C5FD",
+          "fontSize": 20,
+          "align": "center",
+          "bold": false
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-12T06:00:00.000Z"
+    },
+    {
+      "id": "tpl_birthday_royal_02",
+      "title": "Sapphire Blue Birthday Wishes",
+      "category": "Birthdays",
+      "baseImageUrl": "/assets/tpl_birthday_royal_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 60,
+          "y": 60,
+          "width": 200,
+          "height": 70
+        },
+        {
+          "type": "member_photo",
+          "label": "Member Portrait",
+          "x": 360,
+          "y": 270,
+          "width": 360,
+          "height": 360,
+          "shape": "circle",
+          "borderWidth": 4,
+          "borderColor": "#38BDF8"
+        },
+        {
+          "type": "member_name",
+          "label": "Member Name",
+          "x": 80,
+          "y": 670,
+          "width": 920,
+          "height": 65,
+          "color": "#FFFFFF",
+          "fontSize": 44,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "member_designation",
+          "label": "Designation & Chapter",
+          "x": 80,
+          "y": 740,
+          "width": 920,
+          "height": 45,
+          "color": "#38BDF8",
+          "fontSize": 24,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "celebration_date",
+          "label": "Celebration Date",
+          "x": 80,
+          "y": 790,
+          "width": 920,
+          "height": 35,
+          "color": "#CBD5E1",
+          "fontSize": 20,
+          "align": "center",
+          "bold": false
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-12T06:00:00.000Z"
+    },
+    {
+      "id": "tpl_anniversary_platinum_01",
+      "title": "Platinum Elegance Wedding Anniversary",
+      "category": "Anniversaries",
+      "baseImageUrl": "/assets/tpl_anniversary_platinum_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 60,
+          "y": 60,
+          "width": 200,
+          "height": 70
+        },
+        {
+          "type": "member_photo",
+          "label": "Member Portrait",
+          "x": 360,
+          "y": 280,
+          "width": 360,
+          "height": 360,
+          "shape": "circle",
+          "borderWidth": 4,
+          "borderColor": "#F472B6"
+        },
+        {
+          "type": "member_name",
+          "label": "Member & Spouse",
+          "x": 80,
+          "y": 670,
+          "width": 920,
+          "height": 65,
+          "color": "#FFFFFF",
+          "fontSize": 42,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "member_designation",
+          "label": "Designation & Chapter",
+          "x": 80,
+          "y": 740,
+          "width": 920,
+          "height": 45,
+          "color": "#FDE047",
+          "fontSize": 24,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "celebration_date",
+          "label": "Anniversary Date",
+          "x": 80,
+          "y": 790,
+          "width": 920,
+          "height": 35,
+          "color": "#FBCFE8",
+          "fontSize": 20,
+          "align": "center",
+          "bold": false
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-12T06:00:00.000Z"
+    },
+    {
+      "id": "tpl_anniversary_gold_02",
+      "title": "Golden Milestone Wedding Anniversary",
+      "category": "Anniversaries",
+      "baseImageUrl": "/assets/tpl_anniversary_gold_bg.png",
+      "dimensions": {
+        "width": 1080,
+        "height": 1080
+      },
+      "layers": [
+        {
+          "type": "chapter_logo",
+          "label": "Chapter Logo",
+          "x": 60,
+          "y": 60,
+          "width": 200,
+          "height": 70
+        },
+        {
+          "type": "member_photo",
+          "label": "Member Portrait",
+          "x": 360,
+          "y": 280,
+          "width": 360,
+          "height": 360,
+          "shape": "circle",
+          "borderWidth": 4,
+          "borderColor": "#EAB308"
+        },
+        {
+          "type": "member_name",
+          "label": "Member & Spouse",
+          "x": 80,
+          "y": 670,
+          "width": 920,
+          "height": 65,
+          "color": "#FFFFFF",
+          "fontSize": 42,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "member_designation",
+          "label": "Designation & Chapter",
+          "x": 80,
+          "y": 740,
+          "width": 920,
+          "height": 45,
+          "color": "#FDE047",
+          "fontSize": 24,
+          "align": "center",
+          "bold": true
+        },
+        {
+          "type": "celebration_date",
+          "label": "Anniversary Date",
+          "x": 80,
+          "y": 790,
+          "width": 920,
+          "height": 35,
+          "color": "#FEF08A",
+          "fontSize": 20,
+          "align": "center",
+          "bold": false
+        }
+      ],
+      "createdById": "usr_superadmin_01",
+      "createdByName": "Super Admin",
+      "createdAt": "2026-11-12T06:00:00.000Z"
     }
   ],
   "frames": [
@@ -1626,7 +1906,7 @@
     {
       "id": "ORD10237",
       "vendorId": "usr_vnd_01",
-      "title": "Mementoes – 15 Nos",
+      "title": "Mementoes \u2013 15 Nos",
       "chapterName": "JCI Chittoor",
       "orderDate": "08 Jan 2027",
       "amount": 18750,
@@ -1653,7 +1933,7 @@
     {
       "id": "ORD10210",
       "vendorId": "usr_vnd_01",
-      "title": "Brochures – 500 Nos",
+      "title": "Brochures \u2013 500 Nos",
       "chapterName": "JCI Nellore",
       "orderDate": "05 Jan 2027",
       "amount": 7500,
@@ -1687,7 +1967,7 @@
       "eventDate": "20 Jan 2027",
       "status": "Open",
       "isNew": true,
-      "emoji": "🏆",
+      "emoji": "\ud83c\udfc6",
       "description": "25 crystal mementoes with golden crest engraving for annual excellence awards.",
       "itemsSummary": "25 Crystal Shields",
       "createdAt": "2026-11-02T11:38:52.598Z"
@@ -1700,7 +1980,7 @@
       "eventDate": "15 Jan 2027",
       "status": "Open",
       "isNew": true,
-      "emoji": "🖼️",
+      "emoji": "\ud83d\uddbc\ufe0f",
       "description": "20x10 star flex backdrop with wooden frame mounting and 2 presidential podium covers.",
       "itemsSummary": "1 Stage Backdrop, 2 Podium Covers",
       "createdAt": "2026-11-02T11:38:52.598Z"
@@ -1713,7 +1993,7 @@
       "eventDate": "10 Jan 2027",
       "status": "Quoted",
       "isNew": false,
-      "emoji": "📑",
+      "emoji": "\ud83d\udcd1",
       "description": "Tri-fold multi-color brochure for membership drive.",
       "itemsSummary": "500 brochures",
       "quotedAmount": 4250,
@@ -1727,7 +2007,7 @@
       "eventDate": "25 Jan 2027",
       "status": "Open",
       "isNew": false,
-      "emoji": "👕",
+      "emoji": "\ud83d\udc55",
       "description": "Dry-fit collar polo shirts for district sports meet.",
       "itemsSummary": "60 dry-fit polo shirts",
       "createdAt": "2026-11-02T11:38:52.598Z"
@@ -1736,7 +2016,7 @@
   "notifications": [
     {
       "id": "notif_welcome",
-      "title": "🎉 Welcome to Vendor Partner Portal",
+      "title": "\ud83c\udf89 Welcome to Vendor Partner Portal",
       "message": "Your official vendor store is active and serving JCI chapters in Zone IV.",
       "type": "system",
       "targetRole": "VENDOR",
@@ -1745,8 +2025,8 @@
     },
     {
       "id": "notif_init_order",
-      "title": "🛒 New Order Placed: #ORD10248",
-      "message": "JCI Tirupati Innovations placed an order for Installation Kit (₹48,500)",
+      "title": "\ud83d\uded2 New Order Placed: #ORD10248",
+      "message": "JCI Tirupati Innovations placed an order for Installation Kit (\u20b948,500)",
       "type": "order",
       "targetRole": "VENDOR",
       "data": {
@@ -1776,7 +2056,10 @@
       "status": "Pending",
       "lat": 13.627,
       "lng": 79.418,
-      "createdAt": "2026-11-07T14:58:23.657Z"
+      "createdAt": "2026-11-07T14:58:23.657Z",
+      "dob": "1995-03-25",
+      "anniversaryDate": "",
+      "photoUrl": "/assets/member_kiran.png"
     },
     {
       "id": "mem_4",
@@ -1795,7 +2078,11 @@
       "status": "Active",
       "lat": 13.645,
       "lng": 79.43,
-      "createdAt": "2026-11-07T14:58:23.627Z"
+      "createdAt": "2026-11-07T14:58:23.627Z",
+      "dob": "1992-05-18",
+      "anniversaryDate": "2018-11-12",
+      "spouseName": "Mr. Rahul Desai",
+      "photoUrl": "/assets/member_anita.png"
     },
     {
       "id": "mem_3",
@@ -1814,7 +2101,11 @@
       "status": "Active",
       "lat": 13.621,
       "lng": 79.412,
-      "createdAt": "2026-11-07T14:58:23.601Z"
+      "createdAt": "2026-11-07T14:58:23.601Z",
+      "dob": "1985-08-22",
+      "anniversaryDate": "2014-11-15",
+      "spouseName": "Mrs. Lakshmi Raman",
+      "photoUrl": "/assets/member_venkat.png"
     },
     {
       "id": "mem_2",
@@ -1833,7 +2124,11 @@
       "status": "Active",
       "lat": 13.633,
       "lng": 79.425,
-      "createdAt": "2026-11-07T14:58:23.567Z"
+      "createdAt": "2026-11-07T14:58:23.567Z",
+      "dob": "1989-11-14",
+      "anniversaryDate": "2017-02-14",
+      "spouseName": "Mrs. Priya Kumar",
+      "photoUrl": "/assets/member_kiran.png"
     },
     {
       "id": "mem_1",
@@ -1853,7 +2148,33 @@
       "photoUrl": "/uploads/asset_1794047903403_1794047901566_president_profil.png",
       "lat": 13.6288,
       "lng": 79.4192,
-      "createdAt": "2026-11-07T14:58:23.529Z"
+      "createdAt": "2026-11-07T14:58:23.529Z",
+      "dob": "1988-11-12",
+      "anniversaryDate": "2015-12-05",
+      "spouseName": "Mrs. Manasa Raju"
+    },
+    {
+      "id": "mem_6",
+      "name": "JC Dr. Sneha Reddy",
+      "role": "VP - Programs",
+      "phone": "+91 98499 88776",
+      "email": "sneha@apexdiagnostics.in",
+      "businessName": "Apex Healthcare & Diagnostics",
+      "designation": "Chief Medical Officer",
+      "businessCategory": "Healthcare & Medical",
+      "membershipType": "Active Member",
+      "joinYear": "2026",
+      "bloodGroup": "O+",
+      "city": "Tirupati",
+      "chapterName": "JCI Tirupati Innovations",
+      "status": "Active",
+      "dob": "1994-11-18",
+      "anniversaryDate": "2021-11-20",
+      "spouseName": "Dr. Vikram Reddy",
+      "photoUrl": "/assets/member_sneha.png",
+      "lat": 13.639,
+      "lng": 79.421,
+      "createdAt": "2026-11-08T10:00:00.000Z"
     }
   ]
 }

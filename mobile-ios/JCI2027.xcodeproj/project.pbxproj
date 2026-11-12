@@ -22,6 +22,7 @@
 		8AF50547040B484D7FAC17AE /* ExchangeQrDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B523F5E67FCEC46D090CB9D /* ExchangeQrDialogView.swift */; };
 		8E5EB84380F390025889F236 /* BusinessCardOcrEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A439DB48F8042D1FD18684F7 /* BusinessCardOcrEngine.swift */; };
 		92349257FBFE1F0BD0435026 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */; };
+		94F212C32DF6FE9CD12494DC /* CelebrationFlyersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C6363B2EE99F6EC02C3E2E /* CelebrationFlyersView.swift */; };
 		96EDB5FF7F6FC5F1892AD709 /* TopBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF98F1C98434EF3F46110180 /* TopBarView.swift */; };
 		A4089ACF0E7661CBAF7028B0 /* JCI2027App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CC4EE655F3F263BADF78CE /* JCI2027App.swift */; };
 		A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */; };
@@ -64,6 +65,7 @@
 		B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeGenerator.swift; sourceTree = "<group>"; };
 		BF98F1C98434EF3F46110180 /* TopBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBarView.swift; sourceTree = "<group>"; };
 		C7075CD897D27936D616ADB4 /* ExtractAndReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractAndReviewSheet.swift; sourceTree = "<group>"; };
+		D1C6363B2EE99F6EC02C3E2E /* CelebrationFlyersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationFlyersView.swift; sourceTree = "<group>"; };
 		E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterSheet.swift; sourceTree = "<group>"; };
 		E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBarView.swift; sourceTree = "<group>"; };
 		F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 		526DA1A5E4876B4B8CBE48D9 /* Flyers */ = {
 			isa = PBXGroup;
 			children = (
+				D1C6363B2EE99F6EC02C3E2E /* CelebrationFlyersView.swift */,
 				614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */,
 			);
 			path = Flyers;
@@ -343,6 +346,7 @@
 				E9B59B1A13F24F3706001853 /* BottomNavigationBarView.swift in Sources */,
 				8E5EB84380F390025889F236 /* BusinessCardOcrEngine.swift in Sources */,
 				1D775E308589BB5CDEA2BC41 /* CardSnapCameraPicker.swift in Sources */,
+				94F212C32DF6FE9CD12494DC /* CelebrationFlyersView.swift in Sources */,
 				53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */,
 				8AF50547040B484D7FAC17AE /* ExchangeQrDialogView.swift in Sources */,
 				BA102BB23D5E87699996854A /* ExtractAndReviewSheet.swift in Sources */,

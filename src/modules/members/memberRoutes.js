@@ -28,6 +28,104 @@ router.get('/', (req, res, next) => {
 });
 
 /**
+ * GET /api/members/celebrations
+ * Returns today's and upcoming birthdays & anniversaries for the chapter
+ */
+router.get('/celebrations', (req, res, next) => {
+  if (req.headers.authorization) return authenticate(req, res, next);
+  next();
+}, (req, res) => {
+  try {
+    const chapterId = req.user?.chapterId || req.query.chapterId;
+    const allMembers = db.getMembers(chapterId);
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentDay = now.getDate();
+
+    const parseMonthDay = (dateStr) => {
+      if (!dateStr || typeof dateStr !== 'string') return null;
+      const parts = dateStr.trim().split(/[-/]/);
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          return { month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) };
+        } else {
+          return { month: parseInt(parts[1], 10), day: parseInt(parts[0], 10) };
+        }
+      } else if (parts.length === 2) {
+        return { month: parseInt(parts[0], 10), day: parseInt(parts[1], 10) };
+      }
+      return null;
+    };
+
+    const getDaysDiff = (targetMonth, targetDay) => {
+      const thisYear = now.getFullYear();
+      let targetDate = new Date(thisYear, targetMonth - 1, targetDay);
+      const todayStart = new Date(thisYear, now.getMonth(), currentDay);
+      const diffTime = targetDate.getTime() - todayStart.getTime();
+      let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays < -1) {
+        targetDate = new Date(thisYear + 1, targetMonth - 1, targetDay);
+        diffDays = Math.round((targetDate.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
+      }
+      return diffDays;
+    };
+
+    const todayBirthdays = [];
+    const upcomingBirthdays = [];
+    const todayAnniversaries = [];
+    const upcomingAnniversaries = [];
+
+    for (const mem of allMembers) {
+      if (mem.status && mem.status !== 'Active') continue;
+
+      if (mem.dob) {
+        const md = parseMonthDay(mem.dob);
+        if (md && !isNaN(md.month) && !isNaN(md.day)) {
+          const days = getDaysDiff(md.month, md.day);
+          const item = { ...mem, daysUntil: days, celebrationType: 'birthday' };
+          if (days === 0) {
+            todayBirthdays.push(item);
+          } else if (days > 0 && days <= 30) {
+            upcomingBirthdays.push(item);
+          }
+        }
+      }
+
+      if (mem.anniversaryDate) {
+        const md = parseMonthDay(mem.anniversaryDate);
+        if (md && !isNaN(md.month) && !isNaN(md.day)) {
+          const days = getDaysDiff(md.month, md.day);
+          const item = { ...mem, daysUntil: days, celebrationType: 'anniversary' };
+          if (days === 0) {
+            todayAnniversaries.push(item);
+          } else if (days > 0 && days <= 30) {
+            upcomingAnniversaries.push(item);
+          }
+        }
+      }
+    }
+
+    upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
+    upcomingAnniversaries.sort((a, b) => a.daysUntil - b.daysUntil);
+
+    res.json({
+      success: true,
+      data: {
+        todayCount: todayBirthdays.length + todayAnniversaries.length,
+        todayBirthdays,
+        todayAnniversaries,
+        upcomingBirthdays,
+        upcomingAnniversaries
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching celebrations:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch celebrations' });
+  }
+});
+
+/**
  * POST /api/members
  * Create member (by President or Admin)
  */

@@ -55,6 +55,13 @@ class ApiService {
         return response.members
     }
 
+    func getCelebrations(token: String?) async throws -> CelebrationsData {
+        let request = createRequest(path: "/api/members/celebrations", token: token)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(CelebrationsResponse.self, from: data)
+        return response.data
+    }
+
     func saveMember(token: String, member: MemberDto) async throws -> Bool {
         let reqData = try JSONEncoder().encode(member)
         let request = createRequest(path: "/api/members", method: "POST", token: token, body: reqData)

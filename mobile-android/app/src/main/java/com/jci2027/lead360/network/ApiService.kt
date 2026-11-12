@@ -240,6 +240,11 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<MembersResponse>
 
+    @GET("/api/members/celebrations")
+    suspend fun getCelebrations(
+        @Header("Authorization") token: String
+    ): Response<CelebrationsResponse>
+
     @POST("/api/members")
     suspend fun saveMember(
         @Header("Authorization") token: String,
@@ -291,7 +296,23 @@ data class MemberDto(
     val status: String? = "Active",
     val photoUrl: String? = null,
     val lat: Double? = 13.6288,
-    val lng: Double? = 79.4192
+    val lng: Double? = 79.4192,
+    val spouseName: String? = "",
+    val daysUntil: Int? = 0,
+    val celebrationType: String? = ""
+)
+
+data class CelebrationsData(
+    val todayCount: Int,
+    val todayBirthdays: List<MemberDto>,
+    val todayAnniversaries: List<MemberDto>,
+    val upcomingBirthdays: List<MemberDto>,
+    val upcomingAnniversaries: List<MemberDto>
+)
+
+data class CelebrationsResponse(
+    val success: Boolean,
+    val data: CelebrationsData
 )
 
 data class MembersResponse(

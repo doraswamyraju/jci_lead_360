@@ -8,6 +8,7 @@ enum AppScreen: String, CaseIterable, Identifiable {
     case scanCard = "scan_card"
     case store = "store"
     case flyers = "flyers"
+    case celebrations = "celebrations"
     case websitePortal = "website_portal"
     case calendar = "calendar"
     case lgb = "lgb"
@@ -26,6 +27,7 @@ enum AppScreen: String, CaseIterable, Identifiable {
         case .scanCard: return "Scan Card"
         case .store: return "Store"
         case .flyers: return "Flyers"
+        case .celebrations: return "Celebrations"
         case .websitePortal: return "LO Website"
         case .calendar: return "Calendar"
         case .lgb: return "LGB & PST"
@@ -44,6 +46,7 @@ enum AppScreen: String, CaseIterable, Identifiable {
         case .scanCard: return "📇"
         case .store: return "🛍️"
         case .flyers: return "⚡"
+        case .celebrations: return "🎉"
         case .websitePortal: return "🌐"
         case .calendar: return "📅"
         case .lgb: return "🪪"
@@ -62,6 +65,7 @@ enum AppScreen: String, CaseIterable, Identifiable {
         .scanCard,
         .store,
         .flyers,
+        .celebrations,
         .websitePortal,
         .calendar,
         .lgb,

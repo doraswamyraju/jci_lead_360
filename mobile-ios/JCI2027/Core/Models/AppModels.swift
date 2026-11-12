@@ -148,6 +148,22 @@ struct MemberDto: Codable, Identifiable {
     var photoUrl: String?
     var lat: Double?
     var lng: Double?
+    var spouseName: String?
+    var daysUntil: Int?
+    var celebrationType: String?
+}
+
+struct CelebrationsData: Codable {
+    let todayCount: Int
+    let todayBirthdays: [MemberDto]
+    let todayAnniversaries: [MemberDto]
+    let upcomingBirthdays: [MemberDto]
+    let upcomingAnniversaries: [MemberDto]
+}
+
+struct CelebrationsResponse: Codable {
+    let success: Bool
+    let data: CelebrationsData
 }
 
 struct MembersResponse: Codable {

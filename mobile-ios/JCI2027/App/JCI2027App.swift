@@ -171,6 +171,13 @@ struct MainPresidentContainerView: View {
                         userId: userId,
                         serverPhotoUrl: userPhotoUrl
                     )
+                case .celebrations:
+                    CelebrationFlyersView(
+                        token: token,
+                        presidentName: presidentName,
+                        chapterName: chapterName,
+                        onBack: { currentScreen = .dashboard }
+                    )
                 case .store, .vendor:
                     VendorStoreView(
                         chapterName: chapterName,
@@ -335,6 +342,7 @@ struct MainPresidentContainerView: View {
             scanCardStartWithScanner = true
             currentScreen = .scanCard
         case "flyers": currentScreen = .flyers
+        case "celebrations": currentScreen = .celebrations
         case "store": currentScreen = .store
         case "website_builder", "website_portal": currentScreen = .websitePortal
         case "resources": currentScreen = .resources
