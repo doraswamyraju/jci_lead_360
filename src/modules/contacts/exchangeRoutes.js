@@ -84,6 +84,7 @@ router.post('/exchange', async (req, res) => {
       locationName: 'Digital Contact Exchange',
       city: (city || '').trim(),
       notes: notes ? `Exchange note: ${notes.trim()}` : 'Connected via JCI LEAD360 QR Contact Exchange',
+      followUpDate: '',
       capturedAt: new Date().toISOString()
     };
 

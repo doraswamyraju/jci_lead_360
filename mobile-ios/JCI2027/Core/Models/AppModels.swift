@@ -54,6 +54,60 @@ struct SaveContactRequest: Codable, Identifiable {
     var notes: String
     var followUpDate: String
     var photoUrl: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, company, designation, phone, email, website, address, eventTag, locationName, city, notes, followUpDate, photoUrl
+    }
+
+    init(
+        id: String,
+        name: String,
+        company: String = "",
+        designation: String = "",
+        phone: String = "",
+        email: String = "",
+        website: String = "",
+        address: String = "",
+        eventTag: String = "QR Reciprocal Exchange",
+        locationName: String = "",
+        city: String = "",
+        notes: String = "",
+        followUpDate: String = "",
+        photoUrl: String? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.company = company
+        self.designation = designation
+        self.phone = phone
+        self.email = email
+        self.website = website
+        self.address = address
+        self.eventTag = eventTag
+        self.locationName = locationName
+        self.city = city
+        self.notes = notes
+        self.followUpDate = followUpDate
+        self.photoUrl = photoUrl
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? "c_\(UUID().uuidString)"
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        company = try c.decodeIfPresent(String.self, forKey: .company) ?? ""
+        designation = try c.decodeIfPresent(String.self, forKey: .designation) ?? ""
+        phone = try c.decodeIfPresent(String.self, forKey: .phone) ?? ""
+        email = try c.decodeIfPresent(String.self, forKey: .email) ?? ""
+        website = try c.decodeIfPresent(String.self, forKey: .website) ?? ""
+        address = try c.decodeIfPresent(String.self, forKey: .address) ?? ""
+        eventTag = try c.decodeIfPresent(String.self, forKey: .eventTag) ?? "QR Reciprocal Exchange"
+        locationName = try c.decodeIfPresent(String.self, forKey: .locationName) ?? ""
+        city = try c.decodeIfPresent(String.self, forKey: .city) ?? ""
+        notes = try c.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        followUpDate = try c.decodeIfPresent(String.self, forKey: .followUpDate) ?? ""
+        photoUrl = try c.decodeIfPresent(String.self, forKey: .photoUrl)
+    }
 }
 
 struct GetContactsResponse: Codable {
