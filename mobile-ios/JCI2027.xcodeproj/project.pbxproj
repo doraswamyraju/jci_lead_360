@@ -35,12 +35,14 @@
 		D4F9BB2C9C396DDD445F3F44 /* JciLogoGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15EB2F16066466B57448D46 /* JciLogoGenerator.swift */; };
 		D81648534550CE8EAC20B282 /* LgbAndPstManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */; };
 		DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7BE6964FFD652A939E1F7E /* AppModels.swift */; };
+		DEA7983791F44BCE5F629276 /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE3837A4EF577BACE1ECA72 /* ContactManager.swift */; };
 		DFBAD7941A7960FF71F89B04 /* AppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7057367FB2D38B8316008814 /* AppScreen.swift */; };
 		E9B59B1A13F24F3706001853 /* BottomNavigationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */; };
 		F1A23784F8945F4549516A63 /* VendorStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */; };
 		F4B4BDC09BAE587BACBD181A /* SidebarDrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F2BC3ADA718675C87F6CA5 /* SidebarDrawerView.swift */; };
 		F4B61AC0F2B856466A67EF6F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0675DFFDB90D8235D30AB540 /* ProfileView.swift */; };
 		F8E9EF2DDF54A4469F8AB557 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DEBF96B6654FC92841F07B7 /* Assets.xcassets */; };
+		F8F5741A4F5C45ADFAE86950 /* LocationTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB06249A792459C8BD0CE89 /* LocationTrackingService.swift */; };
 		FA2F10C9A955F6CC185340EC /* JciResourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11413A92DF037086639B4D6F /* JciResourcesView.swift */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +65,7 @@
 		73009F97F3C9613B73097A74 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		76A682E44A15575086761388 /* MembersAndNetworkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersAndNetworkingView.swift; sourceTree = "<group>"; };
 		7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAppContainerView.swift; sourceTree = "<group>"; };
+		7AB06249A792459C8BD0CE89 /* LocationTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTrackingService.swift; sourceTree = "<group>"; };
 		7CDF00D536EEA4E6F2AE48F9 /* plus_jakarta_sans_medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = plus_jakarta_sans_medium.ttf; sourceTree = "<group>"; };
 		7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorAppContainerView.swift; sourceTree = "<group>"; };
 		818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LgbAndPstManagementView.swift; sourceTree = "<group>"; };
@@ -80,6 +83,7 @@
 		D1C6363B2EE99F6EC02C3E2E /* CelebrationFlyersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationFlyersView.swift; sourceTree = "<group>"; };
 		E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterSheet.swift; sourceTree = "<group>"; };
 		E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomNavigationBarView.swift; sourceTree = "<group>"; };
+		ECE3837A4EF577BACE1ECA72 /* ContactManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactManager.swift; sourceTree = "<group>"; };
 		F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -312,6 +316,8 @@
 		FCD7167328EEA57B95FEFD7E /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				ECE3837A4EF577BACE1ECA72 /* ContactManager.swift */,
+				7AB06249A792459C8BD0CE89 /* LocationTrackingService.swift */,
 				F6CD69FE68F1106576B9CD05 /* PushNotificationManager.swift */,
 				B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */,
 			);
@@ -407,6 +413,7 @@
 				8E5EB84380F390025889F236 /* BusinessCardOcrEngine.swift in Sources */,
 				1D775E308589BB5CDEA2BC41 /* CardSnapCameraPicker.swift in Sources */,
 				94F212C32DF6FE9CD12494DC /* CelebrationFlyersView.swift in Sources */,
+				DEA7983791F44BCE5F629276 /* ContactManager.swift in Sources */,
 				53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */,
 				8AF50547040B484D7FAC17AE /* ExchangeQrDialogView.swift in Sources */,
 				BA102BB23D5E87699996854A /* ExtractAndReviewSheet.swift in Sources */,
@@ -416,6 +423,7 @@
 				FA2F10C9A955F6CC185340EC /* JciResourcesView.swift in Sources */,
 				5950139218F350E61D82BE2B /* JciTheme.swift in Sources */,
 				D81648534550CE8EAC20B282 /* LgbAndPstManagementView.swift in Sources */,
+				F8F5741A4F5C45ADFAE86950 /* LocationTrackingService.swift in Sources */,
 				25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */,
 				7EC718D31468637AFF30CD27 /* MembersAndNetworkingView.swift in Sources */,
 				A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */,
@@ -449,6 +457,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "JCI LEAD360 needs camera access to scan visiting cards.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "JCI LEAD360 needs contacts access to save scanned business card contacts.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "JCI LEAD360 needs location access to display chapter members on the live networking map.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "JCI LEAD360 needs photo library access to save generated flyers.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "JCI LEAD360 needs photo library access to select pictures.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -534,6 +543,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "JCI LEAD360 needs camera access to scan visiting cards.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "JCI LEAD360 needs contacts access to save scanned business card contacts.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "JCI LEAD360 needs location access to display chapter members on the live networking map.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "JCI LEAD360 needs photo library access to save generated flyers.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "JCI LEAD360 needs photo library access to select pictures.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

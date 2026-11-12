@@ -161,6 +161,8 @@ struct MemberDto: Codable, Identifiable {
     var spouseName: String?
     var daysUntil: Int?
     var celebrationType: String?
+    var isLocationSharingEnabled: Bool?
+    var lastLocationUpdated: String?
 }
 
 struct CelebrationsData: Codable {

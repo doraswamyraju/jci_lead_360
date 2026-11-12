@@ -69,6 +69,26 @@ class ApiService {
         return (response as? HTTPURLResponse)?.statusCode == 200 || (response as? HTTPURLResponse)?.statusCode == 201
     }
 
+    func updateMember(token: String, member: MemberDto) async throws -> Bool {
+        let reqData = try JSONEncoder().encode(member)
+        let request = createRequest(path: "/api/members/\(member.id)", method: "PUT", token: token, body: reqData)
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode == 200
+    }
+
+    func updateMemberLocation(token: String, memberId: String, lat: Double, lng: Double, isSharing: Bool) async throws -> Bool {
+        let payload: [String: Any] = [
+            "lat": lat,
+            "lng": lng,
+            "isLocationSharingEnabled": isSharing,
+            "lastLocationUpdated": ISO8601DateFormatter().string(from: Date())
+        ]
+        let reqData = try JSONSerialization.data(withJSONObject: payload)
+        let request = createRequest(path: "/api/members/\(memberId)", method: "PUT", token: token, body: reqData)
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode == 200
+    }
+
     func approveMember(token: String, memberId: String) async throws -> Bool {
         let request = createRequest(path: "/api/members/\(memberId)/approve", method: "POST", token: token)
         let (_, response) = try await URLSession.shared.data(for: request)
