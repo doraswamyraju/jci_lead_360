@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// JCI Resources & Official Identity Hub (100% Feature Parity with Android JciResourcesScreen.kt)
+/// JCI Resources & Official Identity Hub (Conforming to JCI Brand Guidelines 2026 v1.2)
 /// Vector Chapter Logo Generator (logo.jciath.be replica) + Stationery Kits & Brand Governance
 struct JciResourcesView: View {
     let chapterName: String
@@ -12,6 +12,8 @@ struct JciResourcesView: View {
     // Logo Generator State
     @State private var line1: String
     @State private var line2: String = ""
+    @State private var isSecondaryLogo: Bool = false
+    @State private var isTransparentBg: Bool = false
     @State private var renderedLogos: [JciLogoGenerator.CaseStyle: UIImage] = [:]
     @State private var activeShareItem: Any? = nil
     @State private var showShareSheet = false
@@ -26,7 +28,7 @@ struct JciResourcesView: View {
     }
 
     let categories = [
-        ("logo", "🎨 Official Logo", "Active"),
+        ("logo", "🎨 Official Logo 2026", "Active"),
         ("letterhead", "📄 Letterhead", "Coming Soon"),
         ("visiting_card", "🪪 Visiting Card", "Coming Soon"),
         ("certificate", "🏆 Certificate", "Coming Soon"),
@@ -50,7 +52,7 @@ struct JciResourcesView: View {
                         ComingSoonResourceCard(
                             emoji: "📄",
                             title: "Official LO Letterhead Generator",
-                            description: "Automated vector Letterhead creator with chapter logo, president signature zone, and official postal footer conforming to JCI Corporate Identity manual.",
+                            description: "Automated vector Letterhead creator with chapter logo, president signature zone, and official postal footer conforming to JCI Brand Guidelines 2026.",
                             expectedDate: "Q1 2027",
                             features: [
                                 "Single & Double Page Executive Layouts",
@@ -130,9 +132,9 @@ struct JciResourcesView: View {
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.jciDeepNavy)
 
-                Text("Corporate Brand Assets, Vector Logos & Kits")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.jciTextMuted)
+                Text("Official Brand Guidelines 2026 (v1.2) Compliant")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(Color(hex: "0284C7"))
             }
 
             Spacer()
@@ -204,23 +206,23 @@ struct JciResourcesView: View {
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.jciDeepNavy)
                     Spacer()
-                    Text("logo.jciath.be replica")
+                    Text("JCI 2026 Standards")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.jciSkyBlue)
-                        .padding(.horizontal, 6)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 7)
                         .padding(.vertical, 3)
-                        .background(Color.jciSkyBlue.opacity(0.12))
+                        .background(Color(hex: "0284C7"))
                         .cornerRadius(6)
                 }
 
-                Text("Generates official vector brand marks with exact JCI Corporate Identity proportions, SVG curves, and Helvetica Neue typography.")
+                Text("Generates official vector brand marks with exact JCI Corporate Identity proportions, concentric shield curves, and Plus Jakarta Sans Bold typography.")
                     .font(.system(size: 12))
                     .foregroundColor(.jciTextMuted)
 
                 Divider()
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("LINE 1: CHAPTER NAME *")
+                    Text("LINE 1: LOCATION / CHAPTER NAME * (Proper Case)")
                         .font(.system(size: 10, weight: .black))
                         .foregroundColor(.jciDeepNavy)
 
@@ -246,6 +248,34 @@ struct JciResourcesView: View {
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "CBD5E1"), lineWidth: 1))
                         .onChange(of: line2) { _ in renderAllLogos() }
                 }
+
+                // Options Row
+                VStack(spacing: 10) {
+                    Toggle(isOn: $isSecondaryLogo) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Secondary Logo Format")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.jciDeepNavy)
+                            Text("Includes 'Junior Chamber International' subtitle (Page 10)")
+                                .font(.system(size: 10))
+                                .foregroundColor(.jciTextMuted)
+                        }
+                    }
+                    .onChange(of: isSecondaryLogo) { _ in renderAllLogos() }
+
+                    Toggle(isOn: $isTransparentBg) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Transparent Background")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.jciDeepNavy)
+                            Text("Export transparent PNGs for overlays, apparel & web")
+                                .font(.system(size: 10))
+                                .foregroundColor(.jciTextMuted)
+                        }
+                    }
+                    .onChange(of: isTransparentBg) { _ in renderAllLogos() }
+                }
+                .padding(.top, 4)
             }
             .padding(16)
             .background(Color.white)
@@ -255,10 +285,16 @@ struct JciResourcesView: View {
 
             // Case Styles Showcase
             VStack(alignment: .leading, spacing: 14) {
-                Text("7 Official Color Formats & Social Icons")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.jciDeepNavy)
-                    .padding(.horizontal, 16)
+                HStack {
+                    Text("Official 2026 Colourways & Social Icons")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.jciDeepNavy)
+                    Spacer()
+                    Text("Pages 15-16")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.jciTextMuted)
+                }
+                .padding(.horizontal, 16)
 
                 ForEach(JciLogoGenerator.CaseStyle.allCases) { caseStyle in
                     logoCaseCard(caseStyle: caseStyle)
@@ -270,13 +306,19 @@ struct JciResourcesView: View {
     // MARK: - Logo Case Card
     private func logoCaseCard(caseStyle: JciLogoGenerator.CaseStyle) -> some View {
         let logoImage = renderedLogos[caseStyle]
+        let isDarkCase = (caseStyle == .inverted || caseStyle == .socialDark)
+        let isBlueCase = (caseStyle == .monochromeWhite || caseStyle == .socialBlue)
+
         return VStack(spacing: 0) {
             // Visual Preview Canvas
             ZStack {
-                if caseStyle == .light || caseStyle == .socialBlack {
-                    Color(hex: "130F2D")
-                } else if caseStyle == .whiteOnBlue || caseStyle == .socialWhite {
-                    Color(hex: "0097D8")
+                if isTransparentBg {
+                    // Checkered pattern background indicator
+                    Color(hex: isDarkCase ? "0B132B" : (isBlueCase ? "0284C7" : "F1F5F9"))
+                } else if isDarkCase {
+                    Color(hex: "130F2D") // JCI Black (Page 19)
+                } else if isBlueCase {
+                    Color(hex: "0097D7") // JCI Blue (Page 19)
                 } else {
                     Color.white
                 }
@@ -293,19 +335,26 @@ struct JciResourcesView: View {
             .frame(height: caseStyle.isSocial ? 160 : 130)
             .frame(maxWidth: .infinity)
             .overlay(
-                // Case Badge
+                // Case Badge & Description
                 VStack {
                     HStack {
-                        Text(caseStyle.rawValue)
-                            .font(.system(size: 10, weight: .black))
-                            .foregroundColor(caseStyle == .light || caseStyle == .socialBlack ? .white : (caseStyle == .whiteOnBlue || caseStyle == .socialWhite ? Color(hex: "FEF08A") : .jciDeepNavy))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                (caseStyle == .light || caseStyle == .socialBlack || caseStyle == .whiteOnBlue || caseStyle == .socialWhite) ?
-                                Color.black.opacity(0.35) : Color(hex: "F1F5F9")
-                            )
-                            .cornerRadius(6)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(caseStyle.rawValue)
+                                .font(.system(size: 10, weight: .black))
+                                .foregroundColor(isDarkCase || isBlueCase ? .white : .jciDeepNavy)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(
+                                    (isDarkCase || isBlueCase) ?
+                                    Color.black.opacity(0.4) : Color(hex: "F1F5F9")
+                                )
+                                .cornerRadius(6)
+
+                            Text(caseStyle.description)
+                                .font(.system(size: 9))
+                                .foregroundColor(isDarkCase || isBlueCase ? Color.white.opacity(0.8) : .jciTextMuted)
+                                .padding(.horizontal, 2)
+                        }
                         Spacer()
                     }
                     .padding(8)
@@ -349,8 +398,13 @@ struct JciResourcesView: View {
 
                 // Vector SVG Export
                 Button(action: {
-                    let svgString = JciLogoGenerator.generateSvgString(line1: line1, line2: line2)
-                    let tempUrl = FileManager.default.temporaryDirectory.appendingPathComponent("JCI_\(line1)_Vector.svg")
+                    let svgString = JciLogoGenerator.generateSvgString(
+                        line1: line1,
+                        line2: line2,
+                        isSecondary: isSecondaryLogo,
+                        caseStyle: caseStyle
+                    )
+                    let tempUrl = FileManager.default.temporaryDirectory.appendingPathComponent("JCI_\(line1)_\(caseStyle.rawValue).svg")
                     try? svgString.write(to: tempUrl, atomically: true, encoding: .utf8)
                     activeShareItem = tempUrl
                     showShareSheet = true
@@ -367,7 +421,6 @@ struct JciResourcesView: View {
                 // WhatsApp Share
                 Button(action: {
                     if let img = logoImage {
-                        let caption = "🏛️ Official JCI Logo (*\(caseStyle.rawValue)*) for *\(line1)*"
                         activeShareItem = img
                         showShareSheet = true
                     }
@@ -396,9 +449,9 @@ struct JciResourcesView: View {
     private var governanceDocsView: some View {
         VStack(spacing: 12) {
             let docs = [
+                ("JCI Brand Guidelines 2026 (v1.2)", "Complete corporate identity & logo standards", "paintpalette.fill"),
                 ("JCI Constitution & Policy 2027", "Official governance & bylaws document", "doc.text.fill"),
                 ("Chapter Installation Protocol", "Stage management & gavel handover guidelines", "flag.fill"),
-                ("JCI Brand & Logo Standards", "Shield colors, vector logos, typography rules", "paintpalette.fill"),
                 ("Parliamentary Procedures (Robert's Rules)", "Meeting management & motions reference", "book.closed.fill"),
                 ("Award Bidding Templates", "Templates for Zone & National recognitions", "trophy.fill")
             ]
@@ -440,6 +493,8 @@ struct JciResourcesView: View {
                 caseStyle: caseStyle,
                 line1: line1,
                 line2: line2,
+                isSecondaryLogo: isSecondaryLogo,
+                isTransparentBg: isTransparentBg,
                 width: caseStyle.isSocial ? 800 : 1200,
                 height: 800
             )
@@ -453,7 +508,6 @@ struct JciResourcesView: View {
     }
 }
 
-// MARK: - Coming Soon Resource Card Component
 struct ComingSoonResourceCard: View {
     let emoji: String
     let title: String
@@ -462,71 +516,55 @@ struct ComingSoonResourceCard: View {
     let features: [String]
 
     var body: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(Color(hex: "E0F2FE"))
-                    .frame(width: 72, height: 72)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 14) {
                 Text(emoji)
                     .font(.system(size: 34))
+                    .padding(12)
+                    .background(Color.jciSkyBlue.opacity(0.12))
+                    .cornerRadius(16)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.jciTextDark)
+                    Text("Release scheduled for \(expectedDate)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.jciSkyBlue)
+                }
+                Spacer()
             }
-
-            Text(title)
-                .font(.system(size: 18, weight: .heavy))
-                .foregroundColor(.jciDeepNavy)
-                .multilineTextAlignment(.center)
-
-            Text("🚧 COMING SOON")
-                .font(.system(size: 10, weight: .heavy))
-                .foregroundColor(Color(hex: "D97706"))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color(hex: "FEF3C7"))
-                .cornerRadius(10)
 
             Text(description)
                 .font(.system(size: 13))
                 .foregroundColor(.jciTextMuted)
-                .multilineTextAlignment(.center)
                 .lineSpacing(3)
 
-            Divider()
-
             VStack(alignment: .leading, spacing: 8) {
-                Text("CORE CAPABILITIES BEING CONFIGURED")
-                    .font(.system(size: 10, weight: .heavy))
-                    .foregroundColor(Color(hex: "64748B"))
+                Text("PLANNED CAPABILITIES")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.jciTextMuted)
+                    .tracking(0.5)
 
-                ForEach(features, id: \.self) { feat in
+                ForEach(features, id: \.self) { feature in
                     HStack(spacing: 8) {
-                        Text("✨")
-                            .font(.system(size: 12))
-                        Text(feat)
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 13))
+                            .foregroundColor(.jciSkyBlue)
+                        Text(feature)
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.jciDeepNavy)
+                            .foregroundColor(.jciTextDark)
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack(spacing: 8) {
-                Text("🗓️")
-                Text("Release Timeline: \(expectedDate)")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color(hex: "64748B"))
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity)
+            .padding(14)
             .background(Color(hex: "F8FAFC"))
-            .cornerRadius(10)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "E2E8F0"), lineWidth: 1))
+            .cornerRadius(12)
         }
-        .padding(24)
+        .padding(20)
         .background(Color.white)
         .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(hex: "BAE6FD"), lineWidth: 1))
-        .shadow(color: Color.black.opacity(0.04), radius: 8, y: 3)
+        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
         .padding(.horizontal, 16)
     }
 }
-

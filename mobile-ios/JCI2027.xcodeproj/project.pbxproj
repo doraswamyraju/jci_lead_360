@@ -13,6 +13,7 @@
 		25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E905AC23C0667A2AE2AE73E /* LoginView.swift */; };
 		3A44DC358D16DA3B25AC39BF /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73009F97F3C9613B73097A74 /* ApiService.swift */; };
 		449703C38B073895410F0838 /* InteractiveCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9E883EE1541F468A9CFBA5 /* InteractiveCalendarView.swift */; };
+		46FFA11F6F7E00CAC31283AA /* plus_jakarta_sans_bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C6E0D8F374260D1212DBB787 /* plus_jakarta_sans_bold.ttf */; };
 		53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */; };
 		5950139218F350E61D82BE2B /* JciTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6244A457E27AE50F1076D524 /* JciTheme.swift */; };
 		6D023989A37180B556EBF927 /* PresidentFlyerStudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */; };
@@ -30,6 +31,7 @@
 		B439592D93C0DC6947971B9D /* SecondaryScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */; };
 		BA102BB23D5E87699996854A /* ExtractAndReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7075CD897D27936D616ADB4 /* ExtractAndReviewSheet.swift */; };
 		C49587BF080DAF29B4BC13AE /* ProjectsAndTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */; };
+		D29F6266BA3C4F3A33717A26 /* plus_jakarta_sans_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7CDF00D536EEA4E6F2AE48F9 /* plus_jakarta_sans_medium.ttf */; };
 		D4F9BB2C9C396DDD445F3F44 /* JciLogoGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15EB2F16066466B57448D46 /* JciLogoGenerator.swift */; };
 		D81648534550CE8EAC20B282 /* LgbAndPstManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */; };
 		DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7BE6964FFD652A939E1F7E /* AppModels.swift */; };
@@ -61,6 +63,7 @@
 		73009F97F3C9613B73097A74 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		76A682E44A15575086761388 /* MembersAndNetworkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersAndNetworkingView.swift; sourceTree = "<group>"; };
 		7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAppContainerView.swift; sourceTree = "<group>"; };
+		7CDF00D536EEA4E6F2AE48F9 /* plus_jakarta_sans_medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = plus_jakarta_sans_medium.ttf; sourceTree = "<group>"; };
 		7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorAppContainerView.swift; sourceTree = "<group>"; };
 		818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LgbAndPstManagementView.swift; sourceTree = "<group>"; };
 		86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorStoreView.swift; sourceTree = "<group>"; };
@@ -72,6 +75,7 @@
 		A439DB48F8042D1FD18684F7 /* BusinessCardOcrEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessCardOcrEngine.swift; sourceTree = "<group>"; };
 		B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeGenerator.swift; sourceTree = "<group>"; };
 		BF98F1C98434EF3F46110180 /* TopBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBarView.swift; sourceTree = "<group>"; };
+		C6E0D8F374260D1212DBB787 /* plus_jakarta_sans_bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = plus_jakarta_sans_bold.ttf; sourceTree = "<group>"; };
 		C7075CD897D27936D616ADB4 /* ExtractAndReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractAndReviewSheet.swift; sourceTree = "<group>"; };
 		D1C6363B2EE99F6EC02C3E2E /* CelebrationFlyersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationFlyersView.swift; sourceTree = "<group>"; };
 		E03FB4B7D833D486B3836C80 /* NotificationCenterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterSheet.swift; sourceTree = "<group>"; };
@@ -146,6 +150,7 @@
 				0164BE8682BCD9932A0804EE /* Core */,
 				64DE1D285A369B3C450C2DF2 /* Features */,
 				BB8492D3BAA486C46CAED68F /* FlyerEngine */,
+				8C7F795C4BEFB0C8838D16CC /* Resources */,
 			);
 			path = JCI2027;
 			sourceTree = "<group>";
@@ -194,12 +199,29 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		79FABAC012BB8C63714080E5 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				C6E0D8F374260D1212DBB787 /* plus_jakarta_sans_bold.ttf */,
+				7CDF00D536EEA4E6F2AE48F9 /* plus_jakarta_sans_medium.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		890D113DEEAF66FDD0FC5770 /* LGB */ = {
 			isa = PBXGroup;
 			children = (
 				818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */,
 			);
 			path = LGB;
+			sourceTree = "<group>";
+		};
+		8C7F795C4BEFB0C8838D16CC /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				79FABAC012BB8C63714080E5 /* Fonts */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		8D8C95ED87B81566D6E19EE6 /* Networking */ = {
@@ -365,6 +387,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8E9EF2DDF54A4469F8AB557 /* Assets.xcassets in Resources */,
+				46FFA11F6F7E00CAC31283AA /* plus_jakarta_sans_bold.ttf in Resources */,
+				D29F6266BA3C4F3A33717A26 /* plus_jakarta_sans_medium.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
