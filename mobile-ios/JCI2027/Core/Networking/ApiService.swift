@@ -41,6 +41,13 @@ class ApiService {
         return (response as? HTTPURLResponse)?.statusCode == 200 || (response as? HTTPURLResponse)?.statusCode == 201
     }
 
+    func updateContact(token: String, contactId: String, contact: SaveContactRequest) async throws -> Bool {
+        let reqData = try JSONEncoder().encode(contact)
+        let request = createRequest(path: "/api/contacts/\(contactId)", method: "PUT", token: token, body: reqData)
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode == 200
+    }
+
     func deleteContact(token: String, id: String) async throws -> Bool {
         let request = createRequest(path: "/api/contacts/\(id)", method: "DELETE", token: token)
         let (_, response) = try await URLSession.shared.data(for: request)

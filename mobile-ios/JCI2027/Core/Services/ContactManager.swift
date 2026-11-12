@@ -160,3 +160,4 @@ class ContactManager {
         return vcard
     }
 }
+

@@ -105,3 +105,4 @@ class LocationTrackingService: NSObject, ObservableObject, CLLocationManagerDele
         }
     }
 }
+
