@@ -529,3 +529,4 @@ struct ComingSoonResourceCard: View {
         .padding(.horizontal, 16)
     }
 }
+

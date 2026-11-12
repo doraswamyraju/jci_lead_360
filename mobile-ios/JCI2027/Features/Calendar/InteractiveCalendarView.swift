@@ -324,3 +324,4 @@ struct CalendarEventItemDto: Identifiable {
     let hasInvitation: Bool
     let description: String
 }
+
