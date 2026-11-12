@@ -311,6 +311,9 @@ struct ProfileView: View {
             if let img = portraitImage {
                 onProfileUpdated?(presidentNameInput, chapterNameInput, serverPhotoUrl, img)
             }
+            if let logo = chapterLogoImage {
+                NotificationCenter.default.post(name: NSNotification.Name("ChapterLogoUpdated"), object: logo)
+            }
             Task {
                 if let leader = try? await ApiService.shared.getLeaderProfile(userId: userId),
                    let photo = leader.photoUrl, !photo.isEmpty {
@@ -318,6 +321,31 @@ struct ProfileView: View {
                         self.serverPhotoUrl = photo
                         UserDefaults.standard.set(photo, forKey: "auth_photo_url")
                         self.onProfileUpdated?(self.presidentNameInput, self.chapterNameInput, photo, self.portraitImage)
+                    }
+                }
+                if let token = token {
+                    if let chap = try? await ApiService.shared.fetchChapterDetails(token: token) {
+                        await MainActor.run {
+                            if !chap.zone.isEmpty { self.chapterZone = chap.zone }
+                            if !chap.phone.isEmpty { self.chapterPhone = chap.phone }
+                            if !chap.email.isEmpty { self.chapterEmail = chap.email }
+                        }
+                        if let logoUrl = chap.logoUrl, !logoUrl.isEmpty {
+                            await MainActor.run {
+                                UserDefaults.standard.set(logoUrl, forKey: "auth_chapter_logo_url")
+                            }
+                            if self.chapterLogoImage == nil {
+                                if let img = await iOSFlyerRenderer.downloadImage(from: logoUrl) {
+                                    await MainActor.run {
+                                        self.chapterLogoImage = img
+                                        if let pngData = img.pngData() {
+                                            saveImageToDisk(data: pngData, filename: "chapter_logo.png")
+                                        }
+                                        NotificationCenter.default.post(name: NSNotification.Name("ChapterLogoUpdated"), object: img)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -359,6 +387,23 @@ struct ProfileView: View {
                     await MainActor.run {
                         self.chapterLogoImage = uiImage
                         saveImageToDisk(data: data, filename: "chapter_logo.png")
+                        NotificationCenter.default.post(name: NSNotification.Name("ChapterLogoUpdated"), object: uiImage)
+                    }
+                    // Live upload chapter logo and sync across app
+                    if let token = token {
+                        if let uploadedUrl = try? await ApiService.shared.uploadImage(token: token, imageData: data, filename: "chapter_logo_\(Date().timeIntervalSince1970).png") {
+                            await MainActor.run {
+                                UserDefaults.standard.set(uploadedUrl, forKey: "auth_chapter_logo_url")
+                            }
+                            _ = try? await ApiService.shared.updateChapterDetails(
+                                token: token,
+                                chapterName: chapterNameInput,
+                                zone: chapterZone,
+                                phone: chapterPhone,
+                                email: chapterEmail,
+                                logoUrl: uploadedUrl
+                            )
+                        }
                     }
                 }
             }
@@ -419,6 +464,10 @@ struct ProfileView: View {
 
         onProfileUpdated?(presidentNameInput, chapterNameInput, serverPhotoUrl, portraitImage)
 
+        if let logo = chapterLogoImage {
+            NotificationCenter.default.post(name: NSNotification.Name("ChapterLogoUpdated"), object: logo)
+        }
+
         Task {
             if let token = token {
                 _ = try? await ApiService.shared.updateOfficerDetails(
@@ -429,12 +478,24 @@ struct ProfileView: View {
                     photoUrl: serverPhotoUrl.isEmpty ? nil : serverPhotoUrl,
                     role: role
                 )
+
+                var finalLogoUrl = UserDefaults.standard.string(forKey: "auth_chapter_logo_url")
+                if let logo = chapterLogoImage, let pngData = logo.pngData() {
+                    if let uploaded = try? await ApiService.shared.uploadImage(token: token, imageData: pngData, filename: "chapter_logo.png") {
+                        finalLogoUrl = uploaded
+                        await MainActor.run {
+                            UserDefaults.standard.set(uploaded, forKey: "auth_chapter_logo_url")
+                        }
+                    }
+                }
+
                 _ = try? await ApiService.shared.updateChapterDetails(
                     token: token,
                     chapterName: chapterNameInput,
                     zone: chapterZone,
                     phone: chapterPhone,
-                    email: chapterEmail
+                    email: chapterEmail,
+                    logoUrl: finalLogoUrl
                 )
             }
 

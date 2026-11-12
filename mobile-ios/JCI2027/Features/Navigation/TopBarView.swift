@@ -8,6 +8,8 @@ struct TopBarView: View {
     let chapterName: String
     var photoUrl: String? = nil
     var localImage: UIImage? = nil
+    var chapterLogo: UIImage? = nil
+    var chapterLogoUrl: String? = nil
     var unreadCount: Int = 0
     var onOpenSidebar: () -> Void
     var onNavigateToDashboard: () -> Void
@@ -28,15 +30,44 @@ struct TopBarView: View {
             }
             .buttonStyle(.plain)
 
-            // MARK: - Title: Clickable Logo Badge (Navigates to Dashboard)
+            // MARK: - Title: Clickable Dynamic Logo Badge (Chapter Logo if uploaded, else LEAD360)
             Button(action: onNavigateToDashboard) {
                 HStack(spacing: 0) {
-                    Image("lead360_logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 30)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
+                    if let logo = chapterLogo {
+                        Image(uiImage: logo)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 32)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                    } else if let urlStr = chapterLogoUrl, !urlStr.isEmpty {
+                        let fullUrl = urlStr.starts(with: "http") ? urlStr : "\(ApiService.shared.baseUrl)\(urlStr)"
+                        AsyncImage(url: URL(string: fullUrl)) { phase in
+                            switch phase {
+                            case .success(let img):
+                                img
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
+                            default:
+                                Image("lead360_logo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 30)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                            }
+                        }
+                    } else {
+                        Image("lead360_logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 30)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                    }
                 }
                 .background(Color.white)
                 .cornerRadius(8)

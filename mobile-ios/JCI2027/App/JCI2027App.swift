@@ -107,6 +107,8 @@ struct MainPresidentContainerView: View {
     @StateObject private var pushManager = PushNotificationManager.shared
     @State private var userPhotoUrl: String? = nil
     @State private var userProfileImage: UIImage? = nil
+    @State private var chapterLogoImage: UIImage? = nil
+    @State private var chapterLogoUrl: String? = UserDefaults.standard.string(forKey: "auth_chapter_logo_url")
     @State private var currentScreen: AppScreen = .dashboard
     @State private var isDrawerOpen = false
     @State private var showExchangeQrModal = false
@@ -242,6 +244,8 @@ struct MainPresidentContainerView: View {
                     chapterName: chapterName,
                     photoUrl: userPhotoUrl,
                     localImage: userProfileImage,
+                    chapterLogo: chapterLogoImage,
+                    chapterLogoUrl: chapterLogoUrl,
                     unreadCount: pushManager.unreadCount,
                     onOpenSidebar: {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
@@ -300,6 +304,7 @@ struct MainPresidentContainerView: View {
         }
         .onAppear {
             loadLocalPortrait()
+            loadLocalChapterLogo()
             userPhotoUrl = initialPhotoUrl ?? UserDefaults.standard.string(forKey: "auth_photo_url")
             Task {
                 if let leader = try? await ApiService.shared.getLeaderProfile(userId: userId),
@@ -315,6 +320,13 @@ struct MainPresidentContainerView: View {
             pushManager.onNavigateToContact = { contactId in
                 self.targetContactId = contactId
                 self.currentScreen = .scanCard
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ChapterLogoUpdated"))) { notif in
+            if let img = notif.object as? UIImage {
+                self.chapterLogoImage = img
+            } else {
+                loadLocalChapterLogo()
             }
         }
         .sheet(isPresented: $showNotificationCenter) {
@@ -333,6 +345,27 @@ struct MainPresidentContainerView: View {
             let portraitURL = docDir.appendingPathComponent("president_portrait.jpg")
             if let data = try? Data(contentsOf: portraitURL), let img = UIImage(data: data) {
                 self.userProfileImage = img
+            }
+        }
+    }
+
+    private func loadLocalChapterLogo() {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        if let docDir = paths.first {
+            let logoURL = docDir.appendingPathComponent("chapter_logo.png")
+            if let data = try? Data(contentsOf: logoURL), let img = UIImage(data: data) {
+                self.chapterLogoImage = img
+                return
+            }
+        }
+        if let remote = UserDefaults.standard.string(forKey: "auth_chapter_logo_url"), !remote.isEmpty {
+            self.chapterLogoUrl = remote
+            Task {
+                if let img = await iOSFlyerRenderer.downloadImage(from: remote) {
+                    await MainActor.run {
+                        self.chapterLogoImage = img
+                    }
+                }
             }
         }
     }

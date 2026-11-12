@@ -91,6 +91,9 @@ struct CelebrationFlyersView: View {
         .task {
             await loadCelebrationData()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ChapterLogoUpdated"))) { _ in
+            triggerFlyerCompositing()
+        }
         .sheet(isPresented: $showShareSheet) {
             if let flyer = compositedFlyer {
                 ActivityShareSheet(activityItems: [flyer, celebrationShareMessage])
@@ -828,8 +831,21 @@ struct CelebrationFlyersView: View {
                 memberImg = generateInitialsAvatar(name: member.name)
             }
 
-            // 3. Download Chapter Logo
-            let chapterLogoImg = await iOSFlyerRenderer.downloadImage(from: "/assets/logo.png")
+            // 3. Resolve Chapter Logo (Local persistent logo > Auth Logo URL > Fallback asset)
+            var chapterLogoImg: UIImage? = nil
+            let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+            if let docDir = paths.first {
+                let logoURL = docDir.appendingPathComponent("chapter_logo.png")
+                if let data = try? Data(contentsOf: logoURL), let img = UIImage(data: data) {
+                    chapterLogoImg = img
+                }
+            }
+            if chapterLogoImg == nil, let remoteUrl = UserDefaults.standard.string(forKey: "auth_chapter_logo_url"), !remoteUrl.isEmpty {
+                chapterLogoImg = await iOSFlyerRenderer.downloadImage(from: remoteUrl)
+            }
+            if chapterLogoImg == nil {
+                chapterLogoImg = await iOSFlyerRenderer.downloadImage(from: "/assets/logo.png")
+            }
 
             // 4. Build Dynamic Field Values
             var fields: [String: String] = [:]

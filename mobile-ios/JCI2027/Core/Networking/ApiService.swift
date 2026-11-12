@@ -144,6 +144,25 @@ class ApiService {
         return (response as? HTTPURLResponse)?.statusCode == 200
     }
 
+    func fetchChapterDetails(token: String) async throws -> ChapterDetails? {
+        let request = createRequest(path: "/api/users/chapter-details", method: "GET", token: token)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let success = json["success"] as? Bool, success,
+              let chapDict = json["chapter"] as? [String: Any] else {
+            return nil
+        }
+        return ChapterDetails(
+            id: chapDict["id"] as? String ?? "",
+            name: chapDict["name"] as? String ?? "",
+            zone: chapDict["zone"] as? String ?? "",
+            phone: chapDict["phone"] as? String ?? "",
+            email: chapDict["email"] as? String ?? "",
+            logoUrl: chapDict["logoUrl"] as? String
+        )
+    }
+
     func updateChapterDetails(token: String, chapterName: String, zone: String, phone: String, email: String, logoUrl: String? = nil) async throws -> Bool {
         var payload: [String: String] = ["chapterName": chapterName, "zone": zone, "phone": phone, "email": email]
         if let logoUrl = logoUrl { payload["logoUrl"] = logoUrl }

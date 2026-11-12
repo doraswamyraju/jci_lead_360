@@ -168,6 +168,14 @@ struct PresidentFlyerStudioView: View {
             if customChapterName.isEmpty { customChapterName = chapterName }
             loadCachedUserImages()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ChapterLogoUpdated"))) { notif in
+            if let img = notif.object as? UIImage {
+                self.chapterLogoImage = img
+            } else {
+                loadCachedUserImages()
+            }
+            self.triggerLiveComposite()
+        }
         .task {
             await fetchLiveTemplates()
         }
@@ -784,6 +792,18 @@ struct PresidentFlyerStudioView: View {
                 if let downloaded = await iOSFlyerRenderer.downloadImage(from: photo) {
                     await MainActor.run {
                         self.presidentPhotoImage = downloaded
+                        self.triggerLiveComposite()
+                    }
+                }
+            }
+        }
+
+        // If local chapter logo is nil but remote URL is present, download it
+        if self.chapterLogoImage == nil, let remoteLogo = UserDefaults.standard.string(forKey: "auth_chapter_logo_url"), !remoteLogo.isEmpty {
+            Task {
+                if let downloaded = await iOSFlyerRenderer.downloadImage(from: remoteLogo) {
+                    await MainActor.run {
+                        self.chapterLogoImage = downloaded
                         self.triggerLiveComposite()
                     }
                 }

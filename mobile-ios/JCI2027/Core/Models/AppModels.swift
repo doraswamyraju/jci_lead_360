@@ -121,6 +121,16 @@ struct SaveContactResponse: Codable {
     let contact: SaveContactRequest?
 }
 
+// MARK: - Chapter Details Model
+struct ChapterDetails: Codable, Identifiable {
+    let id: String
+    var name: String
+    var zone: String
+    var phone: String
+    var email: String
+    var logoUrl: String?
+}
+
 // MARK: - Member Models
 struct MemberDto: Codable, Identifiable {
     let id: String
