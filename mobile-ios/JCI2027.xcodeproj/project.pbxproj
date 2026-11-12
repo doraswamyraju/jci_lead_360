@@ -12,6 +12,7 @@
 		2494867F0E969932352BB5D4 /* QrCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */; };
 		25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E905AC23C0667A2AE2AE73E /* LoginView.swift */; };
 		3A44DC358D16DA3B25AC39BF /* ApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73009F97F3C9613B73097A74 /* ApiService.swift */; };
+		449703C38B073895410F0838 /* InteractiveCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9E883EE1541F468A9CFBA5 /* InteractiveCalendarView.swift */; };
 		53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */; };
 		5950139218F350E61D82BE2B /* JciTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6244A457E27AE50F1076D524 /* JciTheme.swift */; };
 		6D023989A37180B556EBF927 /* PresidentFlyerStudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614582BA60ED684FFDF83958 /* PresidentFlyerStudioView.swift */; };
@@ -29,6 +30,8 @@
 		B439592D93C0DC6947971B9D /* SecondaryScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E40D8AE495DD0570E35744 /* SecondaryScreens.swift */; };
 		BA102BB23D5E87699996854A /* ExtractAndReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7075CD897D27936D616ADB4 /* ExtractAndReviewSheet.swift */; };
 		C49587BF080DAF29B4BC13AE /* ProjectsAndTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */; };
+		D4F9BB2C9C396DDD445F3F44 /* JciLogoGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A15EB2F16066466B57448D46 /* JciLogoGenerator.swift */; };
+		D81648534550CE8EAC20B282 /* LgbAndPstManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */; };
 		DA988A0F2C3F59A555F0CB70 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7BE6964FFD652A939E1F7E /* AppModels.swift */; };
 		DFBAD7941A7960FF71F89B04 /* AppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7057367FB2D38B8316008814 /* AppScreen.swift */; };
 		E9B59B1A13F24F3706001853 /* BottomNavigationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F16125E7B45953899BFBE8 /* BottomNavigationBarView.swift */; };
@@ -36,11 +39,14 @@
 		F4B4BDC09BAE587BACBD181A /* SidebarDrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F2BC3ADA718675C87F6CA5 /* SidebarDrawerView.swift */; };
 		F4B61AC0F2B856466A67EF6F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0675DFFDB90D8235D30AB540 /* ProfileView.swift */; };
 		F8E9EF2DDF54A4469F8AB557 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DEBF96B6654FC92841F07B7 /* Assets.xcassets */; };
+		FA2F10C9A955F6CC185340EC /* JciResourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11413A92DF037086639B4D6F /* JciResourcesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0675DFFDB90D8235D30AB540 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		0DEBF96B6654FC92841F07B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		11413A92DF037086639B4D6F /* JciResourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JciResourcesView.swift; sourceTree = "<group>"; };
+		1C9E883EE1541F468A9CFBA5 /* InteractiveCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveCalendarView.swift; sourceTree = "<group>"; };
 		1E2E136CCB9E3713EEFA7609 /* DashboardOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardOverviewView.swift; sourceTree = "<group>"; };
 		1F80D0BEF47A296C43EC73FA /* ScanCardModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanCardModuleView.swift; sourceTree = "<group>"; };
 		34CC4EE655F3F263BADF78CE /* JCI2027App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JCI2027App.swift; sourceTree = "<group>"; };
@@ -56,10 +62,12 @@
 		76A682E44A15575086761388 /* MembersAndNetworkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersAndNetworkingView.swift; sourceTree = "<group>"; };
 		7891B4EC6E3462F64F4DD980 /* AdminAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAppContainerView.swift; sourceTree = "<group>"; };
 		7F5FBB0216AA205F96A6EF3D /* VendorAppContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorAppContainerView.swift; sourceTree = "<group>"; };
+		818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LgbAndPstManagementView.swift; sourceTree = "<group>"; };
 		86529A1B7DA61F39EAB50964 /* VendorStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VendorStoreView.swift; sourceTree = "<group>"; };
 		89F2BC3ADA718675C87F6CA5 /* SidebarDrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarDrawerView.swift; sourceTree = "<group>"; };
 		8F7CF65D98445E15DD1C8B7D /* JCI2027.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = JCI2027.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96F970E3AF97B64B591CDD79 /* ProjectsAndTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsAndTasksView.swift; sourceTree = "<group>"; };
+		A15EB2F16066466B57448D46 /* JciLogoGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JciLogoGenerator.swift; sourceTree = "<group>"; };
 		A33BB1B2197C3E02A4AC54F2 /* CardSnapCameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSnapCameraPicker.swift; sourceTree = "<group>"; };
 		A439DB48F8042D1FD18684F7 /* BusinessCardOcrEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessCardOcrEngine.swift; sourceTree = "<group>"; };
 		B8A0F170E8769DB7C493A23F /* QrCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeGenerator.swift; sourceTree = "<group>"; };
@@ -142,16 +150,27 @@
 			path = JCI2027;
 			sourceTree = "<group>";
 		};
+		5F9E347D15D0B33F2350DA66 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				11413A92DF037086639B4D6F /* JciResourcesView.swift */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		64DE1D285A369B3C450C2DF2 /* Features */ = {
 			isa = PBXGroup;
 			children = (
 				F91D7978F027A26CF8BB887C /* Admin */,
 				9896FA28B7554550F543A3E7 /* Auth */,
+				A49413ED1F954A9B47F812D4 /* Calendar */,
 				18F9278FB3EA20B42A4667E4 /* Dashboard */,
 				526DA1A5E4876B4B8CBE48D9 /* Flyers */,
+				890D113DEEAF66FDD0FC5770 /* LGB */,
 				287D70475DC3F96A3D6F7848 /* Members */,
 				BA2190E3F1C59180BC861A44 /* Navigation */,
 				3FD3B4B397187EE6B45DBAFA /* Projects */,
+				5F9E347D15D0B33F2350DA66 /* Resources */,
 				0835FDE082D3C5977DC54F07 /* ScanCard */,
 				B72A133A9630C79AAC877F44 /* Store */,
 				FDE0973F647BEB36B060BC12 /* Vendor */,
@@ -175,6 +194,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		890D113DEEAF66FDD0FC5770 /* LGB */ = {
+			isa = PBXGroup;
+			children = (
+				818D0066EBC78C84AF7A6165 /* LgbAndPstManagementView.swift */,
+			);
+			path = LGB;
+			sourceTree = "<group>";
+		};
 		8D8C95ED87B81566D6E19EE6 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
@@ -189,6 +216,14 @@
 				4E905AC23C0667A2AE2AE73E /* LoginView.swift */,
 			);
 			path = Auth;
+			sourceTree = "<group>";
+		};
+		A49413ED1F954A9B47F812D4 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				1C9E883EE1541F468A9CFBA5 /* InteractiveCalendarView.swift */,
+			);
+			path = Calendar;
 			sourceTree = "<group>";
 		};
 		A5103ECEE6CD81E7811A41F0 /* DesignSystem */ = {
@@ -223,6 +258,7 @@
 			isa = PBXGroup;
 			children = (
 				58C3798AF5A2F10E75B716A7 /* iOSFlyerRenderer.swift */,
+				A15EB2F16066466B57448D46 /* JciLogoGenerator.swift */,
 			);
 			path = FlyerEngine;
 			sourceTree = "<group>";
@@ -350,8 +386,12 @@
 				53F7E4F5A0D7AD4D7BA4DEC5 /* DashboardOverviewView.swift in Sources */,
 				8AF50547040B484D7FAC17AE /* ExchangeQrDialogView.swift in Sources */,
 				BA102BB23D5E87699996854A /* ExtractAndReviewSheet.swift in Sources */,
+				449703C38B073895410F0838 /* InteractiveCalendarView.swift in Sources */,
 				A4089ACF0E7661CBAF7028B0 /* JCI2027App.swift in Sources */,
+				D4F9BB2C9C396DDD445F3F44 /* JciLogoGenerator.swift in Sources */,
+				FA2F10C9A955F6CC185340EC /* JciResourcesView.swift in Sources */,
 				5950139218F350E61D82BE2B /* JciTheme.swift in Sources */,
+				D81648534550CE8EAC20B282 /* LgbAndPstManagementView.swift in Sources */,
 				25C602BCF0FD44ECE34DBB83 /* LoginView.swift in Sources */,
 				7EC718D31468637AFF30CD27 /* MembersAndNetworkingView.swift in Sources */,
 				A6AB656A3860177531AB283C /* NotificationCenterSheet.swift in Sources */,

@@ -150,7 +150,10 @@ struct MainPresidentContainerView: View {
                         chapterName: chapterName,
                         token: token,
                         onBack: { currentScreen = .dashboard },
-                        onNavigateToScanCard: { currentScreen = .scanCard }
+                        onNavigateToScanCard: { currentScreen = .scanCard },
+                        onOpenCelebrationFlyer: { _ in
+                            currentScreen = .celebrations
+                        }
                     )
                 case .scanCard:
                     ScanCardModuleView(

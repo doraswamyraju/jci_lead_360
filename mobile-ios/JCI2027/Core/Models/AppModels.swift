@@ -277,6 +277,8 @@ struct CatalogItem: Codable, Identifiable {
     var unit: String
     var leadTime: String
     var description: String
+    var imageUrl: String?
+    var vendorName: String?
     var productCountInCat: Int?
 }
 
